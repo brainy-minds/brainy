@@ -17,7 +17,7 @@ def readme():
 
 
 def get_version():
-    src_path = os.path.join(os.path.dirname(__file__), 'lib', 'python')
+    src_path = os.path.join(os.path.dirname(__file__), 'src')
     sys.path.append(src_path)
     from brainy.version import brainy_version
     return brainy_version
@@ -43,7 +43,7 @@ setup(
         'brainy.scheduler',
         'brainy.workflows',
     ],
-    package_dir = {'':'lib/python'},
+    package_dir = {'':'src'},
     package_data={
         '': ['*.html', '*.svg', '*.js'],
     },
