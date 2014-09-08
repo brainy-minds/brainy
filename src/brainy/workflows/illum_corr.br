@@ -1,0 +1,19 @@
+{
+    // Define iBRAIN pipe type
+    "type": "CustomCode.Pipe",
+    // Sort execution of this pipe
+    "after": "raw_input",
+    "before": "cell_profiler",
+    // Define chain of processes - single steps
+    "chain": [
+    	{	
+    		"type": "CustomCode.MatlabCall",            
+            "submit_call": "prepare_batch_measure_illcor_stats('${TIFFDIR}');"
+    	},
+    	// for ILLCORSETTINGSFILE in $(find $BATCHDIR -maxdepth 1 -type f -name "batch_illcor_*.mat"); do
+        {
+            "type": "CustomCode.MatlabCall",            
+            "submit_call": "batch_measure_illcor_stats('${TIFFDIR}','${ILLCORSETTINGSFILE}');"
+        }
+    ]
+}

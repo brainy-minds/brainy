@@ -1,0 +1,180 @@
+#!/usr/bin/env python2.7
+'''
+Brainy is a super CLI tool for iBRAIN. It provides a DSL-like syntaxes to do
+quite advanced and more human-like command handling.
+'''
+import os
+import sys
+import json
+from subprocess import (PIPE, Popen)
+# We include <root>/lib/python
+extend_path = lambda root_path, folder: sys.path.insert(
+    0, os.path.join(root_path, folder))
+ROOT = os.path.dirname(__file__)
+extend_path(ROOT, '')
+extend_path(ROOT, 'lib/python')
+import brainy.config
+brainy.config.IBRAIN_ROOT = ROOT
+# Import brainy modules.
+from brainy.version import brainy_version
+
+
+COMMANDS_PATH = os.path.join(os.path.dirname(__file__), 'brainy-commands')
+DUTIES_CONF = os.path.join(COMMANDS_PATH, 'brainy_duties.conf')
+GUESS_ERROR = '''{program}: '{arg1}' or '{arg2}' are unknown {program}
+command(s). See '{program} --help'.
+
+Did you mean this?
+    {guess}
+'''
+
+
+class PraefectFailure(Exception):
+    '''Prefect has failed to identify his duty!'''
+
+
+class Duty(object):
+
+    def __init__(self, sub_program, imperatives, subjectives, description=''):
+        self.sub_program = sub_program
+        self.imperatives = imperatives
+        self.subjectives = subjectives
+        self.description = description
+
+    @staticmethod
+    def invoke(command, _in=None):
+        '''
+        Invoke command as a new system process and return its output.
+        '''
+        process = Popen(command, stdin=PIPE, stdout=PIPE, shell=True,
+                        executable='/bin/bash')
+        if _in is not None:
+            process.stdin.write(_in)
+        return process.stdout.read()
+
+    def matches(self, imperative, subjective):
+        '''Return true if duty matches by arguments'''
+        return imperative in self.imperatives \
+            and subjective in self.subjectives
+
+    def do(self, imperative, subjective, arguments_tail):
+        sub_program_path = os.path.join(COMMANDS_PATH, self.sub_program)
+        pass_subj_imp = '-i %s -s %s' % (imperative, subjective)
+        command = ' '.join([sub_program_path, pass_subj_imp] + arguments_tail)
+        return self.invoke(command)
+
+
+class Praefect(object):
+
+    def __init__(self, duties):
+        '''
+        We borrow some latin thinking here. Initialize the "prefecture"
+        containing multiple "dioceses" (commanding "districts", where cli
+                                        commands are executed).
+
+        Well it's a wicked joke. We just call it duties.
+        '''
+        # list of dioceses
+
+        self.duties = duties if type(duties) == list else list()
+        # If duties have not been passed as a list of objects, then they have
+        # a form of description and must be initialized.
+        if type(duties) == dict:
+            for sub_program in duties:
+                attributes = duties[sub_program]
+                duty = Duty(
+                    sub_program,
+                    attributes['imperatives'],
+                    attributes['subjectives'],
+                    attributes.get('description', ''),
+                )
+                self.duties.append(duty)
+        if not self.duties:
+            raise PraefectFailure(
+                'Critical Error! No duties has been defined.')
+
+    @property
+    def all_imperatives(self):
+        for duty in self.duties:
+            for imperative in duty.imperatives:
+                yield imperative
+
+    @property
+    def all_subjectives(self):
+        for duty in self.duties:
+            for subjectives in duty.subjectives:
+                yield subjectives
+
+    def parse_instruction(self, arguments):
+        assert len(arguments) > 0
+        arg1 = arguments[0]
+        arg2 = arguments[1] if len(arguments) > 1 else ''
+        assert arg1 != arg2
+        imperative = None
+        subjective = None
+        for arg in (arg1, arg2):
+            if arg in self.all_imperatives:
+                imperative = arg
+            if arg in self.all_subjectives:
+                subjective = arg
+        return (imperative, subjective)
+
+    def match_duty(self, imperative, subjective):
+        for duty in self.duties:
+            if duty.matches(imperative, subjective):
+                return duty
+
+    def carry_out_duties(self, program, arguments):
+        # Match arguments to a duty.
+        imperative, subjective = self.parse_instruction(arguments)
+        duty = self.match_duty(imperative, subjective)
+        if not duty:
+            closest_duty = self.guess(arguments)
+            if not closest_duty:
+                raise PraefectFailure('Unknown command line arguments.')
+            print GUESS_ERROR % {
+                'program': program,
+                'arg1': imperative,
+                'arg2': subjective,
+            }
+        # Perform required duty.
+        arguments_tail = list()
+        if len(arguments) > 2:
+            arguments_tail = arguments[2:]
+        result = duty.do(imperative, subjective, arguments_tail)
+        sys.stdout.write(result)
+
+    def guess(self, arguments):
+        pass
+
+    def gather_help(self):
+        help_message = ''
+        for duty in self.duties:
+            help_message += '  brainy help %s\t\t%s\n' % \
+                ('{%s}' % ','.join(duty.subjectives), duty.description)
+        return help_message
+
+
+def print_version():
+    print 'brainy %s  Brainy is a super CLI tool for iBRAIN' % \
+        brainy_version
+
+
+if __name__ == '__main__':
+    duties = json.loads(open(DUTIES_CONF).read())
+    program = os.path.basename(sys.argv[0])
+    prefect = Praefect(duties)
+    if len(sys.argv) < 3:
+        if len(sys.argv) == 2 and 'help' in sys.argv[1]:
+            print_version()
+            # Generate help overview aggregated from duties.
+            print '\n' + prefect.gather_help()
+        else:
+            sys.stderr.write(('Not enough arguments.'
+                              ' See: \n\n  %s help\n\n') % program)
+        exit(1)
+    try:
+        prefect.carry_out_duties(program, sys.argv[1:])
+    except PraefectFailure as error:
+        sys.stderr.write(str(error) +
+                         ' See: \n\n  %s help\n\n' % program)
