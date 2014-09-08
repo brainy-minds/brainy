@@ -1,25 +1,43 @@
 #!/usr/bin/env python2.7
 '''
-Brainy is a super CLI tool for iBRAIN. It provides a DSL-like syntaxes to do
+brainy
+======
+
+A nimble workflow managing tool, at the core of iBRAIN functionality. It
+allows creation of projects according to the expected framework layout.
+It also oversees the execution of the projects and provides monitoring of any
+relevant progress of the conducted computation.
+
+brainy CLI
+----------
+
+is a super CLI tool for iBRAIN. It provides a DSL-like syntaxes to do
 quite advanced and more human-like command handling.
+
+@author: Yauhen Yakimovich <yauhen.yakimovich@uzh.ch>,
+         Pelkmans Lab <https://www.pelkmanslab.org>
+
+@license: The MIT License (MIT)
+
+Copyright (c) 2014 Pelkmans Lab
+
 '''
 import os
 import sys
 import json
 from subprocess import (PIPE, Popen)
-# We include <root>/lib/python
+# We include <pkg_root>/src, <pkg_root>/lib/python
 extend_path = lambda root_path, folder: sys.path.insert(
     0, os.path.join(root_path, folder))
 ROOT = os.path.dirname(__file__)
 extend_path(ROOT, '')
+extend_path(ROOT, 'src')
 extend_path(ROOT, 'lib/python')
-import brainy.config
-brainy.config.IBRAIN_ROOT = ROOT
 # Import brainy modules.
 from brainy.version import brainy_version
 
 
-COMMANDS_PATH = os.path.join(os.path.dirname(__file__), 'brainy-commands')
+COMMANDS_PATH = os.path.join(os.path.dirname(__file__), 'bin')
 DUTIES_CONF = os.path.join(COMMANDS_PATH, 'brainy_duties.conf')
 GUESS_ERROR = '''{program}: '{arg1}' or '{arg2}' are unknown {program}
 command(s). See '{program} --help'.

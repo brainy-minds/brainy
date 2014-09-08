@@ -1,83 +1,134 @@
+'''
+brainy.config
+
+Save and load configuration files.
+
+@author: Yauhen Yakimovich <yauhen.yakimovich@uzh.ch>,
+         Pelkmans Lab  <https://www.pelkmanslab.org>
+
+@license: The MIT License (MIT)
+
+Copyright (c) 2014 Pelkmans Lab
+'''
 import os
-import json
-from brainy.utils import invoke
+import yaml
+try:
+    from yaml import CLoader as Loader, CDumper as Dumper
+except ImportError:
+    from yaml import Loader, Dumper
+from getpass import getuser
+import logging
+logger = logging.getLogger(__name__)
+from brainy.version import brainy_version
 
 
-# Set this value from the point of import.
-IBRAIN_ROOT = None
-_config = None
+# User-wide (global) configuration
+BRAINY_USER_CONFIG_TPL = '''
+# brainy user config
+brainy_version = '%(brainy_version)s'
+brainy_user = '%(brainy_user)s'
+admin_email = 'root@localhost'
 
-__all__ = ['get_config', 'set_root']
+# Which scheduling API to use by default?
+scheduling
+    # Possible choices are: {'shell_cmd', 'lsf', 'slurm'}
+    engine: 'shell_cmd'
 
-
-def set_root(new_root):
-    '''
-    First time get_config() is called the configuration is cached.
-    You can change IBRAIN_ROOT by calling set_root only before calling it
-    either as argument for get_config() or before get_config().
-    Any set_root() invocation after get_config() is pointless.
-    '''
-    global IBRAIN_ROOT, _config
-    IBRAIN_ROOT = new_root
-    _config = None
-
-
-def get_config(root=None):
-    global _config
-    if not _config is None:
-        return _config
-    if root is None:
-        root = IBRAIN_ROOT
-    if root is None:
-        raise Exception('IBRAIN_ROOT is not set')
-    config_file = os.path.join(root, 'etc', 'config')
-    if not os.path.exists(config_file):
-        raise Exception('Missing iBRAIN configuration file: %s' %
-                        config_file)
-
-    config_json = invoke('''
-export IBRAIN_ROOT=%(IBRAIN_ROOT)s
-. ${IBRAIN_ROOT}/etc/config
-echo {
-echo \\"bin_path\\": \\\"$IBRAIN_BIN_PATH\\\",
-echo \\"etc_path\\": \\\"$IBRAIN_ETC_PATH\\\",
-echo \\"var_path\\": \\\"$IBRAIN_VAR_PATH\\\",
-echo \\"log_path\\": \\\"$IBRAIN_LOG_PATH\\\",
-echo \\"database_path\\": \\\"$IBRAIN_DATABASE_PATH\\\",
-echo \\"user_path\\": \\\"$IBRAIN_USER\\\",
-echo \\"admin_path\\": \\\"$IBRAIN_ADMIN_EMAIL\\\",
-echo \\"scheduling_engine\\": \\\"$SCHEDULING_ENGINE\\\",
-echo \\"python_cmd\\": \\\"$PYTHON_CMD\\\",
-echo \\"matlab_cmd\\": \\\"$MATLAB_CMD\\\",
-echo \\"cellprofiler2_path\\": \\\"$CELLPROFILER2_PATH\\\"
-echo }
-    ''' % {'IBRAIN_ROOT': root})
-    #print config_json
-    config = json.loads(config_json)
-    config['root'] = root
-    return config
+# Preliminary tools and programming languages
+tools:
+    python:
+        cmd: '/usr/bin/env python2.7'
+    matlab:
+        cmd: '/usr/bin/env matlab -singleCompThread -nodisplay -nojvm'
+    ruby:
+        cmd: '/usr/bin/env ruby'
 
 
-# def dump_config(config, format='json'):
-#     if format == 'json':
-#         return json.dumps(config)
-#     elif format == 'bash':
-#         # Map to bash variables
+# Integrated application
+apps:
+    CellProfiler2:
+        path: '%(cellprofiler2_path)s'
+
+# Default project parameters
+project_parameters
+    job_submission_queue: '8:00'
+    job_resubmission_queue: '36:00'
+
+''' % {
+    'brainy_version': brainy_version,
+    'brainy_user': getuser(),
+    'cellprofiler2_path': os.path.expanduser('~/CellProfiler2'),
+}
+BRAINY_USER_CONFIG_PATH = os.path.expanduser('~/.brainy/config')
 
 
-# To use externally defined brainy.modules.IBRAIN_ROOT value call set_root()
-# Otherwise we try guessing from OS ENV or by importing ext_path (symlink).
+# Project specific configuration
+BRAINY_PROJECT_CONFIG_TPL = '''
+# brainy project config
+brainy_version = '%(brainy_version)s'
+
+# Parameters below will affect the whole project. In particular, that defines
+# how jobs in every step of each pipe will be submitted, which folders names
+# and locations are used, etc.
+
+# Uncomment this once deployed
+# scheduling
+#     engine: 'lsf'
+
+project_parameters:
+    # job_submission_queue: '8:00'
+    # job_resubmission_queue: '36:00'
+    batch_path: 'data_of_{name}'
+    tiff_path: 'images_of_{name}'
+
+''' % {
+    'brainy_version': brainy_version,
+}
+BRAINY_PROJECT_CONFIG_NAME = '.brainy'
 
 
-# Use OS environment setting if present.
-if IBRAIN_ROOT is None and 'IBRAIN_ROOT' in os.environ:
-    assert os.path.exists(os.environ['IBRAIN_ROOT'])
-    IBRAIN_ROOT = os.environ['IBRAIN_ROOT']
+def write_config(config_path, value):
+    logger.info('Writing config: %s' % config_path)
+    with open(config_path, 'w+') as stream:
+        stream.write(value)
 
-# Guessing by parsing __file__ in ext_path module.
-if IBRAIN_ROOT is None:
-    from ext_path import root_path
-    IBRAIN_ROOT = root_path
 
-# Note that we don't call get_config(), so there is still an option e.g. for
-# a unit test to perform set_root().
+def load_config(config_path):
+    logger.info('Loading config: %s' % config_path)
+    with open(config_path) as stream:
+        return yaml.load(stream, Loader=Loader)
+
+
+def write_user_config(user_config_path=BRAINY_USER_CONFIG_PATH):
+    '''Write global config into '.brainy' folder inside user's home.'''
+    user_brainy_path = os.path.dirname(user_config_path)
+    if not os.path.exists(user_brainy_path):
+        logger.info('Creating a missing user brainy folder: %s' %
+                    user_brainy_path)
+    if os.path.exists(user_config_path):
+        logger.warn('Abort. Configuration file already exists: %s' %
+                    user_config_path)
+        return
+    write_config(user_config_path, BRAINY_USER_CONFIG_TPL)
+
+
+def load_user_config():
+    return load_config(BRAINY_USER_CONFIG_PATH)
+
+
+def write_project_config(project_path, config_name=BRAINY_PROJECT_CONFIG_NAME):
+    config_path = os.path.join(project_path, config_name)
+    write_config(
+        config_path=config_path,
+        value=BRAINY_PROJECT_CONFIG_TPL,
+    )
+
+
+def load_project_config(project_path, config_name=BRAINY_PROJECT_CONFIG_NAME):
+    config_path = os.path.join(project_path, config_name)
+    return load_config(config_path)
+
+
+def project_has_config(project_path, config_name=BRAINY_PROJECT_CONFIG_NAME):
+    config_path = os.path.join(project_path, config_name)
+    return os.path.exists(config_path)
