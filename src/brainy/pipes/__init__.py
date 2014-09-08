@@ -98,8 +98,8 @@ class BrainyPipe(pipette.Pipe):
 
 class PipesModule(BrainyModule):
 
-    def __init__(self, name, env):
-        BrainyModule.__init__(self, 'pipes', env)
+    def __init__(self, project):
+        self.project = project
         self.pipes_namespace = 'brainy.pipes'
         self.pipes_folder_files = [
             os.path.join(self.env['pipes_path'], filename)
@@ -107,6 +107,10 @@ class PipesModule(BrainyModule):
         ]
         self.__flag_prefix = self.env['pipes_path']
         self.__pipelines = None
+
+    @property
+    def scheduler(self):
+        return self.project.scheduler
 
     def _get_flag_prefix(self):
         return self.__flag_prefix

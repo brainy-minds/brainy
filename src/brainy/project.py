@@ -16,9 +16,9 @@ import logging
 logger = logging.getLogger(__name__)
 from brainy.version import brainy_version
 from brainy.config import (write_project_config, load_project_config,
-                           load_user_config, BRAINY_PROJECT_CONFIG_NAME,
-                           project_has_config)
+                           load_user_config, project_has_config)
 from brainy.workflows import bootstrap_workflow
+from brainy.scheduler import BrainyScheduler
 
 
 class BrainyProjectError(Exception):
@@ -36,6 +36,7 @@ class BrainyProject(object):
         else:
             self.path = path
         self.config = None
+        self.scheduler = None
 
     def create(self):
         # Make project dir.
@@ -60,3 +61,13 @@ class BrainyProject(object):
         project_config = load_project_config(self.path)
         logger.info('Overwriting global configuration with project specific.')
         self.config.update(project_config)
+
+    def run(self):
+        '''
+        Load project config and execute it using the specified scheduler.
+        '''
+        self.load_config()
+        logger.info('Initializing "%s" as scheduling engine' %
+                    self.config['scheduling']['engine'])
+        self.scheduler = BrainyScheduler.build_scheduler(
+            self.config['scheduling']['engine'])
