@@ -4,7 +4,10 @@ iBRAINPipes is an integration of pipette processes into iBRAIN modules.
 import os
 import pipette
 from brainy.process import BrainyProcessError
-from brainy.modules import BrainyModule
+from brainy.flags import FlagManager
+import logging
+logger = logging.getLogger(__name__)
+
 
 
 class BrainyPipeFailure(Exception):
@@ -96,21 +99,25 @@ class BrainyPipe(pipette.Pipe):
             raise BrainyPipeFailure('Execution failed')
 
 
-class PipesModule(BrainyModule):
+class PipesModule(FlagManager):
 
     def __init__(self, project):
         self.project = project
         self.pipes_namespace = 'brainy.pipes'
         self.pipes_folder_files = [
-            os.path.join(self.env['pipes_path'], filename)
-            for filename in os.listdir(self.env['pipes_path'])
+            os.path.join(self.pipes_path, filename)
+            for filename in os.listdir(self.pipes_path)
         ]
-        self.__flag_prefix = self.env['pipes_path']
+        self.__flag_prefix = self.pipes_path
         self.__pipelines = None
 
     @property
     def scheduler(self):
         return self.project.scheduler
+
+    @property
+    def pipes_path(self):
+        return self.project.path
 
     def _get_flag_prefix(self):
         return self.__flag_prefix

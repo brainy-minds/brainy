@@ -49,7 +49,10 @@ setup(
     },
     include_package_data=True,
     download_url='https://github.com/pelkmanslab/iBRAIN/tarball/master',
-    install_requires=[],
+    install_requires=[
+        'pipette~=0.1.2',
+        'tree_output~=0.1.2',
+    ],
     classifiers=[
         'Topic :: System :: Distributed Computing',
         'Topic :: Scientific/Engineering :: Image Recognition',
@@ -66,4 +69,6 @@ setup(
         'Operating System :: POSIX :: Linux',
         'Operating System :: MacOS',
     ],
+    tests_require=['nose>=1.0'],
+    test_suite='nose.collector',
 )

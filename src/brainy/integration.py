@@ -1,10 +1,8 @@
 import os
 import logging
+logger = logging.getLogger(__name__)
 from sh import touch
 from brainy.pipes import PipesModule
-
-
-logger = logging.getLogger(__name__)
 
 
 class CompatiblePipesModule(PipesModule):

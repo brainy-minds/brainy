@@ -15,3 +15,4 @@ relevant progress of the conducted computation.
 Copyright (c) 2014 Pelkmans Lab
 
 '''
+from brainy.version import __version__, brainy_version

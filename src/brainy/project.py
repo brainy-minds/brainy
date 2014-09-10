@@ -19,6 +19,7 @@ from brainy.config import (write_project_config, load_project_config,
                            load_user_config, project_has_config)
 from brainy.workflows import bootstrap_workflow
 from brainy.scheduler import BrainyScheduler
+from brainy.pipes import PipesModule
 
 
 class BrainyProjectError(Exception):
@@ -64,10 +65,17 @@ class BrainyProject(object):
 
     def run(self):
         '''
-        Load project config and execute it using the specified scheduler.
+        Load project configuration. Discover and process pipelines using the
+        specified scheduler.
         '''
+        logger.info('Loading configuration')
         self.load_config()
         logger.info('Initializing "%s" as scheduling engine' %
                     self.config['scheduling']['engine'])
         self.scheduler = BrainyScheduler.build_scheduler(
             self.config['scheduling']['engine'])
+        self.pipes = PipesModule(self)
+        logger.info('Starting pipelines discovery and processing..')
+        self.pipes.process_pipelines()
+        logger.info('Finished pipelines processing.')
+
