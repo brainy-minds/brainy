@@ -20,10 +20,10 @@ class ProccessEndedIncomplete(BrainyPipeFailure):
 
 class BrainyPipe(pipette.Pipe):
 
-    def __init__(self, pipes_module, definition):
+    def __init__(self, pipes_manager, definition):
         super(BrainyPipe, self).__init__(definition)
         self.process_namespace = 'brainy.pipes'
-        self.pipes_module = pipes_module
+        self.pipes_manager = pipes_manager
         self.has_failed = False
         self.previous_process_params = None
 
@@ -51,9 +51,9 @@ class BrainyPipe(pipette.Pipe):
     def execute_process(self, process, parameters):
         '''Add verbosity, e.g. report status using iBRAIN XML scheme'''
         step_name = self.get_step_name(process.name)
-        parameters['pipes_module'] = self.pipes_module
+        parameters['pipes_manager'] = self.pipes_manager
         parameters['process_path'] = os.path.join(
-            self.pipes_module._get_flag_prefix(),
+            self.pipes_manager._get_flag_prefix(),
             self.name,
         )
         parameters['step_name'] = step_name
@@ -99,16 +99,16 @@ class BrainyPipe(pipette.Pipe):
             raise BrainyPipeFailure('Execution failed')
 
 
-class PipesModule(FlagManager):
+class PipesManager(FlagManager):
 
     def __init__(self, project):
         self.project = project
         self.pipes_namespace = 'brainy.pipes'
         self.pipes_folder_files = [
-            os.path.join(self.pipes_path, filename)
-            for filename in os.listdir(self.pipes_path)
+            os.path.join(self.project_path, filename)
+            for filename in os.listdir(self.project_path)
         ]
-        self.__flag_prefix = self.pipes_path
+        self.__flag_prefix = self.project_path
         self.__pipelines = None
 
     @property
@@ -116,7 +116,7 @@ class PipesModule(FlagManager):
         return self.project.scheduler
 
     @property
-    def pipes_path(self):
+    def project_path(self):
         return self.project.path
 
     def _get_flag_prefix(self):
@@ -138,7 +138,7 @@ class PipesModule(FlagManager):
                     continue
                 definition = pipette.Pipe.parse_definition(definition_filename)
                 cls = self.get_class(definition['type'])
-                # Note that we pass itself as a pipes_module
+                # Note that we pass itself as a pipes_manager
                 pipes[definition['name']] = cls(self, definition)
             self.__pipelines = self.sort_pipelines(pipes)
         return self.__pipelines

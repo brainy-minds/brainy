@@ -19,7 +19,7 @@ from brainy.config import (write_project_config, load_project_config,
                            load_user_config, project_has_config)
 from brainy.workflows import bootstrap_workflow
 from brainy.scheduler import BrainyScheduler
-from brainy.pipes import PipesModule
+from brainy.pipes import PipesManager
 
 
 class BrainyProjectError(Exception):
@@ -74,7 +74,7 @@ class BrainyProject(object):
                     self.config['scheduling']['engine'])
         self.scheduler = BrainyScheduler.build_scheduler(
             self.config['scheduling']['engine'])
-        self.pipes = PipesModule(self)
+        self.pipes = PipesManager(self)
         logger.info('Starting pipelines discovery and processing..')
         self.pipes.process_pipelines()
         logger.info('Finished pipelines processing.')

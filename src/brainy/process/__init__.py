@@ -1,23 +1,18 @@
 import os
 import re
 import logging
+logger = logging.getLogger(__name__)
 from datetime import datetime
 from cStringIO import StringIO
 from pindent import reformat_filter
 import pipette
 from brainy.flags import FlagManager
 from brainy.scheduler import SHORT_QUEUE, NORM_QUEUE
-from brainy.config import get_config
 from brainy.errors import (UnknownError, KnownError, TermRunLimitError,
                            check_report_file_for_errors)
 from brainy.utils import escape_xml
 
 
-logger = logging.getLogger(__name__)
-brainy_config = get_config()
-BASH_CALL = '/bin/bash'
-MATLAB_CALL = brainy_config['matlab_cmd']
-PYTHON_CALL = brainy_config['python_cmd']
 PROCESS_STATUS = [
     'submitting',
     'waiting',
@@ -26,10 +21,6 @@ PROCESS_STATUS = [
     'failed',
     'completed',
 ]
-IBRAIN_LIB_PATH = os.path.join(brainy_config['root'], 'lib')
-IBRAIN_LIB_BASH_PATH = os.path.join(IBRAIN_LIB_PATH, 'bash')
-IBRAIN_LIB_MATLAB_PATH = os.path.join(IBRAIN_LIB_PATH, 'matlab')
-IBRAIN_LIB_PYTHON_PATH = os.path.join(IBRAIN_LIB_PATH, 'python')
 
 
 def clean_python_code(code):
@@ -80,7 +71,6 @@ class BrainyProcess(pipette.Process, FlagManager):
 
     def __init__(self):
         super(BrainyProcess, self).__init__()
-        self.pipes_module = None
         self.__reports = None
         self.__batch_listing = None
         self._job_report_exp = None
@@ -90,25 +80,34 @@ class BrainyProcess(pipette.Process, FlagManager):
         self.format_parameters = [
             'name',
             'step_name',
-            'plate_path',
+            # 'plate_path',  # Deprecated
             'process_path',
-            'pipes_path',
+            # 'pipes_path', # Deprecated
             'reports_path',
-            'batch_path',
-            'tiff_path',
-            'postanalysis_path',
-            'jpg_path',
+            # 'batch_path',   # Deprecated
+            # 'tiff_path',   # Deprecated
+            'data_path',
+            'images_path',
+            'analysis_path',
+            # 'postanalysis_path',  # Deprecated
+            # 'jpg_path',  # Deprecated
             'job_submission_queue',
             'job_resubmission_queue',
         ]
 
     @property
-    def env(self):
-        return self.parameters['pipes_module'].env
+    def pipes_manager(self):
+        # FIXME: Path everything to parameters. Make process independent from
+        # manager.
+        return self.parameters['pipes_manager']
+
+    @property
+    def config(self):
+        return self.parameters['pipes_manager'].config
 
     @property
     def scheduler(self):
-        return self.parameters['pipes_module'].scheduler
+        return self.parameters['pipes_manager'].scheduler
 
     @property
     def name(self):
@@ -127,10 +126,10 @@ class BrainyProcess(pipette.Process, FlagManager):
         )
 
     @property
-    def plate_path(self):
-        # We don't allow to parametrize plate_path for security reasons.
+    def project_path(self):
+        # We don't allow to parametrize project_path for security reasons.
         # See method restrict_to_safe_path() below.
-        return self.env['plate_path']
+        return self.parameters['pipes_manager'].project_path
 
     def restrict_to_safe_path(self, pathname):
         '''Restrict every relative pathname to point within the plate path'''
@@ -149,47 +148,46 @@ class BrainyProcess(pipette.Process, FlagManager):
         return self.restrict_to_safe_path(self.parameters['process_path'])
 
     @property
-    def pipes_path(self):
-        '''PIPES folder inside the plate path'''
-        return self.restrict_to_safe_path(self.parameters.get(
-            'pipes_path',
-            self.env['pipes_path'],
-        ))
-
-    @property
     def reports_path(self):
-        return self.restrict_to_safe_path(self.parameters.get(
+        reports_path = self.parameters.get(
             'reports_path',
-            os.path.join(self.process_path, 'REPORTS'),
-        ))
+            os.path.join(self.process_path, 'job_reports_of_{name}'),
+            #os.path.join(self.process_path, 'job_reports'),
+        )
+        reports_path = self.format_with_params(reports_path)
+        return self.restrict_to_safe_path(reports_path)
 
     @property
-    def batch_path(self):
-        return self.restrict_to_safe_path(self.parameters.get(
-            'batch_path',
-            os.path.join(self.process_path, 'BATCH'),
-        ))
+    def data_path(self):
+        '''All the shared data of the process are located here.'''
+        data_path = self.parameters.get(
+            'data_path',
+            os.path.join(self.process_path, 'data_of_{name}'),
+            #os.path.join(self.process_path, 'data'),
+        )
+        data_path = self.format_with_params(data_path)
+        return self.restrict_to_safe_path(data_path)
 
     @property
-    def tiff_path(self):
-        return self.restrict_to_safe_path(self.parameters.get(
-            'tiff_path',
-            self.env['tiff_path'],
-        ))
+    def images_path(self):
+        '''All the shared images of the process are located here.'''
+        images_path = self.parameters.get(
+            'images_path',
+            os.path.join(self.process_path, 'images_of_{name}'),
+            #os.path.join(self.process_path, 'images'),
+        )
+        images_path = self.format_with_params(images_path)
+        return self.restrict_to_safe_path(images_path)
 
     @property
-    def postanalysis_path(self):
-        return self.restrict_to_safe_path(self.parameters.get(
-            'postanalysis_path',
-            self.env['postanalysis_path'],
-        ))
-
-    @property
-    def jpg_path(self):
-        return self.restrict_to_safe_path(self.parameters.get(
-            'jpg_path',
-            self.env['jpg_path'],
-        ))
+    def analysis_path(self):
+        analysis_path = self.parameters.get(
+            'analysis_path',
+            os.path.join(self.process_path, 'analysis_of_{name}'),
+            #os.path.join(self.process_path, 'analysis'),
+        )
+        analysis_path = self.format_with_params(analysis_path)
+        return self.restrict_to_safe_path(analysis_path)
 
     @property
     def job_submission_queue(self):
@@ -209,39 +207,42 @@ class BrainyProcess(pipette.Process, FlagManager):
     def bash_call(self):
         return self.parameters.get(
             'bash_call',
-            BASH_CALL,
+            self.config['tools']['bash']['cmd'],
         )
 
     @property
     def matlab_call(self):
         return self.parameters.get(
             'matlab_call',
-            MATLAB_CALL,
+            self.config['tools']['matlab']['cmd'],
         )
 
     @property
     def python_call(self):
         return self.parameters.get(
             'python_call',
-            PYTHON_CALL,
+            self.config['tools']['python']['cmd'],
         )
+
+    def get_brainy_lib_path(self, language):
+        return os.path.join(self.config['brainy_lib_path'], language.lower())
 
     @property
     def user_bash_path(self):
         user_path = self.parameters.get('user_bash_path',
-                                        '{plate_path}/LIB/BASH')
+                                        '{plate_path}/lib/bash')
         return self.format_with_params(user_path)
 
     @property
     def user_matlab_path(self):
         user_path = self.parameters.get('user_matlab_path',
-                                        '{plate_path}/LIB/MATLAB')
+                                        '{plate_path}/lib/matlab')
         return self.format_with_params(user_path)
 
     @property
     def user_python_path(self):
         user_path = self.parameters.get('user_python_path',
-                                        '{plate_path}/LIB/PYTHON')
+                                        '{plate_path}/lib/python')
         return self.format_with_params(user_path)
 
     def get_user_code_path(self, lang='python', valid_folders=None):
@@ -251,7 +252,8 @@ class BrainyProcess(pipette.Process, FlagManager):
         user_path = value.split(':')
         if valid_folders is None:
             valid_folders = list()
-        valid_folders.append(os.path.join(IBRAIN_LIB_PATH, lang.lower()))
+        brainy_lib_path = self.get_brainy_lib_path(language)
+        valid_folders.append(brainy_lib_path)
         for subfolder in user_path:
             folder_path = self.restrict_to_safe_path(subfolder)
             if not os.path.exists(folder_path):

@@ -27,6 +27,7 @@ BRAINY_USER_CONFIG_TPL = '''
 # brainy user config
 brainy_version = '%(brainy_version)s'
 brainy_user = '%(brainy_user)s'
+brainy_lib_path = '%(brainy_lib_path)s'
 admin_email = 'root@localhost'
 
 # Which scheduling API to use by default?
@@ -58,6 +59,10 @@ project_parameters
     'brainy_version': brainy_version,
     'brainy_user': getuser(),
     'cellprofiler2_path': os.path.expanduser('~/CellProfiler2'),
+    'brainy_lib_path': os.path.join(
+        os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+        'lib'
+    ),
 }
 BRAINY_USER_CONFIG_PATH = os.path.expanduser('~/.brainy/config')
 
