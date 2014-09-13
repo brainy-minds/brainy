@@ -168,8 +168,8 @@ class Praefect(object):
     def gather_help(self):
         help_message = ''
         for duty in self.duties:
-            help_message += '  brainy help %s\t\t%s\n' % \
-                ('{%s}' % ','.join(duty.subjectives), duty.description)
+            help_message += '  brainy help %s\t%s\n' % \
+                ('{%20s}' % ','.join(duty.subjectives), duty.description)
         return help_message
 
 

@@ -25,13 +25,13 @@ from brainy.version import brainy_version
 # User-wide (global) configuration
 BRAINY_USER_CONFIG_TPL = '''
 # brainy user config
-brainy_version = '%(brainy_version)s'
-brainy_user = '%(brainy_user)s'
-brainy_lib_path = '%(brainy_lib_path)s'
-admin_email = 'root@localhost'
+brainy_version: '%(brainy_version)s'
+brainy_user: '%(brainy_user)s'
+brainy_lib_path: '%(brainy_lib_path)s'
+admin_email: 'root@localhost'
 
 # Which scheduling API to use by default?
-scheduling
+scheduling:
     # Possible choices are: {'shell_cmd', 'lsf', 'slurm'}
     engine: 'shell_cmd'
 
@@ -43,6 +43,8 @@ tools:
         cmd: '/usr/bin/env matlab -singleCompThread -nodisplay -nojvm'
     ruby:
         cmd: '/usr/bin/env ruby'
+    node:
+        cmd: '/usr/bin/env node'
 
 
 # Integrated application
@@ -51,7 +53,7 @@ apps:
         path: '%(cellprofiler2_path)s'
 
 # Default project parameters
-project_parameters
+project_parameters:
     job_submission_queue: '8:00'
     job_resubmission_queue: '36:00'
 
@@ -70,7 +72,7 @@ BRAINY_USER_CONFIG_PATH = os.path.expanduser('~/.brainy/config')
 # Project specific configuration
 BRAINY_PROJECT_CONFIG_TPL = '''
 # brainy project config
-brainy_version = '%(brainy_version)s'
+brainy_version: '%(brainy_version)s'
 
 # Parameters below will affect the whole project. In particular, that defines
 # how jobs in every step of each pipe will be submitted, which folders names
@@ -110,6 +112,7 @@ def write_user_config(user_config_path=BRAINY_USER_CONFIG_PATH):
     if not os.path.exists(user_brainy_path):
         logger.info('Creating a missing user brainy folder: %s' %
                     user_brainy_path)
+        os.makedirs(user_brainy_path)
     if os.path.exists(user_config_path):
         logger.warn('Abort. Configuration file already exists: %s' %
                     user_config_path)

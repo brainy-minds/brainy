@@ -1,0 +1,80 @@
+#!/usr/bin/env python2.7
+'''
+brainy-config
+==============
+
+A part of brainy CLI:
+
+ - Init ~/.brainy/config
+ - Manage individual configuration settings
+ - Run tests and checks on configuration
+
+@author: Yauhen Yakimovich <yauhen.yakimovich@uzh.ch>,
+         Pelkmans Lab  <https://www.pelkmanslab.org>
+
+@license: The MIT License (MIT)
+
+Copyright (c) 2014 Pelkmans Lab
+'''
+import os
+import sh
+# Requires: npm install -g js-yaml
+jsyaml = sh.Command('js-yaml')
+import sys
+import logging
+import argparse
+# We include <pkg_root>/src, <pkg_root>/lib/python
+extend_path = lambda root_path, folder: sys.path.insert(
+    0, os.path.join(root_path, folder))
+ROOT = os.path.dirname(os.path.dirname(__file__))
+extend_path(ROOT, '')
+extend_path(ROOT, 'src')
+extend_path(ROOT, 'lib/python')
+# Import brainy modules.
+from brainy.config import (write_user_config, load_user_config,
+                           BRAINY_USER_CONFIG_PATH)
+
+
+def setup_logging():
+    FORMAT = '[%(asctime)-15s] %(name)23s: %(message)s'
+    logging.basicConfig(format=FORMAT, level=logging.INFO)
+
+
+# Now parse and handle command line.
+if __name__ == '__main__':
+    program = os.path.basename(sys.argv[0])
+    logger = logging.getLogger(program)
+    parser = argparse.ArgumentParser(description='Manage brainy configuration')
+    parser.add_argument('-i', '--imperative', dest='action',
+                        choices=['init', 'test', 'help'],
+                        help='Action')
+    parser.add_argument('-s', '--subjective', dest='what',
+                        choices=['config'])
+    parser.add_argument('-f', '--file', dest='file', nargs='?', help='')
+
+    args = parser.parse_args()
+
+    if args.action == 'help':
+        parser.print_help()
+        exit()
+
+    setup_logging()
+    try:
+        if args.action == 'init' and args.what == 'config':
+            # Create ~/.brainy folder and populate it with a default
+            # configuration.
+            logger.info('Initializing brainy config in user home.')
+            write_user_config()
+        elif args.action == 'test' and args.what == 'config':
+            # Valid config files.
+            try:
+                load_user_config()
+            except Exception as error:
+                sys.stderr.write('%s\n' % str(error))
+                exit(1)
+            jsyaml(BRAINY_USER_CONFIG_PATH)
+            if args.file:
+                jsyaml(args.file)
+            # TODO: check the return code and print a positive message.
+    except Exception as error:
+        sys.stderr.write('%s\n' % str(error))

@@ -52,6 +52,7 @@ setup(
     install_requires=[
         'pipette~=0.1.2',
         'tree_output~=0.1.2',
+        'sh~=1.09',
     ],
     classifiers=[
         'Topic :: System :: Distributed Computing',
