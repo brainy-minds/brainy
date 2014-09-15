@@ -1,7 +1,7 @@
 {
-    // Define iBRAIN pipe type
-    "type": "CustomCode.Pipe",    
-    // Define chain of processes - single steps
+    # Define iBRAIN pipe type
+    "type": "CustomCode.CustomPipe",
+    # Define chain of processes - single steps
     "chain": [
         {
             "type": "CustomCode.MatlabCall",

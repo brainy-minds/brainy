@@ -70,7 +70,7 @@ class BrainyProject(object):
         '''
         logger.info('Loading configuration')
         self.load_config()
-        logger.info('Initializing "%s" as scheduling engine' %
+        logger.info('Initializing "%s" as a scheduling engine' %
                     self.config['scheduling']['engine'])
         self.scheduler = BrainyScheduler.build_scheduler(
             self.config['scheduling']['engine'])

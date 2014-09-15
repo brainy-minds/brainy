@@ -225,7 +225,8 @@ class BrainyProcess(pipette.Process, FlagManager):
         )
 
     def get_brainy_lib_path(self, language):
-        return os.path.join(self.config['brainy_lib_path'], language.lower())
+        return os.path.join(self.config['brainy']['lib_path'],
+                            language.lower())
 
     @property
     def user_bash_path(self):

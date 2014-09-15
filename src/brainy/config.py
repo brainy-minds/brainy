@@ -25,15 +25,17 @@ from brainy.version import brainy_version
 # User-wide (global) configuration
 BRAINY_USER_CONFIG_TPL = '''
 # brainy user config
-brainy_version: '%(brainy_version)s'
-brainy_user: '%(brainy_user)s'
-brainy_lib_path: '%(brainy_lib_path)s'
-admin_email: 'root@localhost'
+brainy:
+    version: '%(brainy_version)s'
+    user: '%(brainy_user)s'
+    lib_path: '%(brainy_lib_path)s'
+    pipe_extension: '.br'
+    admin_email: 'root@localhost'
 
 # Which scheduling API to use by default?
 scheduling:
-    # Possible choices are: {'shell_cmd', 'lsf', 'slurm'}
-    engine: 'shell_cmd'
+    # Possible choices are: {'shellcmd', 'lsf', 'slurm'}
+    engine: 'shellcmd'
 
 # Preliminary tools and programming languages
 tools:

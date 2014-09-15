@@ -1,9 +1,9 @@
 {
-    // Define iBRAIN pipe type
-    "type": "CustomCode.Pipe",
-    // Sort execution of this pipe
+    # Define iBRAIN pipe type
+    "type": "CustomCode.CustomPipe",
+    # Sort execution of this pipe
     "after": "cell_profiler",
-    // Define chain of processes - single steps
+    # Define chain of processes - single steps
     "chain": [
         {
             "type": "CustomCode.MatlabCall",

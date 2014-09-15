@@ -9,6 +9,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+PROCESS_NAMESPACE = 'brainy.pipes'
+
 
 class BrainyPipeFailure(Exception):
     '''Thrown when pipeline execution has to be interrupted.'''
@@ -20,12 +22,15 @@ class ProccessEndedIncomplete(BrainyPipeFailure):
 
 class BrainyPipe(pipette.Pipe):
 
-    def __init__(self, pipes_manager, definition):
-        super(BrainyPipe, self).__init__(definition)
-        self.process_namespace = 'brainy.pipes'
+    def __init__(self, pipes_manager, definition=None):
+        super(BrainyPipe, self).__init__(PROCESS_NAMESPACE, definition)
         self.pipes_manager = pipes_manager
         self.has_failed = False
         self.previous_process_params = None
+
+    @property
+    def pipe_extension(self):
+        return self.pipes_manager.pipe_extension
 
     def instantiate_process(self, process_description,
                             default_type=None):
@@ -103,7 +108,7 @@ class PipesManager(FlagManager):
 
     def __init__(self, project):
         self.project = project
-        self.pipes_namespace = 'brainy.pipes'
+        self.pipes_namespace = PROCESS_NAMESPACE
         self.pipes_folder_files = [
             os.path.join(self.project_path, filename)
             for filename in os.listdir(self.project_path)
@@ -122,6 +127,10 @@ class PipesManager(FlagManager):
     def _get_flag_prefix(self):
         return self.__flag_prefix
 
+    @property
+    def pipe_extension(self):
+        return self.project.config['brainy']['pipe_extension']
+
     def get_class(self, pipe_type):
         pipe_type = self.pipes_namespace + '.' + pipe_type
         module_name, class_name = pipe_type.rsplit('.', 1)
@@ -134,12 +143,13 @@ class PipesManager(FlagManager):
             # Repopulate dictionary.
             pipes = dict()
             for definition_filename in self.pipes_folder_files:
-                if not definition_filename.endswith('Pipe.json'):
+                if not definition_filename.endswith(self.pipe_extension):
                     continue
-                definition = pipette.Pipe.parse_definition(definition_filename)
-                cls = self.get_class(definition['type'])
+                pipe = BrainyPipe(self)
+                pipe.parse_definition_file(definition_filename)
+                cls = self.get_class(pipe.definition['type'])
                 # Note that we pass itself as a pipes_manager
-                pipes[definition['name']] = cls(self, definition)
+                pipes[pipe.definition['name']] = cls(self, pipe.definition)
             self.__pipelines = self.sort_pipelines(pipes)
         return self.__pipelines
 
@@ -226,7 +236,7 @@ class PipesManager(FlagManager):
         PipesModule.
         '''
         try:
-            pipeline.communicate()
+            pipeline.communicate({'input': '{}'})
         except BrainyPipeFailure:
             # Errors are reported inside individual pipeline.
             print '<!-- A pipeline has failed. Continue with the next one -->'
