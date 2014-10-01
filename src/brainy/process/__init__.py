@@ -287,8 +287,10 @@ class BrainyProcess(pipette.Process, FlagManager):
             try:
                 compiled_value = value.format(**process_params)
             except KeyError as error:
-                message = ('Failed to compile {%s}: Missing key as '
-                           'reported in "%s"') % (param_name, str(error))
+                message = ('Failed to compile {%s}. Missing value for key'
+                           ' %s in expression: "%s".') % \
+                          (param_name, str(error), value)
+                message += ' Consider doubling the {{ and }} to print { and }.'
                 raise BrainyProcessError(warning=message)
             self.compiled_params[param_name] = compiled_value
         return self.compiled_params[param_name]
