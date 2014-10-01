@@ -39,7 +39,7 @@ class BrainyProject(object):
         self.config = None
         self.scheduler = None
 
-    def create(self):
+    def create(self, from_workflow='canonical'):
         # Make project dir.
         if not os.path.exists(self.path):
             logger.info('Creating new project folder: %s' % self.path)
@@ -52,7 +52,7 @@ class BrainyProject(object):
         write_project_config(self.path)
 
         # Bootstrap project with a standard iBRAIN workflow.
-        bootstrap_workflow(self.path)
+        bootstrap_workflow(self.path, workflow_name=from_workflow)
 
     def is_a_valid_project_folder(self):
         return project_has_config(self.path)

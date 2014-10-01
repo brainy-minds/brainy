@@ -1,0 +1,9 @@
+{    
+    "type": "CustomCode.CustomPipe", 
+    "chain": [
+        {
+            "type": "CustomCode.PythonCall",
+            "submit_call": "print 'hello world'",
+        }
+    ]
+}

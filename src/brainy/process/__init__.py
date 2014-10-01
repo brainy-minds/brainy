@@ -81,6 +81,7 @@ class BrainyProcess(pipette.Process, FlagManager):
             'name',
             'step_name',
             # 'plate_path',  # Deprecated
+            'project_path',
             'process_path',
             # 'pipes_path', # Deprecated
             'reports_path',
@@ -154,7 +155,7 @@ class BrainyProcess(pipette.Process, FlagManager):
             'reports_path',
             os.path.join(self.process_path, 'job_reports_of_{name}'),
         )
-        reports_path = self.format_with_params(__name__, reports_path)
+        reports_path = self.format_with_params('reports_path', reports_path)
         return self.restrict_to_safe_path(reports_path)
 
     @property
@@ -164,7 +165,7 @@ class BrainyProcess(pipette.Process, FlagManager):
             'data_path',
             os.path.join(self.process_path, 'data_of_{name}'),
         )
-        data_path = self.format_with_params(__name__, data_path)
+        data_path = self.format_with_params('data_path', data_path)
         return self.restrict_to_safe_path(data_path)
 
     @property
@@ -175,7 +176,7 @@ class BrainyProcess(pipette.Process, FlagManager):
             os.path.join(self.process_path, 'images_of_{name}'),
             #os.path.join(self.process_path, 'images'),
         )
-        images_path = self.format_with_params(__name__, images_path)
+        images_path = self.format_with_params('images_path', images_path)
         return self.restrict_to_safe_path(images_path)
 
     @property
@@ -185,7 +186,7 @@ class BrainyProcess(pipette.Process, FlagManager):
             os.path.join(self.process_path, 'analysis_of_{name}'),
             #os.path.join(self.process_path, 'analysis'),
         )
-        analysis_path = self.format_with_params(__name__,
+        analysis_path = self.format_with_params('analysis_path',
                                                 analysis_path)
         return self.restrict_to_safe_path(analysis_path)
 
@@ -232,19 +233,19 @@ class BrainyProcess(pipette.Process, FlagManager):
     def user_bash_path(self):
         user_path = self.parameters.get('user_bash_path',
                                         '{project_path}/lib/bash')
-        return self.format_with_params(user_path)
+        return self.format_with_params('user_bash_path', user_path)
 
     @property
     def user_matlab_path(self):
         user_path = self.parameters.get('user_matlab_path',
                                         '{project_path}/lib/matlab')
-        return self.format_with_params(user_path)
+        return self.format_with_params('user_matlab_path', user_path)
 
     @property
     def user_python_path(self):
         user_path = self.parameters.get('user_python_path',
                                         '{project_path}/lib/python')
-        return self.format_with_params(user_path)
+        return self.format_with_params('user_python_path', user_path)
 
     def get_user_code_path(self, lang='python', valid_folders=None):
         if valid_folders is None:
@@ -372,8 +373,7 @@ MATLAB_CODE''' % {
 
     def bake_python_code(self, python_code):
         user_path = str(self.get_user_code_path(
-                        lang='python',
-                        valid_folders=[brainy_config['root']])).split(':')
+                        lang='python')).split(':')
         assert type(user_path) == list
         return '''%(python_call)s - << PYTHON_CODE;
 import sys

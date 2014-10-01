@@ -77,7 +77,7 @@ BRAINY_PROJECT_CONFIG_TPL = '''
 brainy_version: '%(brainy_version)s'
 
 # Parameters below will affect the whole project. In particular, that defines
-# how jobs in every step of each pipe will be submitted, which folders names
+# how jobs in every step of each pipe will be submitted, which folder names
 # and locations are used, etc.
 
 # Uncomment this once deployed
