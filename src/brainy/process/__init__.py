@@ -94,6 +94,7 @@ class BrainyProcess(pipette.Process, FlagManager):
             'job_submission_queue',
             'job_resubmission_queue',
         ]
+        self.compiled_params = dict()
 
     @property
     def pipes_manager(self):
@@ -133,14 +134,14 @@ class BrainyProcess(pipette.Process, FlagManager):
 
     def restrict_to_safe_path(self, pathname):
         '''Restrict every relative pathname to point within the plate path'''
-        plate_path = self.plate_path
-        if not plate_path.endswith('/'):
-            plate_path += '/'
+        safe_path = self.project_path
+        if not safe_path.endswith('/'):
+            safe_path += '/'
         if '../../' in pathname:
-            pathname = pathname.replace('../../', plate_path, 1)
+            pathname = pathname.replace('../../', safe_path, 1)
         pathname = pathname.replace('..', '')
-        # The actual jailing withing the plate_path.
-        assert pathname.startswith(plate_path)
+        # The actual jailing withing the safe_path.
+        assert pathname.startswith(safe_path)
         return pathname
 
     @property
@@ -152,9 +153,8 @@ class BrainyProcess(pipette.Process, FlagManager):
         reports_path = self.parameters.get(
             'reports_path',
             os.path.join(self.process_path, 'job_reports_of_{name}'),
-            #os.path.join(self.process_path, 'job_reports'),
         )
-        reports_path = self.format_with_params(reports_path)
+        reports_path = self.format_with_params(__name__, reports_path)
         return self.restrict_to_safe_path(reports_path)
 
     @property
@@ -163,9 +163,8 @@ class BrainyProcess(pipette.Process, FlagManager):
         data_path = self.parameters.get(
             'data_path',
             os.path.join(self.process_path, 'data_of_{name}'),
-            #os.path.join(self.process_path, 'data'),
         )
-        data_path = self.format_with_params(data_path)
+        data_path = self.format_with_params(__name__, data_path)
         return self.restrict_to_safe_path(data_path)
 
     @property
@@ -176,7 +175,7 @@ class BrainyProcess(pipette.Process, FlagManager):
             os.path.join(self.process_path, 'images_of_{name}'),
             #os.path.join(self.process_path, 'images'),
         )
-        images_path = self.format_with_params(images_path)
+        images_path = self.format_with_params(__name__, images_path)
         return self.restrict_to_safe_path(images_path)
 
     @property
@@ -186,7 +185,8 @@ class BrainyProcess(pipette.Process, FlagManager):
             os.path.join(self.process_path, 'analysis_of_{name}'),
             #os.path.join(self.process_path, 'analysis'),
         )
-        analysis_path = self.format_with_params(analysis_path)
+        analysis_path = self.format_with_params(__name__,
+                                                analysis_path)
         return self.restrict_to_safe_path(analysis_path)
 
     @property
@@ -224,55 +224,74 @@ class BrainyProcess(pipette.Process, FlagManager):
             self.config['tools']['python']['cmd'],
         )
 
-    def get_brainy_lib_path(self, language):
+    def get_brainy_lib_path(self, lang):
         return os.path.join(self.config['brainy']['lib_path'],
-                            language.lower())
+                            lang.lower())
 
     @property
     def user_bash_path(self):
         user_path = self.parameters.get('user_bash_path',
-                                        '{plate_path}/lib/bash')
+                                        '{project_path}/lib/bash')
         return self.format_with_params(user_path)
 
     @property
     def user_matlab_path(self):
         user_path = self.parameters.get('user_matlab_path',
-                                        '{plate_path}/lib/matlab')
+                                        '{project_path}/lib/matlab')
         return self.format_with_params(user_path)
 
     @property
     def user_python_path(self):
         user_path = self.parameters.get('user_python_path',
-                                        '{plate_path}/lib/python')
+                                        '{project_path}/lib/python')
         return self.format_with_params(user_path)
 
     def get_user_code_path(self, lang='python', valid_folders=None):
-        property_name = 'user_%s_path' % lang.lower()
-        assert hasattr(self, property_name)
-        value = getattr(self, property_name)
-        user_path = value.split(':')
         if valid_folders is None:
             valid_folders = list()
-        brainy_lib_path = self.get_brainy_lib_path(language)
+        # Brainy path from deployed code.
+        brainy_lib_path = self.get_brainy_lib_path(lang)
         valid_folders.append(brainy_lib_path)
-        for subfolder in user_path:
-            folder_path = self.restrict_to_safe_path(subfolder)
-            if not os.path.exists(folder_path):
-                logger.warning('The custom code path does not exist: %s' %
-                               folder_path)
-                continue
-            valid_folders.append(folder_path)
+        # User path from config.
+        property_name = 'user_%s_path' % lang.lower()
+        if hasattr(self, property_name):
+            value = getattr(self, property_name)
+            user_path = value.split(':')
+            for subfolder in user_path:
+                folder_path = self.restrict_to_safe_path(subfolder)
+                if not os.path.exists(folder_path):
+                    logger.warning('The custom code path does not exist: %s' %
+                                   folder_path)
+                    continue
+                valid_folders.append(folder_path)
+        # Pack result as colon separated string
         return ':'.join(valid_folders)
 
-    def format_with_params(self, value):
+    def format_with_params(self, param_name, value):
         '''
         Inject updated values into the code. This applies string.format() DSL
         using self.parameters dictionary as arguments.
         '''
-        process_params = dict()
-        for name in self.format_parameters:
-            process_params[name] = getattr(self, name)
-        return value.format(**process_params)
+        if not param_name in self.compiled_params:
+            logger.debug('Compiling (string substitution) param: %s' %
+                         param_name)
+            process_params = dict()
+            for name in self.format_parameters:
+                param_var = '{%s}' % name
+                if not param_var in value:
+                    # Pick only those values that we really need to compile the
+                    # parameter - do string substitution.
+                    continue
+                process_params[name] = getattr(self, name)
+            # Compile by substituting every {variable} with its value.
+            try:
+                compiled_value = value.format(**process_params)
+            except KeyError as error:
+                message = ('Failed to compile {%s}: Missing key as '
+                           'reported in "%s"') % (param_name, str(error))
+                raise BrainyProcessError(warning=message)
+            self.compiled_params[param_name] = compiled_value
+        return self.compiled_params[param_name]
 
     def _get_flag_prefix(self):
         return os.path.join(self.process_path, self.name)
@@ -334,14 +353,13 @@ BASH_CODE''' % {
 
     def bake_matlab_code(self, matlab_code):
         return '''%(matlab_call)s << MATLAB_CODE;
-path('%(ibrain_lib_matlab_path)s', path());
+path('%(user_path)s', path());
 path(getrecpath('%(user_path)s'), path());
 
 %(matlab_code)s
 MATLAB_CODE''' % {
             'matlab_call': self.matlab_call,
             'matlab_code': format_code(matlab_code, lang='matlab'),
-            'ibrain_lib_matlab_path': IBRAIN_LIB_MATLAB_PATH,
             'user_path': self.get_user_code_path(lang='matlab'),
         }
 

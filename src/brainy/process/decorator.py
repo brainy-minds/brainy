@@ -32,32 +32,41 @@ def require_keys_in_description(*description_keys):
     return class_builder
 
 
-def require_key_in_description(property_method):
+def require_key_in_description(method):
     '''
     Same as previous but applicable per property, not class. Make sure
     this decorator is the first to be applied.
     '''
+    param_name = method.__name__
+    if hasattr(method, 'param_name'):
+        param_name = method.param_name
 
     def get_required_description_key(self):
-        property_name = property_method.__name__
-        if not property_method.__name__ in self.description:
+        if not param_name in self.description:
             raise BrainyProcessError(
                 'Missing "%s" key in JSON descriptor of the process.' %
-                property_name
+                param_name
             )
-        result = property_method(self)
-        return self.description[property_name] if result is None else result
+        result = method(self)
+        return self.description[param_name] if result is None else result
 
+    get_required_description_key.param_name = param_name
     return get_required_description_key
 
 
-def format_with_params(process_method):
+def format_with_params(method):
     '''
     Apply this decorator to properties of BrainyProcess() class instances and
     its descendants if you wish to substitute string values of all the
     parameters specified as {variable} using format_with_params().
     '''
-    def formatting_with_params(self):
-        return self.format_with_params(process_method(self))
+    param_name = method.__name__
+    if hasattr(method, 'param_name'):
+        param_name = method.param_name
 
+    def formatting_with_params(self):
+        return self.format_with_params(param_name,
+                                       method(self))
+
+    formatting_with_params.param_name = param_name
     return formatting_with_params

@@ -121,6 +121,10 @@ class PipesManager(FlagManager):
         return self.project.scheduler
 
     @property
+    def config(self):
+        return self.project.config
+
+    @property
     def project_path(self):
         return self.project.path
 
