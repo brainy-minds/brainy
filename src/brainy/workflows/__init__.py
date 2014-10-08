@@ -23,7 +23,8 @@ WORKFLOWS = {
 
 
 def bootstrap_workflow(project_path, workflow_name):
-    logger.info('Bootstraping project with a standard iBRAIN workflow.')
+    logger.info('Bootstraping project with a "%s" iBRAIN workflow.' %
+                workflow_name)
     if not workflow_name in WORKFLOWS:
         raise Exception('Unknown workflow: %s' % workflow_name)
     for workflow_filename in WORKFLOWS[workflow_name]:
