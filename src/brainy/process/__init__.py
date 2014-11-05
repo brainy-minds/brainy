@@ -3,8 +3,6 @@ import re
 import logging
 logger = logging.getLogger(__name__)
 from datetime import datetime
-from cStringIO import StringIO
-from pindent import reformat_filter
 import pipette
 from brainy.flags import FlagManager
 from brainy.scheduler import SHORT_QUEUE, NORM_QUEUE
@@ -21,14 +19,6 @@ PROCESS_STATUS = [
     'failed',
     'completed',
 ]
-
-
-def clean_python_code(code):
-    input = StringIO()
-    input.write(code)
-    output = StringIO()
-    reformat_filter(input, output, expandtabs=True)
-    return output.getvalue()
 
 
 def format_code(code, lang='bash'):

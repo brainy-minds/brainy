@@ -18,22 +18,22 @@ def get_timestamp_str():
     return datetime.now().strftime('%Y%m%d%H%M%S')
 
 
-def backup_batch_folder(batch_path, backups_path):
+def backup_batch_folder(data_path, backups_path):
     '''Will recursively copy current BATCH to backups path'''
     # Make sure folders exist.
-    if not os.path.exists(batch_path):
-        raise IOError('BATCH path was not found: %s' % batch_path)
+    if not os.path.exists(data_path):
+        raise IOError('BATCH path was not found: %s' % data_path)
     if not os.path.exists(backups_path):
         raise IOError('BACKUPS path was not found: %s' % backups_path)
 
     # Making a backup copy.
-    backuped_batch_path = os.path.join(backups_path,
+    backuped_data_path = os.path.join(backups_path,
                                        'BATCH_%s' % get_timestamp_str())
-    if os.path.exists(backuped_batch_path):
+    if os.path.exists(backuped_data_path):
         raise IOError('BACKUP destination already exists: %s' %
-                      backuped_batch_path)
+                      backuped_data_path)
     # Note: the destination directory must not already exist.
-    shutil.copytree(batch_path, backuped_batch_path)
+    shutil.copytree(data_path, backuped_data_path)
 
 
 class BackupPreviousBatch(PythonCodeProcess):
@@ -57,17 +57,14 @@ class BackupPreviousBatch(PythonCodeProcess):
         Note that the interpreter call is included by
         self.submit_python_code()
         '''
-        code = '''
-        # Import iBRAIN environment.
-        import ext_path
+        return '''
         from brainy.pipes.Tools import backup_batch_folder
 
-        backup_batch_folder('%(batch_path)s', '%(backups_path)s')
+        backup_batch_folder('%(data_path)s', '%(backups_path)s')
         ''' % {
-            'batch_path': self.batch_path,
+            'data_path': self.data_path,
             'backups_path': self.backups_path,
         }
-        return code
 
     def has_data(self):
         '''
@@ -188,8 +185,8 @@ class LinkFiles(PythonCodeProcess):
     def put_on(self):
         super(LinkFiles, self).put_on()
         # Create miss)ing process folder path.
-        if not os.path.exists(self.batch_path):
-            os.makedirs(self.batch_path)
+        if not os.path.exists(self.data_path):
+            os.makedirs(self.data_path)
 
     @staticmethod
     def link(source_path, target_path, patterns, link_type='hard',
@@ -266,10 +263,7 @@ class LinkFiles(PythonCodeProcess):
         assert 'hardlink' in self.file_patterns \
             or 'symlink' in self.file_patterns
 
-        code = '''# Import iBRAIN environment.
-import ext_path
-from brainy.pipes.Tools import LinkFiles
-'''
+        code = 'from brainy.pipes.Tools import LinkFiles\n'
 
         for args in LinkFiles.build_linking_args(self.source_location,
                                                  self.target_location,

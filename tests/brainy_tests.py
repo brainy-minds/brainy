@@ -1,9 +1,11 @@
 '''
 Basic routings for nose testing of brainy code.
 '''
+from __future__ import unicode_literals
 import re
 import os
 import sys
+import yaml
 import tempfile
 import unittest
 from cStringIO import StringIO
@@ -13,21 +15,43 @@ extend_path = lambda root_path, folder: sys.path.insert(
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 extend_path(ROOT, '')
 extend_path(ROOT, 'lib/python')
-import brainy.config
-brainy.config.IBRAIN_ROOT = os.path.join(ROOT, 'tests', 'mock', 'root')
-from brainy.pipes import PipesModule
+# import brainy.config
+# brainy.config.IBRAIN_ROOT = os.path.join(ROOT, 'tests', 'mock', 'root')
+from brainy.config import (BRAINY_PROJECT_CONFIG_TPL, BRAINY_USER_CONFIG_TPL,
+                           write_project_config)
+from brainy.utils import merge_dicts
+from brainy.project import BrainyProject
+from brainy.pipes import BrainyPipe, PipesManager
+from brainy.scheduler import BrainyScheduler
 
 
-class MockPipesModule(PipesModule):
+class MockProject(BrainyProject):
 
-    def __init__(self, mock_pipe_json):
-        env = self.bake_and_init_env()
-        # Write the mock pipe content.
-        with open(os.path.join(env['pipes_path'], 'mockPipe.json'), 'w+') \
-                as pipe_file:
-            pipe_file.write(mock_pipe_json)
+    def __init__(self):
+        super(MockProject, self).__init__('mock', tempfile.mkdtemp())
+        assert not os.path.exists(self.path)
+        os.makedirs(self.path)
+        self.write_mock_project_config()
+        self.load_config()
+        self.scheduler = BrainyScheduler.build_scheduler(
+            self.config['scheduling']['engine'])
+
+    def load_config(self):
+        # Overwrite with mock config which a usual nested dictionary.
+        user_config_tpl = yaml.load(StringIO(BRAINY_USER_CONFIG_TPL))
+        super(MockProject, self).load_config()
+        self.config = merge_dicts(user_config_tpl, self.config)
+
+    def write_mock_project_config(self):
+        write_project_config(self.path)
+
+
+class MockPipe(BrainyPipe):
+
+    def __init__(self, pipes_manager, mock_pipe_json):
+        # env = self.bake_and_init_env()
         # Overwrite the initialization
-        PipesModule.__init__(self, 'pipes', env)
+        super(MockPipesModule, self).__init__(pipes_manager, mock_pipe_json)
 
     def bake_and_init_env(self):
         project_dir = tempfile.mkdtemp()
@@ -44,6 +68,20 @@ class MockPipesModule(PipesModule):
                 continue
             os.makedirs(env[key])
         return env
+
+
+class MockPipesManager(PipesManager):
+    pass
+
+
+def build_pipes(mock_pipe_json):
+    project = MockProject()
+    # Write the mock pipe content.
+    with open(os.path.join(project.path, 'mock.br'), 'w+') \
+            as pipe_file:
+        pipe_file.write(mock_pipe_json)
+    pipes = MockPipesManager(project)
+    return pipes
 
 
 class BrainyTest(unittest.TestCase):
@@ -77,6 +115,7 @@ class BrainyTest(unittest.TestCase):
         # self.stop_capturing_output()
 
     def get_report_content(self):
+        # raise Exception(self.captured_output)
         match = re.search('^Report file is written to:\s*([^\s\<]+)',
                           self.captured_output, re.MULTILINE)
         report_file = match.group(1)
