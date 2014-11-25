@@ -5,15 +5,15 @@ Usage example:
     nosetests -vv -x --pdb test_customcode_processes
 '''
 import os
-from brainy_tests import MockPipesModule, BrainyTest
+from brainy_tests import MockPipesManager, BrainyTest
 
 
 def bake_a_mock_pipe_with_no_param():
-    return MockPipesModule('''
+    return MockPipesManager('''
 {
-    // Define iBRAIN pipe type
+    # Define iBRAIN pipe type
     "type": "CellProfiler.Pipe",
-    // Define chain of processes
+    # Define chain of processes
     "chain": [
         {
             "type": "CustomCode.PythonCall",
@@ -29,11 +29,11 @@ def bake_a_mock_pipe_with_no_param():
 
 
 def bake_a_working_mock_pipe():
-    return MockPipesModule('''
+    return MockPipesManager('''
 {
-    // Define iBRAIN pipe type
+    # Define iBRAIN pipe type
     "type": "CellProfiler.Pipe",
-    // Define chain of processes
+    # Define chain of processes
     "chain": [
         {
             "type": "CustomCode.PythonCall",
@@ -50,11 +50,11 @@ def bake_a_working_mock_pipe():
 
 
 def bake_a_bash_pipe():
-    return MockPipesModule('''
+    return MockPipesManager('''
 {
-    // Define iBRAIN pipe type
+    # Define iBRAIN pipe type
     "type": "CellProfiler.Pipe",
-    // Define chain of processes
+    # Define chain of processes
     "chain": [
         {
             "type": "CustomCode.BashCall",
@@ -71,11 +71,11 @@ def bake_a_bash_pipe():
 
 
 def bake_a_matlab_pipe():
-    return MockPipesModule('''
+    return MockPipesManager('''
 {
-    // Define iBRAIN pipe type
+    # Define iBRAIN pipe type
     "type": "CellProfiler.Pipe",
-    // Define chain of processes
+    # Define chain of processes
     "chain": [
         {
             "type": "CustomCode.MatlabCall",
@@ -91,11 +91,11 @@ def bake_a_matlab_pipe():
 
 
 def bake_pipe_with_matlab_user_path_extend():
-    return MockPipesModule('''
+    return MockPipesManager('''
 {
-    // Define iBRAIN pipe type
+    # Define iBRAIN pipe type
     "type": "CellProfiler.Pipe",
-    // Define chain of processes
+    # Define chain of processes
     "chain": [
         {
             "type": "CustomCode.MatlabCall",

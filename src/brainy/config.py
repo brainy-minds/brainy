@@ -80,7 +80,9 @@ brainy_version: '%(brainy_version)s'
 # how jobs in every step of each pipe will be submitted, which folder names
 # and locations are used, etc.
 
-# Uncomment this once deployed
+# Uncomment these section to use parallel submission engines once your project
+# is deployed onto a cluster.
+#
 # scheduling
 #     engine: 'lsf'
 

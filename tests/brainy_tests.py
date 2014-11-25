@@ -15,35 +15,32 @@ extend_path(ROOT, '')
 extend_path(ROOT, 'lib/python')
 import brainy.config
 brainy.config.IBRAIN_ROOT = os.path.join(ROOT, 'tests', 'mock', 'root')
-from brainy.pipes import PipesModule
+from brainy.pipes import PipesManager
+from brainy.project import BrainyProject
+
+print brainy.workflows.__file__
+exit()
+
+class MockProject(BrainyProject):
+
+    def __init__(self, name):
+        '''bootstrap test project folder in temporary path'''
+        path = tempfile.mkdtemp()
+        BrainyProject.__init__(self, name, path)
 
 
-class MockPipesModule(PipesModule):
+class MockPipesManager(PipesManager):
 
-    def __init__(self, mock_pipe_json):
-        env = self.bake_and_init_env()
+    def __init__(self, mock_pipe_yaml, pipe_name='mock_test'):
+        self.project = MockProject('mock_project')
+        # Bootstrap test project.
+        self.project.create(from_workflow='empty')
         # Write the mock pipe content.
-        with open(os.path.join(env['pipes_path'], 'mockPipe.json'), 'w+') \
+        with open(os.path.join(self.project_path, pipe_name + '.br'), 'w+') \
                 as pipe_file:
-            pipe_file.write(mock_pipe_json)
-        # Overwrite the initialization
-        PipesModule.__init__(self, 'pipes', env)
-
-    def bake_and_init_env(self):
-        project_dir = tempfile.mkdtemp()
-        env = {
-            'plate_path': project_dir,
-            'tiff_path': os.path.join(project_dir, 'TIFF'),
-            'batch_path': os.path.join(project_dir, 'BATCH'),
-            'postanalysis_path': os.path.join(project_dir, 'POSTANALYSIS'),
-            'jpg_path': os.path.join(project_dir, 'JPG'),
-            'pipes_path': os.path.join(project_dir, 'PIPES'),
-        }
-        for key in env:
-            if not key.endswith('path') or os.path.exists(env[key]):
-                continue
-            os.makedirs(env[key])
-        return env
+            pipe_file.write(mock_pipe_yaml)
+        # Overwrite the initialization.
+        PipesManager.__init__(self, self.project)
 
 
 class BrainyTest(unittest.TestCase):
