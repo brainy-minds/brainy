@@ -15,10 +15,10 @@ extend_path = lambda root_path, folder: sys.path.insert(
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 extend_path(ROOT, '')
 extend_path(ROOT, 'src')
-# from brainy.utils import merge_dicts
+from brainy.config import BRAINY_USER_CONFIG_TPL
 from brainy.project import BrainyProject
 from brainy.pipes import PipesManager
-# from brainy.scheduler import BrainyScheduler
+from brainy.scheduler import BrainyScheduler
 
 
 class MockProject(BrainyProject):
@@ -35,10 +35,19 @@ class MockPipesManager(PipesManager):
         self.project = MockProject('mock_project')
 
         # Bootstrap test project.
-        self.project.create(from_workflow='empty')
+        inherit_config = yaml.load(BRAINY_USER_CONFIG_TPL)
+        override_config = {
+        }
+        self.project.create(from_workflow='empty',
+                            inherit_config=inherit_config,
+                            override_config=override_config)
+
+        self.project.load_config()
+        self.project.scheduler = BrainyScheduler.build_scheduler(
+            self.project.config['scheduling']['engine'])
 
         # Write the mock pipe content.
-        if type(mock_pipe_yaml, dict):
+        if type(mock_pipe_yaml) == dict:
             mock_pipe_yaml = yaml.dump(mock_pipe_yaml, default_flow_style=True)
         test_pipe_filepath = os.path.join(self.project_path, pipe_name + '.br')
         with open(test_pipe_filepath, 'w+') as pipe_file:

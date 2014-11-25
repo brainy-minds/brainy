@@ -40,7 +40,8 @@ class BrainyProject(object):
         self.config = None
         self.scheduler = None
 
-    def create(self, from_workflow='canonical'):
+    def create(self, from_workflow='canonical', inherit_config={},
+               override_config={}):
         # Make project dir.
         if not os.path.exists(self.path):
             logger.info('Creating new project folder: %s' % self.path)
@@ -50,7 +51,8 @@ class BrainyProject(object):
                                      self.path)
         # Put basic YAML config during project creation. This is required for
         # project to be valid. We will also check version compatibility.
-        write_project_config(self.path)
+        write_project_config(self.path, inherit_config=inherit_config,
+                             override_config=override_config)
 
         # Bootstrap project with a standard iBRAIN workflow.
         bootstrap_workflow(self.path, workflow_name=from_workflow)
@@ -64,7 +66,7 @@ class BrainyProject(object):
         logger.info('Overwriting global configuration with project specific.')
         self.config = merge_dicts(self.config, project_config)
 
-    def run(self):
+    def run(self, manager_cls=PipesManager):
         '''
         Load project configuration. Discover and process pipelines using the
         specified scheduler.
@@ -75,7 +77,7 @@ class BrainyProject(object):
                     self.config['scheduling']['engine'])
         self.scheduler = BrainyScheduler.build_scheduler(
             self.config['scheduling']['engine'])
-        self.pipes = PipesManager(self)
+        self.pipes = manager_cls(self)
         logger.info('Starting pipelines discovery and processing..')
         self.pipes.process_pipelines()
         logger.info('Finished pipelines processing.')

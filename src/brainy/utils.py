@@ -22,7 +22,7 @@ def escape_xml(raw_value):
     return escape_exp.sub('', unicode(escape_xml_special_chars(raw_value)))
 
 
-def merge_dicts(a, b, path=None):
+def merge_dicts(a, b, path=None, overwrite=True):
     "merges b into a"
     if path is None:
         path = []
@@ -33,7 +33,9 @@ def merge_dicts(a, b, path=None):
             elif a[key] == b[key]:
                 pass  # same leaf value
             else:
-                raise Exception('Conflict at %s' % '.'.join(path + [str(key)]))
+                if not overwrite:
+                    raise Exception('Conflict at %s' % '.'.join(path +
+                                    [str(key)]))
         else:
             a[key] = b[key]
     return a

@@ -20,6 +20,7 @@ from getpass import getuser
 import logging
 logger = logging.getLogger(__name__)
 from brainy.version import brainy_version
+from brainy.utils import merge_dicts
 
 
 # User-wide (global) configuration
@@ -103,6 +104,8 @@ BRAINY_PROJECT_CONFIG_NAME = '.brainy'
 
 def write_config(config_path, value):
     logger.info('Writing config: %s' % config_path)
+    if type(value) == dict:
+            value = yaml.dump(value, default_flow_style=True)
     with open(config_path, 'w+') as stream:
         stream.write(value)
 
@@ -131,11 +134,20 @@ def load_user_config():
     return load_config(BRAINY_USER_CONFIG_PATH)
 
 
-def write_project_config(project_path, config_name=BRAINY_PROJECT_CONFIG_NAME):
+def write_project_config(project_path, config_name=BRAINY_PROJECT_CONFIG_NAME,
+                         inherit_config={}, override_config={}):
     config_path = os.path.join(project_path, config_name)
+    if inherit_config or override_config:
+        value = yaml.load(BRAINY_PROJECT_CONFIG_TPL)
+        if inherit_config:
+            value = merge_dicts(inherit_config, value)
+        if override_config:
+            value = merge_dicts(value, override_config)
+    else:
+        value = BRAINY_PROJECT_CONFIG_TPL
     write_config(
         config_path=config_path,
-        value=BRAINY_PROJECT_CONFIG_TPL,
+        value=value,
     )
 
 
