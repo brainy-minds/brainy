@@ -116,8 +116,8 @@ class TestCustomCode(BrainyTest):
         '''Test PythonCall: for "missing parameter" error'''
         self.start_capturing_output()
         # Run pipes.
-        pipes_module = bake_a_mock_pipe_with_no_param()
-        pipes_module.process_pipelines()
+        pipes = bake_a_mock_pipe_with_no_param()
+        pipes.process_pipelines()
         # Check output.
         self.stop_capturing_output()
         #print self.captured_output
@@ -128,8 +128,8 @@ class TestCustomCode(BrainyTest):
         '''Test PythonCall: for basic submission'''
         self.start_capturing_output()
         # Run pipes.
-        pipes_module = bake_a_working_mock_pipe()
-        pipes_module.process_pipelines()
+        pipes = bake_a_working_mock_pipe()
+        pipes.process_pipelines()
         # Check output.
         self.stop_capturing_output()
         #print self.captured_output
@@ -140,8 +140,8 @@ class TestCustomCode(BrainyTest):
         '''Test BashCall: for basic submission'''
         self.start_capturing_output()
         # Run pipes.
-        pipes_module = bake_a_bash_pipe()
-        pipes_module.process_pipelines()
+        pipes = bake_a_bash_pipe()
+        pipes.process_pipelines()
         # Check output.
         self.stop_capturing_output()
         #print self.captured_output
@@ -152,8 +152,8 @@ class TestCustomCode(BrainyTest):
         '''Test MatlabCall: for basic submission'''
         self.start_capturing_output()
         # Run pipes.
-        pipes_module = bake_a_matlab_pipe()
-        pipes_module.process_pipelines()
+        pipes = bake_a_matlab_pipe()
+        pipes.process_pipelines()
         # Check output.
         self.stop_capturing_output()
         #print self.captured_output
@@ -164,10 +164,10 @@ class TestCustomCode(BrainyTest):
         '''Test MatlabCall: if extending user path works'''
         self.start_capturing_output()
         # Run pipes.
-        pipes_module = bake_pipe_with_matlab_user_path_extend()
+        pipes = bake_pipe_with_matlab_user_path_extend()
         # Place new matlab function into extending location.
-        lib_matlab_path = os.path.join(pipes_module.env['plate_path'],
-                                       'LIB', 'MATLAB')
+        lib_matlab_path = os.path.join(pipes.project.path,
+                                       'lib', 'matlab')
         os.makedirs(lib_matlab_path)
         overwrite_func_path = os.path.join(lib_matlab_path, 'foo.m')
         with open(overwrite_func_path, 'w+') as func_file:
@@ -175,7 +175,7 @@ class TestCustomCode(BrainyTest):
 res = 'foo';
 end
             ''')
-        pipes_module.process_pipelines()
+        pipes.process_pipelines()
         # Check output.
         self.stop_capturing_output()
         #print self.captured_output

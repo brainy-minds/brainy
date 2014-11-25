@@ -1,9 +1,11 @@
 '''
 Basic routings for nose testing of brainy code.
 '''
+from __future__ import unicode_literals
 import re
 import os
 import sys
+import yaml
 import tempfile
 import unittest
 from cStringIO import StringIO
@@ -12,14 +14,12 @@ extend_path = lambda root_path, folder: sys.path.insert(
     0, os.path.join(root_path, folder))
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 extend_path(ROOT, '')
-extend_path(ROOT, 'lib/python')
-import brainy.config
-brainy.config.IBRAIN_ROOT = os.path.join(ROOT, 'tests', 'mock', 'root')
-from brainy.pipes import PipesManager
+extend_path(ROOT, 'src')
+# from brainy.utils import merge_dicts
 from brainy.project import BrainyProject
+from brainy.pipes import PipesManager
+# from brainy.scheduler import BrainyScheduler
 
-print brainy.workflows.__file__
-exit()
 
 class MockProject(BrainyProject):
 
@@ -33,12 +33,17 @@ class MockPipesManager(PipesManager):
 
     def __init__(self, mock_pipe_yaml, pipe_name='mock_test'):
         self.project = MockProject('mock_project')
+
         # Bootstrap test project.
         self.project.create(from_workflow='empty')
+
         # Write the mock pipe content.
-        with open(os.path.join(self.project_path, pipe_name + '.br'), 'w+') \
-                as pipe_file:
-            pipe_file.write(mock_pipe_yaml)
+        if type(mock_pipe_yaml, dict):
+            mock_pipe_yaml = yaml.dump(mock_pipe_yaml, default_flow_style=True)
+        test_pipe_filepath = os.path.join(self.project_path, pipe_name + '.br')
+        with open(test_pipe_filepath, 'w+') as pipe_file:
+                pipe_file.write(mock_pipe_yaml)
+
         # Overwrite the initialization.
         PipesManager.__init__(self, self.project)
 
@@ -74,6 +79,7 @@ class BrainyTest(unittest.TestCase):
         # self.stop_capturing_output()
 
     def get_report_content(self):
+        # raise Exception(self.captured_output)
         match = re.search('^Report file is written to:\s*([^\s\<]+)',
                           self.captured_output, re.MULTILINE)
         report_file = match.group(1)

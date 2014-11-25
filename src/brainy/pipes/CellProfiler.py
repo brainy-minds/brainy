@@ -169,7 +169,7 @@ class CPCluster(BrainyProcess):
         for batch_filename in self.batch_files:
             matlab_code = self.get_matlab_code(batch_filename)
             batch_report = batch_filename.replace(
-                '.mat', '.results_%s' % get_timestamp_str())
+                '.mat', '_%s.results' % get_timestamp_str())
             submission_result = self.submit_matlab_job(
                 matlab_code,
                 report_file=batch_report,
@@ -213,7 +213,7 @@ class CPCluster(BrainyProcess):
             # Batch has not produced any output yet. We can resubmit it.
             matlab_code = self.get_matlab_code(batch_filename)
             batch_report = batch_filename.replace(
-                '.mat', '.results_%s' % get_timestamp_str())
+                '.mat', '_%s.results' % get_timestamp_str())
             resubmission_result = self.submit_matlab_job(
                 matlab_code,
                 report_file=batch_report,
@@ -261,7 +261,7 @@ class CPCluster(BrainyProcess):
         '''Get a list of job report files from BATCH folder.'''
         return [self.parse_batch(filename)
                 for filename in self.list_batch_dir()
-                if fnmatch(basename(filename), 'Batch_*.results_*')]
+                if fnmatch(basename(filename), 'Batch_*_*.results')]
 
     def has_data(self):
         '''Validate the integrity of cpcluster step'''
@@ -293,7 +293,7 @@ class CPDataFusion(BrainyProcess):
     def __init__(self):
         super(CPDataFusion, self).__init__()
         self.__fused_files = None
-        self._job_report_exp = 'DataFusion_.*\.results_\d+'
+        self._job_report_exp = 'DataFusion_.*_\d+\.results'
 
     @property
     def fused_files(self):
@@ -326,7 +326,7 @@ class CPDataFusion(BrainyProcess):
         for fused_filename in self.fused_files:
             matlab_code = self.get_matlab_code(fused_filename)
             fused_report = 'DataFusion_' + fused_filename.replace(
-                '.mat', '.results_%s' % get_timestamp_str())
+                '.mat', '_%s.results' % get_timestamp_str())
             submission_result = self.submit_matlab_job(
                 matlab_code,
                 report_file=fused_report,
@@ -355,7 +355,7 @@ class CPDataFusion(BrainyProcess):
         for fused_filename in self.fused_files:
             matlab_code = self.get_matlab_code(fused_filename)
             fused_report = 'DataFusion_' + fused_filename.replace(
-                '.mat', '.results_%s' % get_timestamp_str())
+                '.mat', '_%s.results' % get_timestamp_str())
             resubmission_result = self.submit_matlab_job(
                 matlab_code,
                 report_file=fused_report,

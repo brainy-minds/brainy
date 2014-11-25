@@ -52,6 +52,7 @@ if __name__ == '__main__':
     parser.add_argument('-s', '--subjective')
     parser.add_argument('--from', dest='workflow_name',
                         choices=WORKFLOWS.keys(),
+                        default='canonical',
                         help='Specify name of the workflow')
 
     args = parser.parse_args()

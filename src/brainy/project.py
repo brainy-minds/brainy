@@ -15,6 +15,7 @@ import os
 import logging
 logger = logging.getLogger(__name__)
 from brainy.version import brainy_version
+from brainy.utils import merge_dicts
 from brainy.config import (write_project_config, load_project_config,
                            load_user_config, project_has_config)
 from brainy.workflows import bootstrap_workflow
@@ -61,7 +62,7 @@ class BrainyProject(object):
         self.config = load_user_config()
         project_config = load_project_config(self.path)
         logger.info('Overwriting global configuration with project specific.')
-        self.config.update(project_config)
+        self.config = merge_dicts(self.config, project_config)
 
     def run(self):
         '''

@@ -5,8 +5,10 @@ import brainy_tests
 from brainy.apps.cellprofiler import CellProfilerImages
 
 
-IMAGES_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)),
-                           'mock', 'images')
+IMAGES_PATH = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    'mock', 'images',
+)
 
 
 def test_cpimages_basic():

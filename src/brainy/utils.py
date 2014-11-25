@@ -11,7 +11,7 @@ def invoke(command, _in=None):
     '''
     Invoke command as a new system process and return its output.
     '''
-    process = Popen(command, stdin=PIPE, stdout=PIPE, shell=True,
+    process = Popen(command, stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=True,
                     executable='/bin/bash')
     if _in is not None:
         process.stdin.write(_in)
@@ -20,3 +20,20 @@ def invoke(command, _in=None):
 
 def escape_xml(raw_value):
     return escape_exp.sub('', unicode(escape_xml_special_chars(raw_value)))
+
+
+def merge_dicts(a, b, path=None):
+    "merges b into a"
+    if path is None:
+        path = []
+    for key in b:
+        if key in a:
+            if isinstance(a[key], dict) and isinstance(b[key], dict):
+                merge_dicts(a[key], b[key], path + [str(key)])
+            elif a[key] == b[key]:
+                pass  # same leaf value
+            else:
+                raise Exception('Conflict at %s' % '.'.join(path + [str(key)]))
+        else:
+            a[key] = b[key]
+    return a

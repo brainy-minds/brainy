@@ -47,6 +47,8 @@ tools:
         cmd: '/usr/bin/env ruby'
     node:
         cmd: '/usr/bin/env node'
+    bash:
+        cmd: '/bin/bash'
 
 
 # Integrated application
@@ -74,7 +76,8 @@ BRAINY_USER_CONFIG_PATH = os.path.expanduser('~/.brainy/config')
 # Project specific configuration
 BRAINY_PROJECT_CONFIG_TPL = '''
 # brainy project config
-brainy_version: '%(brainy_version)s'
+brainy:
+    version: '%(brainy_version)s'
 
 # Parameters below will affect the whole project. In particular, that defines
 # how jobs in every step of each pipe will be submitted, which folder names

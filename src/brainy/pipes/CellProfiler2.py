@@ -124,8 +124,6 @@ class CreateJobBatches(PythonCodeProcess):
         self.submit_python_code()
         '''
         code = '''
-        # Import iBRAIN environment.
-        import ext_path
         from brainy.pipes.CellProfiler2 import (
             create_imagelists_for_batching,
             run_cp2_pipeline_batch)
