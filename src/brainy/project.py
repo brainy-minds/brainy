@@ -22,6 +22,10 @@ from brainy.workflows import bootstrap_workflow
 from brainy.scheduler import BrainyScheduler
 from brainy.pipes import PipesManager
 
+# This is a global namespace variable containing a DOM-like structure of
+# project report. It is mainly modified during `brainy run project` call.
+report = {}
+
 
 class BrainyProjectError(Exception):
     '''Thrown by brainy project if the logic goes wrong.'''
@@ -73,7 +77,7 @@ class BrainyProject(object):
         '''
         logger.info('Loading configuration')
         self.load_config()
-        logger.info('Initializing "%s" as a scheduling engine' %
+        logger.info('Initializing "%s" as a scheduling engine.' %
                     self.config['scheduling']['engine'])
         self.scheduler = BrainyScheduler.build_scheduler(
             self.config['scheduling']['engine'])

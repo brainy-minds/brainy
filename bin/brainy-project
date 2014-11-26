@@ -18,7 +18,6 @@ Copyright (c) 2014 Pelkmans Lab
 '''
 import os
 import sys
-import logging
 import argparse
 # We include <pkg_root>/src, <pkg_root>/lib/python
 extend_path = lambda root_path, folder: sys.path.insert(
@@ -30,11 +29,7 @@ extend_path(ROOT, 'lib/python')
 # Import brainy modules.
 from brainy.project import BrainyProject, BrainyProjectError
 from brainy.workflows import WORKFLOWS
-
-
-def setup_logging():
-    FORMAT = '[%(asctime)-15s] %(name)23s: %(message)s'
-    logging.basicConfig(format=FORMAT, level=logging.INFO)
+from brainy.log import setup_logging, LOGGING_OPTIONS
 
 
 # Now parse and handle command line.
@@ -54,6 +49,8 @@ if __name__ == '__main__':
                         choices=WORKFLOWS.keys(),
                         default='canonical',
                         help='Specify name of the workflow')
+    parser.add_argument('--logging', dest='logging_option',
+                        choices=LOGGING_OPTIONS, default='console')
 
     args = parser.parse_args()
 
@@ -71,7 +68,7 @@ if __name__ == '__main__':
         exit()
 
     brainy_project = BrainyProject(args.project_name, args.path)
-    setup_logging()
+    setup_logging(args.logging_option)
     try:
         if args.action == 'create':
             brainy_project.create(from_workflow=args.workflow_name)

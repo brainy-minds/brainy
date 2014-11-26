@@ -1,6 +1,6 @@
 import os
 import re
-from brainy_tests import MockPipesModule, BrainyTest
+from brainy_tests import BrainyTest
 from brainy.scheduler import BrainyScheduler
 from brainy.scheduler.lsf import NoLsfSchedulerFound, Lsf
 
