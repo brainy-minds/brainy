@@ -70,7 +70,7 @@ class BrainyProject(object):
         logger.info('Overwriting global configuration with project specific.')
         self.config = merge_dicts(self.config, project_config)
 
-    def run(self, manager_cls=PipesManager):
+    def run(self, manager_cls=PipesManager, command='process_pipelines'):
         '''
         Load project configuration. Discover and process pipelines using the
         specified scheduler.
@@ -82,7 +82,5 @@ class BrainyProject(object):
         self.scheduler = BrainyScheduler.build_scheduler(
             self.config['scheduling']['engine'])
         self.pipes = manager_cls(self)
-        logger.info('Starting pipelines discovery and processing..')
-        self.pipes.process_pipelines()
-        logger.info('Finished pipelines processing.')
-
+        self.pipes.run(command)
+        logger.info('Done.')

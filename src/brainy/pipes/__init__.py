@@ -1,12 +1,14 @@
 '''
 iBRAINPipes is an integration of pipette processes into iBRAIN modules.
 '''
+from __future__ import with_statement
 import os
 import pipette
-from brainy.process import BrainyProcessError
-from brainy.flags import FlagManager
 import logging
 logger = logging.getLogger(__name__)
+from brainy.process import BrainyProcessError
+from brainy.flags import FlagManager
+from brainy.utils import Timer
 
 
 PROCESS_NAMESPACE = 'brainy.pipes'
@@ -40,7 +42,7 @@ class BrainyPipe(pipette.Pipe):
         return process
 
     def get_step_name(self, process_name):
-        return 'pipes-%s-%s' % (self.name, process_name)
+        return '%s-%s' % (self.name, process_name)
 
     def get_previous_parameters(self):
         if self.previous_process_params is None:
@@ -54,8 +56,12 @@ class BrainyPipe(pipette.Pipe):
         return self.previous_process_params
 
     def execute_process(self, process, parameters):
-        '''Add verbosity, e.g. report status using iBRAIN XML scheme'''
+        '''
+        Execute process as a step in brainy pipeline. Add verbosity, e.g.
+        report status using brainy project report scheme.
+        '''
         step_name = self.get_step_name(process.name)
+        logger.info('Executing step {%s}' % step_name)
         parameters['pipes_manager'] = self.pipes_manager
         parameters['process_path'] = os.path.join(
             self.pipes_manager._get_flag_prefix(),
@@ -145,6 +151,7 @@ class PipesManager(FlagManager):
     def pipelines(self):
         if self.__pipelines is None:
             # Repopulate dictionary.
+            logger.info('Discovering pipelines.')
             pipes = dict()
             for definition_filename in self.pipes_folder_files:
                 if not definition_filename.endswith(self.pipe_extension):
@@ -279,3 +286,20 @@ class PipesManager(FlagManager):
 
             # Remember as previous.
             previous_pipeline = pipeline
+
+    def run(self, command):
+        if not hasattr(self, command):
+            logger.error('Pipes manager does not know command called: %s' %
+                         command)
+            return
+        try:
+            # Obtain method.
+            method = getattr(self, command)
+            # Time method execution.
+            timer = Timer()
+            with timer:
+                method()
+            logger.info('Finished running <%s>. It took about %d (s)' % (
+                        command, timer.duration_in_seconds()))
+        except Exception as error:
+            logger.error(error)

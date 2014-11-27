@@ -579,5 +579,5 @@ PYTHON_CODE''' % {
 
     def reduce(self):
         if self.results['step_status'] == 'completed':
-            logger.info('Step {%s} has completed' % self.step_name)
+            logger.info('Step {%s} was completed.' % self.step_name)
 

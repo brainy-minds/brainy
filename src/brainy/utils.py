@@ -1,4 +1,5 @@
 import re
+import time
 from xml.sax.saxutils import escape as escape_xml_special_chars
 from subprocess import (PIPE, Popen)
 
@@ -39,3 +40,24 @@ def merge_dicts(a, b, path=None, overwrite=True):
         else:
             a[key] = b[key]
     return a
+
+
+class Timer(object):
+    '''
+    timer = Timer()
+
+    with timer:
+        # Whatever you want to measure goes here
+        time.sleep(2)
+
+    print timer.duration_in_seconds()
+    '''
+    def __enter__(self):
+        self.__start = time.time()
+
+    def __exit__(self, type, value, traceback):
+        # Error handling here
+        self.__finish = time.time()
+
+    def duration_in_seconds(self):
+        return self.__finish - self.__start
