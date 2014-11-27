@@ -43,12 +43,12 @@ class BrainyProject(object):
         self.scheduler = None
 
     @property
-    def report_foler_path(self):
+    def report_folder_path(self):
         return os.path.join(self.path, 'reports')
 
     @property
     def report_prefix_path(self):
-        return os.path.join(self.report_foler_path, self.name)
+        return os.path.join(self.report_folder_path, self.name)
 
     def seed_report_data(self):
         '''Put meta data about this project into report'''
@@ -93,10 +93,10 @@ class BrainyProject(object):
         self.pipes = manager_cls(self)
         logger.info('Removing all the output data of every pipeline.')
         self.pipes.run('clean_pipelines_output')
-        if os.path.exists(self.report_foler_path):
+        if os.path.exists(self.report_folder_path):
             logger.info('Removing all the reports in: %s' %
-                        self.report_foler_path)
-            shutil.rmtree(self.report_foler_path)
+                        self.report_folder_path)
+            shutil.rmtree(self.report_folder_path)
         logger.info('<Done>')
 
     def run(self, manager_cls=PipesManager, command='process_pipelines'):
