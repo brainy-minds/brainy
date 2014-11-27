@@ -9,6 +9,8 @@ logger = logging.getLogger(__name__)
 from brainy.process import BrainyProcessError
 from brainy.flags import FlagManager
 from brainy.utils import Timer
+from brainy.project.report import (report_data, start_report,
+                                   finalize_report, save_report)
 
 
 PROCESS_NAMESPACE = 'brainy.pipes'
@@ -254,6 +256,7 @@ class PipesManager(FlagManager):
             pipeline.has_failed = True
 
     def process_pipelines(self):
+        start_report()
         previous_pipeline = None
         for pipeline in self.pipelines:
             # Check if current pipeline is dependent on previous one.
@@ -286,6 +289,8 @@ class PipesManager(FlagManager):
 
             # Remember as previous.
             previous_pipeline = pipeline
+        finalize_report()
+        save_report(self.project.report_path)
 
     def run(self, command):
         if not hasattr(self, command):
@@ -301,5 +306,7 @@ class PipesManager(FlagManager):
                 method()
             logger.info('Finished running <%s>. It took about %d (s)' % (
                         command, timer.duration_in_seconds()))
+            report_data['duration_in_seconds'] = timer.duration_in_seconds()
         except Exception as error:
-            logger.error(error)
+            #logger.error(error)
+            logger.exception(error)

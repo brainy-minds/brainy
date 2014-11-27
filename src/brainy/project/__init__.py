@@ -21,10 +21,7 @@ from brainy.config import (write_project_config, load_project_config,
 from brainy.workflows import bootstrap_workflow
 from brainy.scheduler import BrainyScheduler
 from brainy.pipes import PipesManager
-
-# This is a global namespace variable containing a DOM-like structure of
-# project report. It is mainly modified during `brainy run project` call.
-report = {}
+from brainy.project.report import report_data
 
 
 class BrainyProjectError(Exception):
@@ -43,6 +40,19 @@ class BrainyProject(object):
             self.path = path
         self.config = None
         self.scheduler = None
+
+    @property
+    def report_path(self):
+        return os.path.join(self.path, 'reports', self.name)
+
+    def seed_report_data(self):
+        '''Put meta data about this project into report'''
+        logger.info('Seeding report data.')
+        report_data['project'] = {
+            'brainy_version': brainy_version,
+            'name': self.name,
+            'pipes': [],
+        }
 
     def create(self, from_workflow='canonical', inherit_config={},
                override_config={}):
@@ -77,6 +87,7 @@ class BrainyProject(object):
         '''
         logger.info('Loading configuration')
         self.load_config()
+        self.seed_report_data()
         logger.info('Initializing "%s" as a scheduling engine.' %
                     self.config['scheduling']['engine'])
         self.scheduler = BrainyScheduler.build_scheduler(
