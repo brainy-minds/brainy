@@ -1,0 +1,17 @@
+{
+  "name": "better-collapse",
+  "version": "2.0.2",
+  "description": "A better bootstrap accordion",
+  "jam": {
+    "main":  "lib/better-collapse.js",
+    "include": [
+      "lib/better-collapse.js"
+    ]
+  },
+  "repositories": [
+    {
+      "type": "git", 
+      "url": "https://github.com/Kyruus/better-collapse.git"
+    }
+  ]
+}
