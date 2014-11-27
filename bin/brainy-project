@@ -42,7 +42,7 @@ if __name__ == '__main__':
                         help='Full path to the folder containing brainy '
                         'project.')
     parser.add_argument('-i', '--imperative', dest='action',
-                        choices=['run', 'create', 'help'],
+                        choices=['run', 'create', 'clean', 'restart', 'help'],
                         help='Action')
     parser.add_argument('-s', '--subjective')
     parser.add_argument('--from', dest='workflow_name',
@@ -74,5 +74,7 @@ if __name__ == '__main__':
             brainy_project.create(from_workflow=args.workflow_name)
         elif args.action == 'run':
             brainy_project.run()
+        elif args.action == 'clean':
+            brainy_project.clean()
     except BrainyProjectError as error:
         sys.stderr.write('%s\n' % str(error))

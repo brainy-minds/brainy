@@ -12,6 +12,7 @@ Copyright (c) 2014 Pelkmans Lab
 '''
 
 import os
+import shutil
 import logging
 logger = logging.getLogger(__name__)
 from brainy.version import brainy_version
@@ -42,8 +43,12 @@ class BrainyProject(object):
         self.scheduler = None
 
     @property
-    def report_path(self):
-        return os.path.join(self.path, 'reports', self.name)
+    def report_foler_path(self):
+        return os.path.join(self.path, 'reports')
+
+    @property
+    def report_prefix_path(self):
+        return os.path.join(self.report_foler_path, self.name)
 
     def seed_report_data(self):
         '''Put meta data about this project into report'''
@@ -80,11 +85,26 @@ class BrainyProject(object):
         logger.info('Overwriting global configuration with project specific.')
         self.config = merge_dicts(self.config, project_config)
 
+    def clean(self, manager_cls=PipesManager):
+        '''Clean the project house.'''
+        logger.info('<brainy rolls over the project to clean the house>')
+        logger.info('Loading configuration')
+        self.load_config()
+        self.pipes = manager_cls(self)
+        logger.info('Removing all the output data of every pipeline.')
+        self.pipes.run('clean_pipelines_output')
+        if os.path.exists(self.report_foler_path):
+            logger.info('Removing all the reports in: %s' %
+                        self.report_foler_path)
+            shutil.rmtree(self.report_foler_path)
+        logger.info('<Done>')
+
     def run(self, manager_cls=PipesManager, command='process_pipelines'):
         '''
         Load project configuration. Discover and process pipelines using the
         specified scheduler.
         '''
+        logger.info('<brainy rolls over the project to {%s}>' % command)
         logger.info('Loading configuration')
         self.load_config()
         self.seed_report_data()
@@ -94,4 +114,4 @@ class BrainyProject(object):
             self.config['scheduling']['engine'])
         self.pipes = manager_cls(self)
         self.pipes.run(command)
-        logger.info('Done.')
+        logger.info('<Done>')

@@ -3,6 +3,7 @@ iBRAINPipes is an integration of pipette processes into iBRAIN modules.
 '''
 from __future__ import with_statement
 import os
+import shutil
 import pipette
 import logging
 logger = logging.getLogger(__name__)
@@ -35,6 +36,10 @@ class BrainyPipe(pipette.Pipe):
     @property
     def pipe_extension(self):
         return self.pipes_manager.pipe_extension
+
+    @property
+    def output_path(self):
+        return os.path.join(self.pipes_manager.project_path, self.name)
 
     def instantiate_process(self, process_description,
                             default_type=None):
@@ -290,7 +295,14 @@ class PipesManager(FlagManager):
             # Remember as previous.
             previous_pipeline = pipeline
         finalize_report()
-        save_report(self.project.report_path)
+        save_report(self.project.report_prefix_path)
+
+    def clean_pipelines_output(self):
+        for pipeline in self.pipelines:
+            if os.path.exists(pipeline.output_path):
+                logger.warn('Recursively clean/remove subfolder: %s' %
+                            pipeline.output_path)
+                shutil.rmtree(pipeline.output_path)
 
     def run(self, command):
         if not hasattr(self, command):
