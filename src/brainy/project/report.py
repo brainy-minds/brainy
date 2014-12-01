@@ -18,7 +18,6 @@ UI_WEB_PATH = os.path.join(
     'ui', 'web')
 
 
-
 class BrainyReporter(object):
 
     @classmethod
@@ -74,6 +73,7 @@ class BrainyReporter(object):
         # Generated/update reports.json
         report_list = glob(os.path.join(reports_folder_path,
                            '*-report-*.json'))
+        sorted(report_list, reverse=True)
         reports = {
             'modified_at': cls.get_now_str(),
             'reports_list': report_list,

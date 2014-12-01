@@ -83,7 +83,8 @@ module.exports = function(grunt) {
       main: {
         files: [
           // includes files within path
-          {expand: true, src: ['dist/<%= pkg.name %>.css' ], dest: 'assets/css/<%= pkg.name %>.css'}
+          {src: 'bower_components/bootstrap/dist/css/bootstrap.css.map', dest: 'assets/css/bootstrap.css.map'},
+          {src: 'bower_components/bootstrap/dist/css/bootstrap-theme.css.map', dest: 'assets/css/bootstrap-theme.css.map'}
         ]
       }
   	}
@@ -100,5 +101,5 @@ module.exports = function(grunt) {
  
   grunt.registerTask('test', ['jshint', 'qunit']); 
   grunt.registerTask('default', ['jshint', 'qunit', 'concat', 'uglify']); 
-  grunt.registerTask('assets', ['bower_concat', 'concat', 'uglify']); 
+  grunt.registerTask('assets', ['bower_concat', 'concat', 'uglify', 'copy']); 
 };
