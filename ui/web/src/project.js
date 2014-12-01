@@ -11,18 +11,14 @@ function renderMustache(data) {
 
 jQuery(document).ready(function(){
 
-	var data = {
-		project: {
-			name: 'foo'
-		}
-	};
+	var data = {};
 
 	$.get('reports.json', function(reports) {		
 		data.reports = reports;
 		// console.log(reports);
 		var report_file = basename(reports.reports_list[0]);
 		$.get('/reports/' + report_file, function(report) {
-			// console.log(report);
+			console.log(report);
 			data.report = report
 			renderMustache(data);
 		});
