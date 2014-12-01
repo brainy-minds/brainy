@@ -2,13 +2,18 @@ module.exports = function(grunt) {
  
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
-    concat: {
-      options: {
-        separator: ';'
-      },
-      dist: {
-        src: ['src/**/*.js'],
-        dest: 'dist/<%= pkg.name %>.js'
+    concat: {      
+      // assets_js: {
+      //   options: {
+      //     separator: ';'
+      //   },
+      //   src: ['src/**/*.js'],
+      //   // dest: 'assets/js/<%= pkg.name %>.js'
+      //   dest: 'dist/_bower.js'
+      // }, 
+      assets_css: {
+        src: ['dist/_bower.css', 'src/*.css' ],
+        dest: 'assets/css/<%= pkg.name %>.css'
       }
     },
     uglify: {
@@ -21,7 +26,7 @@ module.exports = function(grunt) {
       },
       dist: {
         files: {
-          'assets/js/<%= pkg.name %>.min.js': ['dist/_bower.js', 'dist/*.js'],
+          'assets/js/<%= pkg.name %>.min.js': ['dist/_bower.js', 'src/*.js'],
         }
       }
     },
@@ -51,8 +56,8 @@ module.exports = function(grunt) {
       }
     },
     watch: {
-      files: ['<%= jshint.files %>'],
-      tasks: ['jshint', 'qunit']
+      files: ['src/*'],
+      tasks: ['assets']
     },
     // concat everything from bower_components
 	  bower_concat: {
@@ -78,7 +83,7 @@ module.exports = function(grunt) {
       main: {
         files: [
           // includes files within path
-          {expand: false, src: ['dist/_bower.css', 'dist/*.css' ], dest: 'assets/css/<%= pkg.name %>.css'}
+          {expand: true, src: ['dist/<%= pkg.name %>.css' ], dest: 'assets/css/<%= pkg.name %>.css'}
         ]
       }
   	}
@@ -95,5 +100,5 @@ module.exports = function(grunt) {
  
   grunt.registerTask('test', ['jshint', 'qunit']); 
   grunt.registerTask('default', ['jshint', 'qunit', 'concat', 'uglify']); 
-  grunt.registerTask('assets', ['bower_concat', 'uglify', 'copy']); 
+  grunt.registerTask('assets', ['bower_concat', 'concat', 'uglify']); 
 };

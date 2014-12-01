@@ -53,11 +53,13 @@ class PraefectFailure(Exception):
 
 class Duty(object):
 
-    def __init__(self, sub_program, imperatives, subjectives, description=''):
+    def __init__(self, sub_program, imperatives, subjectives, description='',
+                 use_exec=False):
         self.sub_program = sub_program
         self.imperatives = imperatives
         self.subjectives = subjectives
         self.description = description
+        self.use_exec = use_exec
 
     @staticmethod
     def invoke(command, _in=None):
@@ -78,8 +80,13 @@ class Duty(object):
     def do(self, imperative, subjective, arguments_tail):
         sub_program_path = os.path.join(COMMANDS_PATH, self.sub_program)
         pass_subj_imp = '-i %s -s %s' % (imperative, subjective)
-        command = ' '.join([sub_program_path, pass_subj_imp] + arguments_tail)
-        return self.invoke(command)
+        if self.use_exec:
+            args = ' '.join([sub_program_path, pass_subj_imp] + arguments_tail)
+            os.execvp(sub_program_path, args.split(' '))
+        else:
+            command = ' '.join([sub_program_path, pass_subj_imp] +
+                               arguments_tail)
+            return self.invoke(command)
 
 
 class Praefect(object):
@@ -105,6 +112,7 @@ class Praefect(object):
                     attributes['imperatives'],
                     attributes['subjectives'],
                     attributes.get('description', ''),
+                    use_exec=attributes.get('use_exec', False),
                 )
                 self.duties.append(duty)
         if not self.duties:

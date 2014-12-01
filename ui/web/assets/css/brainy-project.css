@@ -6330,3 +6330,13 @@ button.close {
   }
 }
 /*# sourceMappingURL=bootstrap.css.map */
+
+
+.brainy-bild {
+	position: relative;
+	margin-top: 78px;
+}
+
+.brainy-stati {
+	background-color: #777;
+}

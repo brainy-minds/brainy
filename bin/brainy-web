@@ -1,0 +1,58 @@
+#!/usr/bin/env python2.7
+'''
+brainy-web
+==============
+
+Starts a web server in command line, providing a full scale GUI.
+
+@author: Yauhen Yakimovich <yauhen.yakimovich@uzh.ch>,
+         Pelkmans Lab  <https://www.pelkmanslab.org>
+
+@license: The MIT License (MIT)
+
+Copyright (c) 2014 Pelkmans Lab
+'''
+import os
+import sys
+import argparse
+# We include <pkg_root>/src, <pkg_root>/lib/python
+extend_path = lambda root_path, folder: sys.path.insert(
+    0, os.path.join(root_path, folder))
+ROOT = os.path.dirname(os.path.dirname(__file__))
+extend_path(ROOT, '')
+extend_path(ROOT, 'src')
+extend_path(ROOT, 'lib/python')
+# Import brainy modules.
+from brainy.project import BrainyProject, BrainyProjectError
+from brainy.webserver import serve_brainy_project
+from brainy.log import setup_logging, LOGGING_OPTIONS
+
+
+# Now parse and handle command line.
+if __name__ == '__main__':
+    program = os.path.basename(sys.argv[0])
+    parser = argparse.ArgumentParser(description='brainy web server')
+    parser.add_argument('-p', '--path', default=os.getcwd(),
+                        help='Full path to the folder containing brainy '
+                        'project.')
+    parser.add_argument('-i', '--imperative', dest='action',
+                        choices=['serve', 'help'],
+                        help='Action')
+    parser.add_argument('-s', '--subjective')
+    parser.add_argument('--port', default=8880, type=int,
+                        help='Specify an alternative port. Default is 8880')
+
+    args = parser.parse_args()
+
+    if args.action == 'help':
+        parser.print_help()
+        exit()
+
+    # setup_logging(args.logging_option)
+    try:
+        if args.action == 'serve':
+            project_name = os.path.basename(args.path)
+            brainy_project = BrainyProject(project_name, args.path)
+            serve_brainy_project(brainy_project, args.port)
+    except BrainyProjectError as error:
+        sys.stderr.write('%s\n' % str(error))
