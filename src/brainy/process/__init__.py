@@ -9,6 +9,7 @@ from brainy.scheduler import SHORT_QUEUE, NORM_QUEUE
 from brainy.errors import (UnknownError, KnownError, TermRunLimitError,
                            check_report_file_for_errors)
 from brainy.utils import escape_xml
+from brainy.project.report import BrainyReporter
 
 
 PROCESS_STATUS = [
@@ -300,7 +301,7 @@ class BrainyProcess(pipette.Process, FlagManager):
 
     def list_batch_dir(self):
         if self.__batch_listing is None:
-            # print('Listing batch folder. Please wait.. ')
+            logger.info('Listing batch folder. Please wait.. ')
             self.__batch_listing = list()
             for filename in os.listdir(self.batch_path):
                 self.__batch_listing.append(
@@ -445,11 +446,8 @@ PYTHON_CODE''' % {
 
     def report(self, message, warning=''):
         if warning:
-            warning = '\n                <warning>%s</warning>' % warning
-        print('''
-        <status action="%(step_name)s">%(message)s%(warning)s
-        </status>
-        ''' % {
+            logger.warn(warning)
+        logger.info('%(step_name)s: %(message)s %(warning)s' % {
             'step_name': self.step_name,
             'message': escape_xml(message),
             'warning': warning,
@@ -486,13 +484,16 @@ PYTHON_CODE''' % {
                         output=escape_xml(error.details),
                     )
                 else:
-                    print '<!--[KNOWN ERROR FOUND]: Job exceeded runlimit, ' \
-                        'resetting job and placing timeout flag file -->'
+                    BrainyReporter.append_known_error(
+                        'Job has exceeded runlimit, resetting job and placing '
+                        'timeout flag file')
                     self.set_flag('runlimit')
             except KnownError as error:
-                print ('<!--[KNOWN ERROR FOUND]: type=\'%s\' ' % error.type) \
-                    + 'Resetting ".(re)submitted" and ".runlimit" flags and ' \
-                    + 'removing job report.-->'
+                BrainyReporter.append_known_error(
+                    'Resetting ".(re)submitted" and ".runlimit" flags and '
+                    'removing job report.',
+                    {'error_type': error.type},
+                )
                 self.reset_resubmitted()
                 # Modifies self.__reports
                 self.remove_job_report_file(report_filepath)
@@ -551,8 +552,8 @@ PYTHON_CODE''' % {
         # Step is incomplete. Do we want to submit?
         elif self.want_to_submit():
             if self.working_jobs_count() > 0:
-                print '<!-- Warning: some jobs are still running, but we are '\
-                      'submitting everything a new! -->'
+                logger.warn('Some jobs are still running, but we are '
+                            'submitting everything a new!')
             self.submit()
         # Submitted but no work has started yet?
         elif self.no_work_is_happening():
@@ -568,8 +569,8 @@ PYTHON_CODE''' % {
         # Check for known errors if both data output and job results are
         # present.
         else:
-            print '<!-- Checking logs for errors. Setting process state to '\
-                  'completed if none found. -->'
+            logger.info('Checking logs for errors. Setting process state to '
+                        'completed if none found.')
             self.check_logs_for_errors()
             self.check_for_missed_errors()
             # At this point we have detected no errors and the data test

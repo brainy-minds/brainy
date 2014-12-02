@@ -82,3 +82,41 @@ class BrainyReporter(object):
                 as reportsfile:
             reportsfile.write(json.dumps(reports))
 
+    @classmethod
+    def get_current_report_pipe(cls):
+        pipe_index = len(report_data['pipes']) - 1
+        if pipe_index < 0:
+            raise Exception('Failed to find current pipe. '
+                            'Please append a pipe first.')
+        return report_data['pipes'][pipe_index]
+
+    @classmethod
+    def get_current_report_step(cls):
+        pipe = cls.get_current_report_pipe()
+        process_index = len(pipe['processes']) - 1
+        if process_index < 0:
+            raise Exception('Failed to find current process. '
+                            'Please append a process first.')
+        return pipe['processes'][process_index]
+
+    @classmethod
+    def append_message(cls, message, message_type='info', extra={}):
+        process = cls.get_current_report_step()
+        if not 'messages' in process:
+            process['messages'] = []
+        message = {
+            'message': message,
+            'type': message_type,
+        }
+        message.update(extra)
+        process['messages'].append(message)
+
+    @classmethod
+    def append_unknown_error(cls, message, **kwds):
+        '''Unknown error is fatal and should break any further progress'''
+        cls.append_message(message, message_type='unknown_error', extra=kwds)
+
+    @classmethod
+    def append_known_error(cls, message, **kwds):
+        '''Known error is typical and causes a series of retries'''
+        cls.append_message(message, message_type='known_error', extra=kwds)
