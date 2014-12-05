@@ -9,17 +9,28 @@ function renderMustache(data) {
   	$('#rendered').html(rendered);
 }
 
+function addReportNames(reports) {
+	reports.report_files = [];
+	for (var i=0; i < reports.reports_list.length; i++) {		
+		reports.report_files[i] = {
+			path: reports.reports_list[i],
+			name: basename(reports.reports_list[i])
+		}
+	}
+	return reports;
+}
+
+
 jQuery(document).ready(function(){
 
 	var data = {};
 
-	$.get('reports.json', function(reports) {		
-		data.reports = reports;
+	$.get('reports.json', function(reports){
+		data.reports = addReportNames(reports);
 		// console.log(reports);
 		var report_file = basename(reports.reports_list[0]);
-		$.get('/reports/' + report_file, function(report) {
-			console.log(report);
-			data.report = report
+		$.get('/reports/' + report_file, function(report) {			
+			data.report = report;
 			renderMustache(data);
 		});
 	});

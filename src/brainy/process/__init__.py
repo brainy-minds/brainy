@@ -52,10 +52,14 @@ def format_code(code, lang='bash'):
 class BrainyProcessError(Exception):
     '''Logical error that happened while executing brainy pipe process'''
 
-    def __init__(self, warning, output='', job_report=None):
-        self.warning = warning
-        self.output = output
-        self.job_report = job_report
+    def __init__(self, message, message_type='error', output='',
+                 job_report=None, **kwds):
+        super(BrainyProcessError, self).__init__(message)
+        self.extra = {}
+        self.extra['message_type'] = message_type  # info, warning, error
+        self.extra['output'] = output
+        self.extra['job_report'] = job_report
+        self.extra.update(kwds)
 
 
 class BrainyProcess(pipette.Process, FlagManager):
@@ -447,11 +451,13 @@ PYTHON_CODE''' % {
     def report(self, message, warning=''):
         if warning:
             logger.warn(warning)
+            BrainyReporter.append_warning(warning)
         logger.info('%(step_name)s: %(message)s %(warning)s' % {
             'step_name': self.step_name,
-            'message': escape_xml(message),
+            'message': message,
             'warning': warning,
         })
+        BrainyReporter.append_message(message)
 
     def has_runlimit(self):
         return os.path.exists(self.get_flag('runlimit'))
@@ -474,14 +480,12 @@ PYTHON_CODE''' % {
                 check_report_file_for_errors(report_filepath)
             except TermRunLimitError as error:
                 if self.has_runlimit():
-                    message = '''
-                        Job %s timed out too many times.
-                        <result_file>%s</result_file>
-                    ''' % (escape_xml(report_filename),
-                           escape_xml(report_filepath))
+                    message = 'Job %s timed out too many times.' % \
+                        report_filename
                     raise BrainyProcessError(
                         warning=message.strip(),
-                        output=escape_xml(error.details),
+                        output=error.details,
+                        job_report=report_filepath,
                     )
                 else:
                     BrainyReporter.append_known_error(
@@ -489,30 +493,25 @@ PYTHON_CODE''' % {
                         'timeout flag file')
                     self.set_flag('runlimit')
             except KnownError as error:
-                BrainyReporter.append_known_error(
-                    'Resetting ".(re)submitted" and ".runlimit" flags and '
-                    'removing job report.',
-                    {'error_type': error.type},
-                )
                 self.reset_resubmitted()
+                message = 'Resetting ".(re)submitted" and ".runlimit" flags'\
+                    ' and removing job report.'
                 # Modifies self.__reports
                 self.remove_job_report_file(report_filepath)
                 raise BrainyProcessError(
-                    warning=escape_xml(error.message),
-                    output=escape_xml(error.details),
+                    message=message,
+                    warning=str(error),
+                    output=error.details,
+                    error_type=error.type,
                 )
             except UnknownError as error:
-                message = '''
-                    Unknown error found in result file %s
-                    <result_file>%s</result_file>
-                ''' % (escape_xml(report_filename),
-                       escape_xml(report_filepath))
+                message = 'Unknown error found in job report file %s' % \
+                    report_filename
                 raise BrainyProcessError(
-                    warning=message.strip(),
-                    output=escape_xml(error.details),
+                    message=message,
+                    warning=str(error),
+                    output=error.details,
                 )
-                # TODO: append error message to ~/iBRAIN_errorlog.xml
-
         # Finally, no errors were found.
 
     def resubmit(self):
@@ -581,4 +580,3 @@ PYTHON_CODE''' % {
     def reduce(self):
         if self.results['step_status'] == 'completed':
             logger.info('Step {%s} was completed.' % self.step_name)
-

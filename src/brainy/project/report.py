@@ -73,7 +73,7 @@ class BrainyReporter(object):
         # Generated/update reports.json
         report_list = glob(os.path.join(reports_folder_path,
                            '*-report-*.json'))
-        sorted(report_list, reverse=True)
+        report_list = sorted(report_list, reverse=True)
         reports = {
             'modified_at': cls.get_now_str(),
             'reports_list': report_list,
@@ -84,11 +84,33 @@ class BrainyReporter(object):
 
     @classmethod
     def get_current_report_pipe(cls):
-        pipe_index = len(report_data['pipes']) - 1
+        if not 'pipes' in report_data['project']:
+            raise Exception('KeyError "pipes". Report data was not properly '
+                            'initialized.')
+        pipe_index = len(report_data['project']['pipes']) - 1
         if pipe_index < 0:
             raise Exception('Failed to find current pipe. '
                             'Please append a pipe first.')
-        return report_data['pipes'][pipe_index]
+        return report_data['project']['pipes'][pipe_index]
+
+    @classmethod
+    def append_report_pipe(cls, name, **extra):
+        pipe = {
+            'name': name,
+            'processes': [],
+        }
+        pipe.update(extra)
+        if not 'pipes' in report_data['project']:
+            report_data['project']['pipes'] = []
+        report_data['project']['pipes'].append(pipe)
+
+    @classmethod
+    def append_report_process(cls, name, **extra):
+        process = {
+            'name': name,
+        }
+        process.update(extra)
+        cls.get_current_report_pipe()['processes'].append(process)
 
     @classmethod
     def get_current_report_step(cls):
@@ -100,7 +122,7 @@ class BrainyReporter(object):
         return pipe['processes'][process_index]
 
     @classmethod
-    def append_message(cls, message, message_type='info', extra={}):
+    def append_message(cls, message, message_type='info', **kwds):
         process = cls.get_current_report_step()
         if not 'messages' in process:
             process['messages'] = []
@@ -108,15 +130,20 @@ class BrainyReporter(object):
             'message': message,
             'type': message_type,
         }
-        message.update(extra)
+        message.update(kwds)
         process['messages'].append(message)
+
+    @classmethod
+    def append_warning(cls, message, **kwds):
+        '''Unknown error is fatal and should break any further progress'''
+        cls.append_message(message, message_type='warning', **kwds)
 
     @classmethod
     def append_unknown_error(cls, message, **kwds):
         '''Unknown error is fatal and should break any further progress'''
-        cls.append_message(message, message_type='unknown_error', extra=kwds)
+        cls.append_message(message, message_type='unknown_error', **kwds)
 
     @classmethod
     def append_known_error(cls, message, **kwds):
         '''Known error is typical and causes a series of retries'''
-        cls.append_message(message, message_type='known_error', extra=kwds)
+        cls.append_message(message, message_type='known_error', **kwds)

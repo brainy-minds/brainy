@@ -79,6 +79,9 @@ class BrainyPipe(pipette.Pipe):
         # get_previous_parameters().
         parameters['previous_process_params'] = self.get_previous_parameters()
         self.previous_process_params = parameters
+
+        BrainyReporter.append_report_process(process.name)
+
         try:
             super(BrainyPipe, self).execute_process(process, parameters)
 
@@ -86,34 +89,17 @@ class BrainyPipe(pipette.Pipe):
                 raise ProccessEndedIncomplete()
 
         except BrainyProcessError as error:
-            output = ''
-            if error.output:
-                # Use CDATA tag this part of the XML parsable but ignore
-                # unexpected characters.
-                output = '<output><![CDATA[\n%s\n]]></output>' % error.output\
-                    .replace(']]>', ']]&lt;')
-            warning = ''
-            if error.warning:
-                # Optionally link the log file if found.
-                if error.job_report:
-                    warning = ('<warning>%s<result_file>%s</result_file>' +
-                               '</warning>') % \
-                        (error.warning, error.job_report)
-                else:
-                    warning = '<warning>%s</warning>' % error.warning
-
-            print('''
-        <status action="%(step_name)s">failed
-            %(warning_message)s
-            %(output_message)s
-        </status>
-            ''' % {
-                'step_name': step_name,
-                'warning_message': warning,
-                'output_message': output,
-            })
-            # Finally, interrupt execution
-            raise BrainyPipeFailure('Execution failed')
+            if 'error_type':
+                BrainyReporter.append_known_error(
+                    message=str(error),
+                    **error.extra)
+            else:
+                BrainyReporter.append_unknown_error(
+                    message=str(error),
+                    **error.extra)
+            # Finally, interrupt execution if we error is fatal.
+            if error.message_type == 'error':
+                raise BrainyPipeFailure('Execution failed')
 
 
 class PipesManager(FlagManager):
@@ -253,10 +239,11 @@ class PipesManager(FlagManager):
         PipesModule.
         '''
         try:
+            BrainyReporter.append_report_pipe(pipeline.name)
             pipeline.communicate({'input': '{}'})
         except BrainyPipeFailure:
             # Errors are reported inside individual pipeline.
-            print '<!-- A pipeline has failed. Continue with the next one -->'
+            logger.error('A pipeline has failed. We can not continue.')
             pipeline.has_failed = True
 
     def process_pipelines(self):
@@ -274,13 +261,9 @@ class PipesManager(FlagManager):
                         previous_pipeline.name == pipeline.definition['after']
 
             if depends_on_previous and previous_pipeline.has_failed:
-                print('''
-                 <status action="pipes-%(pipeline_name)s">paused
-                    <message>Previous pipe that we depend on has failed or did not complete</message>
-                 </status>
-                ''' % {
-                    'pipeline_name': pipeline.name,
-                })
+                logger.warn(('%s is skipped. Previous pipe that we depend on'
+                            ' has failed or did not complete.') %
+                            pipeline.name)
                 # If previous pipeline we are dependent on has failed, then
                 # mark pipeline as failed too to inform the next dependent
                 # pipeline about the failure.
