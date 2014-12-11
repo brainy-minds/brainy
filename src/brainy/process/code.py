@@ -1,6 +1,7 @@
 import json
 from brainy.process import BrainyProcess
 from brainy.utils import invoke, escape_xml
+from brainy.project.report import BrainyReporter
 
 
 class CanCheckData(object):

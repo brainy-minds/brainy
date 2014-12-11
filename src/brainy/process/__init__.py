@@ -580,3 +580,4 @@ PYTHON_CODE''' % {
     def reduce(self):
         if self.results['step_status'] == 'completed':
             logger.info('Step {%s} was completed.' % self.step_name)
+            BrainyReporter.append_message('complete', status='complete')
