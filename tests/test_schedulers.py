@@ -5,8 +5,10 @@ from brainy.scheduler import BrainyScheduler
 from brainy.scheduler.lsf import NoLsfSchedulerFound, Lsf
 
 
-MOCK_BJOBS_FILEPATH = os.path.join('..', 'mock', 'schedulers', 'ibrain_bjobs')
-
+MOCK_BJOBS_FILEPATH = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    'mock', 'schedulers', 'ibrain_bjobs',
+)
 
 
 class GrayBoxedLsf(Lsf):
@@ -33,4 +35,3 @@ class TestCustomCode(BrainyTest):
         assert scheduler.count_working_jobs(None) > 0
         key = 'Data__Users__Markus__AntioxScreen'
         assert scheduler.count_working_jobs(key) > 0
-
