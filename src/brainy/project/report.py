@@ -59,11 +59,11 @@ class BrainyReporter(object):
         Put a copy of static html to browse project reports inside
         'reports/html'.
         '''
-        #logger.info('web ui path: %s' % UI_WEB_PATH)
+        # logger.info('web ui path: %s' % UI_WEB_PATH)
         html_path = os.path.join(reports_folder_path, 'html')
         if not os.path.exists(html_path):
             logger.info('Creating static html to browse reports.')
-            #os.makedirs(html_path)
+            # os.makedirs(html_path)
             shutil.copytree(os.path.join(UI_WEB_PATH, 'assets'),
                             os.path.join(html_path, 'assets'))
             shutil.copy(os.path.join(UI_WEB_PATH, 'index.html'),
@@ -84,7 +84,7 @@ class BrainyReporter(object):
 
     @classmethod
     def get_current_report_pipe(cls):
-        if not 'pipes' in report_data['project']:
+        if 'pipes' not in report_data['project']:
             raise Exception('KeyError "pipes". Report data was not properly '
                             'initialized.')
         pipe_index = len(report_data['project']['pipes']) - 1
@@ -100,7 +100,7 @@ class BrainyReporter(object):
             'processes': [],
         }
         pipe.update(extra)
-        if not 'pipes' in report_data['project']:
+        if 'pipes' not in report_data['project']:
             report_data['project']['pipes'] = []
         report_data['project']['pipes'].append(pipe)
 
@@ -124,7 +124,7 @@ class BrainyReporter(object):
     @classmethod
     def append_message(cls, message, message_type='info', **kwds):
         process = cls.get_current_report_step()
-        if not 'messages' in process:
+        if 'messages' not in process:
             process['messages'] = []
         message = {
             'message': message,

@@ -6,11 +6,11 @@ import os
 import shutil
 import pipette
 import logging
-logger = logging.getLogger(__name__)
 from brainy.process import BrainyProcessError
 from brainy.flags import FlagManager
 from brainy.utils import Timer
 from brainy.project.report import BrainyReporter, report_data
+logger = logging.getLogger(__name__)
 
 
 PROCESS_NAMESPACE = 'brainy.pipes'
@@ -89,7 +89,13 @@ class BrainyPipe(pipette.Pipe):
                 raise ProccessEndedIncomplete()
 
         except BrainyProcessError as error:
-            if 'error_type':
+            # See brainy.errors
+            error_is_fatal = False
+            if 'message_type' in error.extra:
+                if error.extra['message_type'] == 'error':
+                    error_is_fatal = True
+                del error.extra['message_type']
+            if 'error_type' in error.extra:
                 BrainyReporter.append_known_error(
                     message=str(error),
                     **error.extra)
@@ -97,8 +103,8 @@ class BrainyPipe(pipette.Pipe):
                 BrainyReporter.append_unknown_error(
                     message=str(error),
                     **error.extra)
-            # Finally, interrupt execution if we error is fatal.
-            if error.message_type == 'error':
+            # Finally, interrupt execution if we error is fatal (default).
+            if error_is_fatal:
                 raise BrainyPipeFailure('Execution failed')
 
 
@@ -164,19 +170,19 @@ class PipesManager(FlagManager):
             pipe = pipes[depended_pipename]
             if 'after' in pipe.definition:
                 dependends_on = pipe.definition['after']
-                if not dependends_on in after_dag:
+                if dependends_on not in after_dag:
                     after_dag[dependends_on] = list()
                 after_dag[dependends_on].append(depended_pipename)
             if 'before' in pipe.definition:
                 dependends_on = pipe.definition['before']
-                if not dependends_on in before_dag:
+                if dependends_on not in before_dag:
                     before_dag[dependends_on] = list()
                 before_dag[dependends_on].append(depended_pipename)
 
         def resolve_dependecy(name_a, name_b):
             # After
             if name_a in after_dag:
-                if not name_b in after_dag:
+                if name_b not in after_dag:
                     # Second argument has no "after" dependencies.
                     if name_b in after_dag[name_a]:
                         return -1
@@ -188,7 +194,7 @@ class PipesManager(FlagManager):
                     if name_b in after_dag[name_a]:
                         return -1
             if name_b in after_dag:
-                if not name_a in after_dag:
+                if name_a not in after_dag:
                     # First argument has no "after" dependencies.
                     if name_a in after_dag[name_b]:
                         return 1
@@ -201,7 +207,7 @@ class PipesManager(FlagManager):
                         return 1
             # Before
             if name_a in before_dag:
-                if not name_b in before_dag:
+                if name_b not in before_dag:
                     # Second argument has no "before" dependencies.
                     if name_b in before_dag[name_a]:
                         return 1
@@ -213,7 +219,7 @@ class PipesManager(FlagManager):
                     if name_b in before_dag[name_a]:
                         return 1
             if name_b in before_dag:
-                if not name_a in before_dag:
+                if name_a not in before_dag:
                     # First argument has no "before" dependencies.
                     if name_a in before_dag[name_b]:
                         return -1
@@ -252,7 +258,7 @@ class PipesManager(FlagManager):
         for pipeline in self.pipelines:
             # Check if current pipeline is dependent on previous one.
             depends_on_previous = False
-            if not previous_pipeline is None:
+            if previous_pipeline is not None:
                 if 'before' in previous_pipeline.definition:
                     depends_on_previous = \
                         previous_pipeline.definition['before'] == pipeline.name
@@ -304,5 +310,5 @@ class PipesManager(FlagManager):
                         command, timer.duration_in_seconds()))
             report_data['duration_in_seconds'] = timer.duration_in_seconds()
         except Exception as error:
-            #logger.error(error)
+            # logger.error(error)
             logger.exception(error)

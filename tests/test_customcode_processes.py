@@ -120,7 +120,7 @@ class TestCustomCode(BrainyTest):
         pipes.process_pipelines()
         # Check output.
         self.stop_capturing_output()
-        #print self.captured_output
+        # print self.captured_output
         assert 'Missing "submit_call" key in JSON descriptor' \
             in self.captured_output
 
@@ -132,8 +132,8 @@ class TestCustomCode(BrainyTest):
         pipes.process_pipelines()
         # Check output.
         self.stop_capturing_output()
-        #print self.captured_output
-        #assert False
+        # print self.captured_output
+        # assert False
         assert 'I am a mock custom python call' in self.get_report_content()
 
     def test_a_basic_bash_call(self):
@@ -144,8 +144,8 @@ class TestCustomCode(BrainyTest):
         pipes.process_pipelines()
         # Check output.
         self.stop_capturing_output()
-        #print self.captured_output
-        #assert False
+        # print self.captured_output
+        # assert False
         assert 'I am a mock custom bash call' in self.get_report_content()
 
     def test_a_basic_matlab_call(self):
@@ -156,8 +156,8 @@ class TestCustomCode(BrainyTest):
         pipes.process_pipelines()
         # Check output.
         self.stop_capturing_output()
-        #print self.captured_output
-        #assert False
+        # print self.captured_output
+        # assert False
         assert 'I am a mock custom matlab call' in self.get_report_content()
 
     def test_user_path_in_matlab_call(self):
@@ -178,6 +178,6 @@ end
         pipes.process_pipelines()
         # Check output.
         self.stop_capturing_output()
-        #print self.captured_output
-        #assert False
+        # print self.captured_output
+        # assert False
         assert 'Call result is: foo' in self.get_report_content()

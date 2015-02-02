@@ -93,7 +93,7 @@ class BrainyProcess(pipette.Process, FlagManager):
 
     @property
     def pipes_manager(self):
-        # FIXME: Path everything to parameters. Make process independent from
+        # FIXME: Pass everything to parameters. Make process independent from
         # manager.
         return self.parameters['pipes_manager']
 

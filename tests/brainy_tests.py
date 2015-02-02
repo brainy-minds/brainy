@@ -27,6 +27,7 @@ class MockProject(BrainyProject):
         '''bootstrap test project folder in temporary path'''
         path = tempfile.mkdtemp()
         BrainyProject.__init__(self, name, path)
+        self.seed_report_data()
 
 
 class MockPipesManager(PipesManager):
@@ -51,7 +52,7 @@ class MockPipesManager(PipesManager):
             mock_pipe_yaml = yaml.dump(mock_pipe_yaml, default_flow_style=True)
         test_pipe_filepath = os.path.join(self.project_path, pipe_name + '.br')
         with open(test_pipe_filepath, 'w+') as pipe_file:
-                pipe_file.write(mock_pipe_yaml)
+            pipe_file.write(mock_pipe_yaml)
 
         # Overwrite the initialization.
         PipesManager.__init__(self, self.project)

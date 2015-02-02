@@ -14,7 +14,6 @@ Copyright (c) 2014 Pelkmans Lab
 import os
 import shutil
 import logging
-logger = logging.getLogger(__name__)
 from brainy.version import brainy_version
 from brainy.utils import merge_dicts
 from brainy.config import (write_project_config, load_project_config,
@@ -23,6 +22,7 @@ from brainy.workflows import bootstrap_workflow
 from brainy.scheduler import BrainyScheduler
 from brainy.pipes import PipesManager
 from brainy.project.report import report_data
+logger = logging.getLogger(__name__)
 
 
 class BrainyProjectError(Exception):
