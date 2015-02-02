@@ -1,15 +1,15 @@
 import os
 import re
 import logging
-logger = logging.getLogger(__name__)
 from datetime import datetime
+from cStringIO import StringIO
 import pipette
 from brainy.flags import FlagManager
 from brainy.scheduler import SHORT_QUEUE, NORM_QUEUE
 from brainy.errors import (UnknownError, KnownError, TermRunLimitError,
                            check_report_file_for_errors)
-from brainy.utils import escape_xml
 from brainy.project.report import BrainyReporter
+logger = logging.getLogger(__name__)
 
 
 PROCESS_STATUS = [
@@ -25,7 +25,6 @@ PROCESS_STATUS = [
 def format_code(code, lang='bash'):
     result = ''
     if lang == 'python':
-        #result = clean_python_code(code)
         left_strip_width = None
         for line in code.split('\n'):
             if len(line.strip()) == 0:
@@ -169,7 +168,7 @@ class BrainyProcess(pipette.Process, FlagManager):
         images_path = self.parameters.get(
             'images_path',
             os.path.join(self.process_path, 'images_of_{name}'),
-            #os.path.join(self.process_path, 'images'),
+            # os.path.join(self.process_path, 'images'),
         )
         images_path = self.format_with_params('images_path', images_path)
         return self.restrict_to_safe_path(images_path)
@@ -179,7 +178,7 @@ class BrainyProcess(pipette.Process, FlagManager):
         analysis_path = self.parameters.get(
             'analysis_path',
             os.path.join(self.process_path, 'analysis_of_{name}'),
-            #os.path.join(self.process_path, 'analysis'),
+            # os.path.join(self.process_path, 'analysis'),
         )
         analysis_path = self.format_with_params('analysis_path',
                                                 analysis_path)
@@ -268,13 +267,13 @@ class BrainyProcess(pipette.Process, FlagManager):
         Inject updated values into the code. This applies string.format() DSL
         using self.parameters dictionary as arguments.
         '''
-        if not param_name in self.compiled_params:
+        if param_name not in self.compiled_params:
             logger.debug('Compiling (string substitution) param: %s' %
                          param_name)
             process_params = dict()
             for name in self.format_parameters:
                 param_var = '{%s}' % name
-                if not param_var in value:
+                if param_var not in value:
                     # Pick only those values that we really need to compile the
                     # parameter - do string substitution.
                     continue
@@ -436,7 +435,7 @@ PYTHON_CODE''' % {
         Override this method to implement step specific data existence and
         integrity checks.
         '''
-        #raise NotImplemented('Missing implementation for has_data() method.')
+        # raise NotImplemented('Missing implementation for has_data() method.')
         return True
 
     def finished_work_but_has_no_data(self):
@@ -474,7 +473,7 @@ PYTHON_CODE''' % {
 
     def check_logs_for_errors(self):
         for report_filename in list(self.get_job_reports()):
-            ## print report_filename
+            # print report_filename
             report_filepath = os.path.join(self.reports_path, report_filename)
             try:
                 check_report_file_for_errors(report_filepath)
@@ -543,8 +542,8 @@ PYTHON_CODE''' % {
                                      job_report=report_filepath)
 
     def run(self):
-        ## print self.get_job_reports()
-        ## print self.working_jobs_count()
+        # print self.get_job_reports()
+        # print self.working_jobs_count()
         # Skip if ".complete" flag was found.
         if self.is_complete:
             self.results['step_status'] = 'completed'
