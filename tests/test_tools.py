@@ -93,12 +93,12 @@ class TestFileLinking(BrainyTest):
 
     def test_failing_pipe(self):
         '''Test LinkFiles: for failing if file pattern list is empty'''
-        self.start_capturing_output()
+        self.start_capturing()
         # Run pipes.
         pipes = bake_an_empty_filepattern_list_pipe()
         pipes.process_pipelines()
         # Check output.
-        self.stop_capturing_output()
+        self.stop_capturing()
         #print self.captured_output
         assert 'warning' in self.captured_output
 
@@ -121,7 +121,7 @@ class TestFileLinking(BrainyTest):
 
     def test_a_basic_linking(self):
         '''Test LinkFiles: for basic linking'''
-        self.start_capturing_output()
+        self.start_capturing()
         # Run pipes.
         pipes = bake_a_working_mock_pipe()
         # Do some mocking to make sure hard link is done on /tmp - same
@@ -131,7 +131,7 @@ class TestFileLinking(BrainyTest):
         # Run the pipes.
         pipes.process_pipelines()
         # Check output.
-        self.stop_capturing_output()
+        self.stop_capturing()
         #print self.captured_output
         #print self.get_report_content()
         #assert False
@@ -142,9 +142,9 @@ class TestFileLinking(BrainyTest):
         # We want to test LinkFiles.has_data(). For this we just simulate
         # running pipes and attached pipeline with single tested
         # process type of interest, i.e. LinkFiles
-        self.start_capturing_output()
+        self.start_capturing()
         pipes.process_pipelines()
-        self.stop_capturing_output()
+        self.stop_capturing()
         #print self.captured_output
         assert '<status action="pipes-mock-linkfiles">completed</status>'\
             in self.captured_output
@@ -152,7 +152,7 @@ class TestFileLinking(BrainyTest):
 
     def test_folder_linking(self):
         '''Test LinkFiles: for folder linking'''
-        self.start_capturing_output()
+        self.start_capturing()
         # Run pipes.
         pipes = bake_a_pipe_for_folder_linking()
         # Do some mocking to make sure hard link is done on /tmp - same
@@ -164,7 +164,7 @@ class TestFileLinking(BrainyTest):
         # Run the pipes.
         pipes.process_pipelines()
         # Check output.
-        self.stop_capturing_output()
+        self.stop_capturing()
         #print self.captured_output
         #print self.get_report_content()
         #assert False

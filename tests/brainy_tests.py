@@ -19,6 +19,8 @@ from brainy.config import BRAINY_USER_CONFIG_TPL
 from brainy.project import BrainyProject
 from brainy.pipes import PipesManager
 from brainy.scheduler import BrainyScheduler
+from brainy.log import setup_logging
+setup_logging('silent')  # Otherwise output capturing will not work
 
 
 class MockProject(BrainyProject):
@@ -64,29 +66,37 @@ class BrainyTest(unittest.TestCase):
     def __init__(self, methodName='runTest'):
         super(BrainyTest, self).__init__(methodName)
         self.captured_output = None
+        self.captured_error = None
 
-    def start_capturing_output(self):
+    def start_capturing(self):
         # Start output capturing.
         self.captured_output = None
         self.__old_stdout = sys.stdout
         sys.stdout = self.__stdout = StringIO()
+        self.captured_error = None
+        self.__old_stderr = sys.stderr
+        sys.stderr = self.__stderr = StringIO()
 
-    def stop_capturing_output(self):
+    def stop_capturing(self):
+        # Stop output capturing.
         if self.captured_output is None:
             self.captured_output = self.__stdout.getvalue()
-        # Stop output capturing.
         sys.stdout = self.__old_stdout
+        # Stop error capturing.
+        if self.captured_error is None:
+            self.captured_error = self.__stderr.getvalue()
+        sys.stderr = self.__old_stderr
 
     def setup(self):
         # Make sure pipette is not waiting forever for the input.
         self.__old_stdin = sys.stdin
         sys.stdin = StringIO()
-        # self.start_capturing_output()
+        # self.start_capturing()
 
     def teardown(self):
         # Restore the standard input.
         sys.stdin = self.__old_stdin
-        # self.stop_capturing_output()
+        # self.stop_capturing()
 
     def get_report_content(self):
         # raise Exception(self.captured_output)

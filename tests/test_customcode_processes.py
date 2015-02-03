@@ -6,6 +6,7 @@ Usage example:
 '''
 import os
 from brainy_tests import MockPipesManager, BrainyTest
+from testfixtures import LogCapture
 
 
 def bake_a_mock_pipe_with_no_param():
@@ -114,55 +115,56 @@ class TestCustomCode(BrainyTest):
 
     def test_python_call_missing_param(self):
         '''Test PythonCall: for "missing parameter" error'''
-        self.start_capturing_output()
+        self.start_capturing()
         # Run pipes.
         pipes = bake_a_mock_pipe_with_no_param()
-        pipes.process_pipelines()
+        with LogCapture() as logs:
+            pipes.process_pipelines()
         # Check output.
-        self.stop_capturing_output()
-        print self.captured_output
-        assert 'Missing "submit_call" key in JSON descriptor' \
-            in self.captured_output
+        self.stop_capturing()
+        # print logs
+        assert 'Missing "submit_call" key in YAML descriptor' \
+            in str(logs)
 
     def test_a_basic_python_call(self):
         '''Test PythonCall: for basic submission'''
-        self.start_capturing_output()
+        self.start_capturing()
         # Run pipes.
         pipes = bake_a_working_mock_pipe()
         pipes.process_pipelines()
         # Check output.
-        self.stop_capturing_output()
+        self.stop_capturing()
         # print self.captured_output
         # assert False
         assert 'I am a mock custom python call' in self.get_report_content()
 
     def test_a_basic_bash_call(self):
         '''Test BashCall: for basic submission'''
-        self.start_capturing_output()
+        self.start_capturing()
         # Run pipes.
         pipes = bake_a_bash_pipe()
         pipes.process_pipelines()
         # Check output.
-        self.stop_capturing_output()
+        self.stop_capturing()
         # print self.captured_output
         # assert False
         assert 'I am a mock custom bash call' in self.get_report_content()
 
     def test_a_basic_matlab_call(self):
         '''Test MatlabCall: for basic submission'''
-        self.start_capturing_output()
+        self.start_capturing()
         # Run pipes.
         pipes = bake_a_matlab_pipe()
         pipes.process_pipelines()
         # Check output.
-        self.stop_capturing_output()
+        self.stop_capturing()
         # print self.captured_output
         # assert False
         assert 'I am a mock custom matlab call' in self.get_report_content()
 
     def test_user_path_in_matlab_call(self):
         '''Test MatlabCall: if extending user path works'''
-        self.start_capturing_output()
+        self.start_capturing()
         # Run pipes.
         pipes = bake_pipe_with_matlab_user_path_extend()
         # Place new matlab function into extending location.
@@ -177,7 +179,7 @@ end
             ''')
         pipes.process_pipelines()
         # Check output.
-        self.stop_capturing_output()
+        self.stop_capturing()
         # print self.captured_output
         # assert False
         assert 'Call result is: foo' in self.get_report_content()

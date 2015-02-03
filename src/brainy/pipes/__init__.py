@@ -85,9 +85,6 @@ class BrainyPipe(pipette.Pipe):
         try:
             super(BrainyPipe, self).execute_process(process, parameters)
 
-            if not process.is_complete:
-                raise ProccessEndedIncomplete()
-
         except BrainyProcessError as error:
             # See brainy.errors
             error_is_fatal = False
@@ -105,7 +102,13 @@ class BrainyPipe(pipette.Pipe):
                     **error.extra)
             # Finally, interrupt execution if we error is fatal (default).
             if error_is_fatal:
+                logger.exception(error)
                 raise BrainyPipeFailure('Execution failed')
+
+        finally:
+
+            if not process.is_complete:
+                raise ProccessEndedIncomplete()
 
 
 class PipesManager(FlagManager):

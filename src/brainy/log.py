@@ -26,7 +26,7 @@ def output_json():
 
 
 def setup_logging(option, level=logging.INFO):
-    if not option in LOGGING_OPTIONS:
+    if option not in LOGGING_OPTIONS:
         raise Exception('Unknown logging option: %s' % option)
 
     logging.root.setLevel(level)
