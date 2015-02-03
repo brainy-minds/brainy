@@ -120,7 +120,7 @@ class TestCustomCode(BrainyTest):
         pipes.process_pipelines()
         # Check output.
         self.stop_capturing_output()
-        # print self.captured_output
+        print self.captured_output
         assert 'Missing "submit_call" key in JSON descriptor' \
             in self.captured_output
 

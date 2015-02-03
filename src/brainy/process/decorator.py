@@ -17,7 +17,7 @@ def require_keys_in_description(*description_keys):
                 return self.description[property_name]
             except KeyError:
                 raise BrainyProcessError(
-                    'Missing "%s" key in JSON descriptor of the process.' %
+                    'Missing "%s" key in YAML descriptor of the process.' %
                     property_name
                 )
 
@@ -42,9 +42,9 @@ def require_key_in_description(method):
         param_name = method.param_name
 
     def get_required_description_key(self):
-        if not param_name in self.description:
+        if param_name not in self.description:
             raise BrainyProcessError(
-                'Missing "%s" key in JSON descriptor of the process.' %
+                'Missing "%s" key in YAML descriptor of the process.' %
                 param_name
             )
         result = method(self)

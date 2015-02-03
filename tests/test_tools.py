@@ -7,7 +7,7 @@ Usage example:
 import os
 import shutil
 import tempfile
-from brainy_tests import build_pipes, BrainyTest
+from brainy_tests import BrainyTest, MockPipesManager
 from brainy.pipes.Tools import relative_symlink
 
 
@@ -18,7 +18,7 @@ MOCK_LINKING_FILEPATH = os.path.join(
 
 
 def bake_an_empty_filepattern_list_pipe():
-    return build_pipes('''
+    return MockPipesManager('''
 {
     # Define iBRAIN pipe type
     "type": "CellProfiler.Pipe",
@@ -43,7 +43,7 @@ def bake_an_empty_filepattern_list_pipe():
 
 
 def bake_a_working_mock_pipe():
-    return build_pipes('''
+    return MockPipesManager('''
 {
     # Define iBRAIN pipe type
     "type": "CellProfiler.Pipe",
@@ -68,7 +68,7 @@ def bake_a_working_mock_pipe():
 
 
 def bake_a_pipe_for_folder_linking():
-    return build_pipes('''
+    return MockPipesManager('''
 {
     # Define iBRAIN pipe type
     "type": "CellProfiler.Pipe",
