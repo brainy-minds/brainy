@@ -21,12 +21,9 @@ from brainy.config import (write_project_config, load_project_config,
 from brainy.workflows import bootstrap_workflow
 from brainy.scheduler import BrainyScheduler
 from brainy.pipes import PipesManager
+from brainy.errors import BrainyProjectError
 from brainy.project.report import report_data
 logger = logging.getLogger(__name__)
-
-
-class BrainyProjectError(Exception):
-    '''Thrown by brainy project if the logic goes wrong.'''
 
 
 class BrainyProject(object):
@@ -59,6 +56,16 @@ class BrainyProject(object):
             'pipes': [],
         }
 
+    def init(self, inherit_config={}, override_config={}):
+        # Make project dir.
+        if not os.path.exists(self.path):
+            raise BrainyProjectError('Project folder does not exists: %s' %
+                                     self.path)
+        # Put basic YAML config during project creation. This is required for
+        # project to be valid. We will also check version compatibility.
+        write_project_config(self.path, inherit_config=inherit_config,
+                             override_config=override_config)
+
     def create(self, from_workflow='canonical', inherit_config={},
                override_config={}):
         # Make project dir.
@@ -68,11 +75,8 @@ class BrainyProject(object):
         else:
             raise BrainyProjectError('Project folder already exists: %s' %
                                      self.path)
-        # Put basic YAML config during project creation. This is required for
-        # project to be valid. We will also check version compatibility.
-        write_project_config(self.path, inherit_config=inherit_config,
-                             override_config=override_config)
-
+        self.init(inherit_config=inherit_config,
+                  override_config=override_config)
         # Bootstrap project with a standard iBRAIN workflow.
         bootstrap_workflow(self.path, workflow_name=from_workflow)
 

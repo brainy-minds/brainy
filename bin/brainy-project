@@ -42,7 +42,8 @@ if __name__ == '__main__':
                         help='Full path to the folder containing brainy '
                         'project.')
     parser.add_argument('-i', '--imperative', dest='action',
-                        choices=['run', 'create', 'clean', 'restart', 'help'],
+                        choices=['run', 'create', 'clean', 'restart', 'help',
+                                 'init'],
                         help='Action')
     parser.add_argument('-s', '--subjective')
     parser.add_argument('--from', dest='workflow_name',
@@ -72,6 +73,8 @@ if __name__ == '__main__':
     try:
         if args.action == 'create':
             brainy_project.create(from_workflow=args.workflow_name)
+        elif args.action == 'init':
+            brainy_project.init()
         elif args.action == 'run':
             brainy_project.run()
         elif args.action == 'clean':
