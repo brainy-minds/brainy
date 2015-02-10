@@ -67,6 +67,7 @@ class BrainyTest(unittest.TestCase):
         super(BrainyTest, self).__init__(methodName)
         self.captured_output = None
         self.captured_error = None
+        self.__first_baked_process = None
 
     def start_capturing(self):
         # Start output capturing.
@@ -98,10 +99,28 @@ class BrainyTest(unittest.TestCase):
         sys.stdin = self.__old_stdin
         # self.stop_capturing()
 
-    def get_report_content(self):
-        raise Exception(self.captured_output)
-        match = re.search('^Report file is written to:\s*([^\s\<]+)',
-                          self.captured_output, re.MULTILINE)
+    def get_report_content(self, output=None):
+        if output is None:
+            output = self.captured_output
+        match = re.search('\s*Report file is written to:\s*([^\s\<]+)',
+                          output, re.MULTILINE)
         report_file = match.group(1)
         assert os.path.exists(report_file)
         return open(report_file).read()
+
+    def get_first_process(self, pipes):
+        '''
+        Takes pipe manager and returns a first baked process instance.
+        Can be useful for mocking around.
+        '''
+        if self.__first_baked_process is None:
+            for pipeline in pipes.pipelines:
+                for process in pipeline.bake_processes():
+                    process.parameters.update(
+                        pipeline.get_process_parameters(),
+                    )
+                    self.__first_baked_process = process
+            if self.__first_baked_process is None:
+                raise Exception('Failed to bake a process for mocking'
+                                ' using given pipe manager')
+        return self.__first_baked_process

@@ -106,12 +106,11 @@ class TestFileLinking(BrainyTest):
         assert 'LinkFiles process requires a non empty list of file patterns '\
             'which can be match to files in source_location' in str(logs)
 
+    def get_data_path(self, pipes):
+        return self.get_first_process(pipes).data_path
+
     def fetch_expected_files(self, pipes):
-        data_path = os.path.join(
-            pipes._get_flag_prefix(),
-            pipes.pipelines[0].name,
-            'BATCH',
-        )
+        data_path = self.get_data_path(pipes)
         old_data_path = data_path + '_old'
         os.makedirs(old_data_path)
         expected_files = ['test_hard_linking', 'test_sym_linking',
@@ -132,27 +131,37 @@ class TestFileLinking(BrainyTest):
         # file system.
         data_path, old_data_path, expected_files = \
             self.fetch_expected_files(pipes)
-        # Run the pipes.
-        pipes.process_pipelines()
+        #
+        # FIRST RUN:
+        #
+        with LogCapture() as logs:
+            pipes.process_pipelines()
         # Check output.
         self.stop_capturing()
-        #print self.captured_output
-        #print self.get_report_content()
-        #assert False
-        assert 'Linking ' in self.get_report_content()
+        # print self.captured_output
+        # print self.get_report_content(output=str(logs))
+        # assert False
+        assert 'Linking ' in self.get_report_content(output=str(logs))
         links = os.listdir(old_data_path)
         assert all([(expected_file in links)
                    for expected_file in expected_files])
+        #
+        # SECOND RUN:
+        #
         # We want to test LinkFiles.has_data(). For this we just simulate
         # running pipes and attached pipeline with single tested
         # process type of interest, i.e. LinkFiles
         self.start_capturing()
         pipes.process_pipelines()
         self.stop_capturing()
-        #print self.captured_output
-        assert '<status action="pipes-mock-linkfiles">completed</status>'\
-            in self.captured_output
-        #assert False
+        # has_data() should return True after second run
+        process = self.get_first_process(pipes)
+        assert process.has_data() is True
+        assert process.is_resubmitted is False
+        # Check if the pipeline we run twice has failed.
+        for pipeline in pipes.pipelines:
+            # E.g. this frequently breaks if has_data() fails
+            assert pipeline.has_failed is False
 
     def test_folder_linking(self):
         '''Test LinkFiles: for folder linking'''
@@ -181,16 +190,17 @@ class TestFileLinking(BrainyTest):
         parent = tempfile.mkdtemp()
         source = os.path.join(parent, 'some', 'upper', 'folder', 'aka',
                               'source')
-        target = os.path.join(parent, 'some', 'target', 'folder')
+        target = os.path.join(parent, 'some', 'target', 'folder', 'and',
+                              'nested')
         os.makedirs(source)
-        #os.makedirs(target)
+        # os.makedirs(target)
         relative_symlink(source, target)
         # Check for value error.
         target = os.path.join(parent, 'some')
         try:
             relative_symlink(source, target)
         except ValueError as error:
-            assert 'Target can not be part of the source path' in str(error)
+            assert 'Source includes target pathname' in str(error)
         # Check for absolute path error.
         target = os.path.join('some', 'foo')
         try:
@@ -200,3 +210,13 @@ class TestFileLinking(BrainyTest):
         # Check for unshared prefix. ('requires sudo')
         # target = os.path.join('/','some','foo')
         # relative_symlink(source, target)
+
+        # Reproducing a bug:
+        foo_path = parent + '/mock_project/mock_test/data_of_linkfile'\
+            + 's_old/test_hard_linking'
+        bar_path = parent + '/mock_project/mock_test/data_of_linkfiles'\
+            + '/test_hard_linking'
+        os.makedirs(os.path.dirname(foo_path))
+        relative_symlink(foo_path, bar_path)
+        points_to = os.readlink(bar_path)
+        assert points_to.startswith('../../')

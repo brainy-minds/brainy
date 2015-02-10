@@ -184,10 +184,19 @@ class PipesManager(FlagManager):
                 continue
 
             # Execute current pipeline.
+            if pipeline.has_failed is True:
+                raise Exception('Pipeline failed before running')
             self.execute_pipeline(pipeline)
 
             # Remember as previous.
             previous_pipeline = pipeline
+
+            if pipeline.has_failed:
+                logger.warning('Pipeline {%s} has failed.' % pipeline.name)
+            else:
+                logger.info('Pipeline {%s} run without fatal errors.' %
+                            pipeline.name)
+
 
         # Finalize the report.
         BrainyReporter.finalize_report()

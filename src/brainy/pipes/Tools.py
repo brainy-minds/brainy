@@ -2,7 +2,8 @@ import os
 import shutil
 import logging
 from datetime import datetime
-from findtools.find_files import (find_files, Match, MatchAnyPatternsAndTypes)
+from findtools.find_files import (find_files, Match, MatchAnyPatternsAndTypes,
+                                  MatchAllPatternsAndTypes)
 from brainy.errors import BrainyProcessError
 from brainy.process.code import PythonCodeProcess
 from brainy.process.decorator import (
@@ -134,14 +135,22 @@ def move_microscope_metadata(tiff_path, metadata_path):
 def relative_symlink(source, target):
     if source[0] != '/' or target[0] != '/':
         raise ValueError('Arguments can be only absolute pathnames.')
+    if source.startswith(target):
+        raise ValueError('Source includes target pathname.')
     prefix = os.path.commonprefix([source, target])
+    # Test for shared prefix to avoid bugs.
+    if not prefix or prefix == '/':
+        raise ValueError('No common shared prefix found.')
+    if not prefix.endswith('/'):
+        # Cut non-dir part.
+        prefix = os.path.dirname(prefix)
     cut_index = len(prefix)
     relative_source = source[cut_index:]
+    if relative_source.startswith('/'):
+        relative_source = relative_source[1:]
     if len(relative_source) == 0:
         relative_source = prefix
     target_dir = target[cut_index:]
-    if len(target_dir) == 0:
-        raise ValueError('Target can not be part of the source path.')
     # Find relative prefix.
     depth = len(target_dir.split(os.path.sep)) - 1
     relative_prefix = os.path.sep.join(['..' for foo in range(depth)])
@@ -150,7 +159,6 @@ def relative_symlink(source, target):
     parent_dir = os.path.dirname(target)
     if not os.path.exists(parent_dir):
         os.makedirs(parent_dir)
-    # print (relative_source, target)
     os.symlink(relative_source, target)
 
 
@@ -196,6 +204,7 @@ class LinkFiles(PythonCodeProcess):
         description['file_patterns']. If pattern string starts and ends with
         '/' then it is a regexp, otherwise it is fnmatch.
         '''
+        print source_path
         assert os.path.exists(source_path)
         if not os.path.exists(target_path):
             os.makedirs(target_path)
@@ -285,45 +294,68 @@ class LinkFiles(PythonCodeProcess):
         '''
         Check if all files matching given patterns have been linked.
         '''
-        print self.target_location
         if not os.path.exists(self.target_location):
-            raise BrainyProcessError(warning='Expected target folder is not '
-                                     'found: %s' % self.target_location)
+            raise BrainyProcessError(
+                message='Expected target folder is not '
+                        'found: %s' % self.target_location,
+                message_type='warning')
 
         def get_name(root, name):
             return name
-        linking_per_file_type = {
-            'f': ['hardlink', 'symlink'],
-            'd': ['symlink'],
-        }
 
-        for file_type in linking_per_file_type:
-            linking = linking_per_file_type[file_type]
-            for link_type in linking:
-                if link_type in self.file_patterns:
-                    patterns = self.file_patterns[link_type]
-                    source_matches = list(find_files(
-                        path=self.source_location,
-                        match=MatchAnyPatternsAndTypes(
-                            filetypes=[file_type, 'l'],
-                            names=patterns,
-                        ),
-                        collect=get_name,
-                        recursive=self.recursively,
-                    ))
-                    target_matches = list(find_files(
-                        path=self.target_location,
-                        match=MatchAnyPatternsAndTypes(
-                            filetypes=[file_type, 'l'],
-                            names=patterns,
-                        ),
-                        collect=get_name,
-                        recursive=self.recursively,
-                    ))
-                    source_matches = sorted(source_matches)
-                    target_matches = sorted(target_matches)
-                    # print len(source_matches)
-                    # print len(target_matches)
-                    if not source_matches == target_matches:
-                        return False
+        # raise Exception(self.source_location)
+
+        if 'symlink' in self.file_patterns:
+            patterns = self.file_patterns['symlink']
+            source_matches = list(find_files(
+                path=self.source_location,
+                # Match any source type, i.e. we can link any source.
+                match=MatchAnyPatternsAndTypes(names=patterns),
+                recursive=self.recursively,
+            ))
+            target_matches = list(find_files(
+                path=self.target_location,
+                match=MatchAnyPatternsAndTypes(
+                    filetypes=['l'],
+                    names=patterns,
+                ),
+                recursive=self.recursively,
+            ))
+            if len(source_matches) != len(target_matches):
+                return False
+            source_matches = sorted(source_matches)
+            target_matches = sorted(target_matches)
+            for index in range(len(target_matches)):
+                points_to = os.readlink(target_matches[index])
+                while points_to.startswith('../'):
+                    points_to = points_to[3:]
+                if not source_matches[index].endswith(points_to):
+                    return False
+
+        if 'hardlink' in self.file_patterns:
+            patterns = self.file_patterns['hardlink']
+            for file_type in ['d', 'f']:
+                source_matches = list(find_files(
+                    path=self.source_location,
+                    # Match any source type, i.e. we can link any source.
+                    match=MatchAllPatternsAndTypes(
+                       filetypes=[file_type],
+                       names=patterns,
+                    ),
+                    collect=get_name,
+                    recursive=self.recursively,
+                ))
+                target_matches = list(find_files(
+                    path=self.target_location,
+                    match=MatchAnyPatternsAndTypes(
+                        filetypes=[file_type],
+                        names=patterns,
+                    ),
+                    collect=get_name,
+                    recursive=self.recursively,
+                ))
+                source_matches = sorted(source_matches)
+                target_matches = sorted(target_matches)
+                if source_matches != target_matches:
+                    return False
         return True

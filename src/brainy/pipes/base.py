@@ -51,19 +51,28 @@ class BrainyPipe(pipette.Pipe):
             self.previous_process_params['previous_process_params'] = None
         return self.previous_process_params
 
+    def get_process_path(self):
+        return os.path.join(
+            self.pipes_manager._get_flag_prefix(),
+            self.name,
+        )
+
+    def get_process_parameters(self):
+        parameters = dict()
+        parameters['pipes_manager'] = self.pipes_manager
+        parameters['process_path'] = self.get_process_path()
+        return parameters
+
     def execute_process(self, process, parameters):
         '''
         Execute process as a step in brainy pipeline. Add verbosity, e.g.
         report status using brainy project report scheme.
         '''
+        parameters = self.get_process_parameters()
+        # Set step name.
         step_name = self.get_step_name(process.name)
         logger.info('Executing step {%s}' % step_name)
-        parameters['pipes_manager'] = self.pipes_manager
-        parameters['process_path'] = os.path.join(
-            self.pipes_manager._get_flag_prefix(),
-            self.name,
-        )
-        parameters['step_name'] = step_name
+        parameters['step_name'] = self.get_step_name(process.name)
         # Some modules are allowed to have limited dependency on previous
         # steps, but this is restricted. Also check unlinking in
         # get_previous_parameters().
