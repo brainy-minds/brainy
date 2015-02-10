@@ -25,8 +25,7 @@ class ShellCommand(BrainyScheduler):
         # Fail submission if the child process ended up badly.
         if len(stderrdata) > 0:
             raise BrainyProcessError(
-                message='Process job produced some error(s). '
-                        'Inspect the report %s' % report_file,
+                message='Process job produced some error(s). ',
                 output=stderrdata,
                 job_report=report_file,
             )

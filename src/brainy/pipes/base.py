@@ -93,6 +93,9 @@ class BrainyPipe(pipette.Pipe):
             # Finally, interrupt execution if we error is fatal (default).
             if error_is_fatal:
                 logger.exception(error)
+                if 'job_report' in error.extra:
+                    logger.error('Inspect error details in job report: %s' %
+                                 error.extra['job_report'])
                 raise BrainyPipeFailure('Execution failed')
 
         finally:
