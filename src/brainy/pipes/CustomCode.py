@@ -1,5 +1,3 @@
-import textwrap
-from brainy.utils import invoke, escape_xml
 from brainy.pipes import BrainyPipe
 from brainy.process.code import (BashCodeProcess, MatlabCodeProcess,
                                  PythonCodeProcess)

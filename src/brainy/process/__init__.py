@@ -48,19 +48,6 @@ def format_code(code, lang='bash'):
     return result
 
 
-class BrainyProcessError(Exception):
-    '''Logical error that happened while executing brainy pipe process'''
-
-    def __init__(self, message, message_type='error', output='',
-                 job_report=None, **kwds):
-        super(BrainyProcessError, self).__init__(message)
-        self.extra = {}
-        self.extra['message_type'] = message_type  # info, warning, error
-        self.extra['output'] = output
-        self.extra['job_report'] = job_report
-        self.extra.update(kwds)
-
-
 class BrainyProcess(pipette.Process, FlagManager):
 
     def __init__(self):

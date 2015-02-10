@@ -119,3 +119,21 @@ def check_report_file_for_errors(report_filepath):
     error = UnknownError('[UNKNOWN] Unknown error found')
     error.details = grab_details(report_text, match.group(0))
     raise error
+
+
+class BrainyProjectError(Exception):
+    '''Thrown by brainy project if the logic goes wrong.'''
+
+
+class BrainyProcessError(Exception):
+    '''Logical error that happened while executing brainy pipe process'''
+
+    def __init__(self, message, message_type='error', output='',
+                 job_report=None, **kwds):
+        super(BrainyProcessError, self).__init__(message)
+        self.extra = {}
+        self.extra['message_type'] = message_type  # info, warning, error
+        self.extra['output'] = output
+        self.extra['job_report'] = job_report
+        self.extra.update(kwds)
+

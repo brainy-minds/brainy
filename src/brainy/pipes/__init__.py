@@ -6,7 +6,7 @@ import os
 import shutil
 import pipette
 import logging
-from brainy.process import BrainyProcessError
+from brainy.errors import BrainyProcessError
 from brainy.flags import FlagManager
 from brainy.utils import Timer
 from brainy.project.report import BrainyReporter, report_data
@@ -22,6 +22,12 @@ class BrainyPipeFailure(Exception):
 
 class ProccessEndedIncomplete(BrainyPipeFailure):
     '''One of the pipe's processes failed to complete successfully.'''
+
+    def __init__(self, process):
+        self.process = process
+
+    def __str__(self):
+        return self.__doc__
 
 
 class BrainyPipe(pipette.Pipe):
@@ -108,7 +114,7 @@ class BrainyPipe(pipette.Pipe):
         finally:
 
             if not process.is_complete:
-                raise ProccessEndedIncomplete()
+                raise ProccessEndedIncomplete(process=process)
 
 
 class PipesManager(FlagManager):
@@ -250,9 +256,14 @@ class PipesManager(FlagManager):
         try:
             BrainyReporter.append_report_pipe(pipeline.name)
             pipeline.communicate({'input': '{}'})
-        except BrainyPipeFailure:
+        except ProccessEndedIncomplete as process_error:
+            logger.error('%s Stopped on process called: %s' %
+                         (str(process_error), process_error.process.name))
+            pipeline.has_failed  # Halt further progress
+        except BrainyPipeFailure as failure:
             # Errors are reported inside individual pipeline.
             logger.error('A pipeline has failed. We can not continue.')
+            logger.exception(failure)
             pipeline.has_failed = True
 
     def process_pipelines(self):
@@ -285,6 +296,8 @@ class PipesManager(FlagManager):
 
             # Remember as previous.
             previous_pipeline = pipeline
+
+        # Finalize the report.
         BrainyReporter.finalize_report()
         BrainyReporter.save_report(self.project.report_prefix_path)
         BrainyReporter.update_or_generate_static_html(

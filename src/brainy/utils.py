@@ -15,8 +15,10 @@ def invoke(command, _in=None):
     process = Popen(command, stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=True,
                     executable='/bin/bash')
     if _in is not None:
-        process.stdin.write(_in)
-    return process.stdout.read()
+        return process.communicate(input=_in)
+    stdoutdata = process.stdout.read()
+    stderrdata = process.stderr.read()
+    return (stdoutdata, stderrdata)
 
 
 def escape_xml(raw_value):

@@ -1,4 +1,4 @@
-from brainy.process import BrainyProcessError
+from brainy.errors import BrainyProcessError
 
 
 def require_keys_in_description(*description_keys):

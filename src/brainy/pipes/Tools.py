@@ -1,14 +1,14 @@
 import os
-import re
 import shutil
+import logging
 from datetime import datetime
 from findtools.find_files import (find_files, Match, MatchAnyPatternsAndTypes)
-from fnmatch import fnmatch, translate as fntranslate
-from brainy.process import BrainyProcessError
+from brainy.errors import BrainyProcessError
 from brainy.process.code import PythonCodeProcess
 from brainy.process.decorator import (
     format_with_params, require_keys_in_description,
     require_key_in_description)
+logger = logging.getLogger(__name__)
 
 
 KNOWN_MICROSCOPES = ['CV7K']
@@ -28,7 +28,7 @@ def backup_batch_folder(data_path, backups_path):
 
     # Making a backup copy.
     backuped_data_path = os.path.join(backups_path,
-                                       'BATCH_%s' % get_timestamp_str())
+                                      'BATCH_%s' % get_timestamp_str())
     if os.path.exists(backuped_data_path):
         raise IOError('BACKUP destination already exists: %s' %
                       backuped_data_path)
@@ -241,7 +241,7 @@ class LinkFiles(PythonCodeProcess):
                 if type(nested_file_patterns[link_type]) != list \
                         or len(nested_file_patterns[link_type]) == 0:
                     raise BrainyProcessError(
-                        warning='LinkFiles process requires a non empty list '
+                        message='LinkFiles process requires a non empty list '
                                 'of file patterns which can be match to '
                                 'files in source_location.'
                     )

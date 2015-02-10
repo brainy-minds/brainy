@@ -9,6 +9,7 @@ import shutil
 import tempfile
 from brainy_tests import BrainyTest, MockPipesManager
 from brainy.pipes.Tools import relative_symlink
+from testfixtures import LogCapture
 
 
 MOCK_LINKING_FILEPATH = os.path.join(
@@ -96,11 +97,14 @@ class TestFileLinking(BrainyTest):
         self.start_capturing()
         # Run pipes.
         pipes = bake_an_empty_filepattern_list_pipe()
-        pipes.process_pipelines()
+        with LogCapture() as logs:
+            pipes.process_pipelines()
         # Check output.
         self.stop_capturing()
-        #print self.captured_output
-        assert 'warning' in self.captured_output
+        # print self.captured_output
+        # print logs
+        assert 'LinkFiles process requires a non empty list of file patterns '\
+            'which can be match to files in source_location' in str(logs)
 
     def fetch_expected_files(self, pipes):
         data_path = os.path.join(
