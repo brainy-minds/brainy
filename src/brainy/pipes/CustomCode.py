@@ -1,4 +1,4 @@
-from brainy.pipes import BrainyPipe
+from brainy.pipes.base import BrainyPipe
 from brainy.process.code import (BashCodeProcess, MatlabCodeProcess,
                                  PythonCodeProcess)
 from brainy.process.decorator import (format_with_params,

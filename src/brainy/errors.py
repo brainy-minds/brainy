@@ -137,3 +137,16 @@ class BrainyProcessError(Exception):
         self.extra['job_report'] = job_report
         self.extra.update(kwds)
 
+
+class BrainyPipeFailure(Exception):
+    '''Thrown when pipeline execution has to be interrupted.'''
+
+
+class ProccessEndedIncomplete(BrainyPipeFailure):
+    '''One of the pipe's processes failed to complete successfully.'''
+
+    def __init__(self, process):
+        self.process = process
+
+    def __str__(self):
+        return self.__doc__

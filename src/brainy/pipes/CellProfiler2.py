@@ -3,9 +3,9 @@ import re
 import textwrap
 from fnmatch import translate as fntranslate
 import brainy
-from brainy.process import BrainyProcessError
+from brainy.errors import BrainyProcessError
 from brainy.process.code import PythonCodeProcess
-from brainy.pipes import BrainyPipe
+from brainy.pipes.base import BrainyPipe
 from brainy.config import get_config
 
 

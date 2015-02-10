@@ -1,5 +1,6 @@
 from brainy.utils import invoke
 from brainy.scheduler.base import BrainyScheduler
+from brainy.errors import BrainyProcessError
 
 
 class ShellCommand(BrainyScheduler):
@@ -9,16 +10,26 @@ class ShellCommand(BrainyScheduler):
     '''
 
     def submit_job(self, shell_command, queue, report_file):
+        # Invoke the shell command.
+        (stdoutdata, stderrdata) = invoke(shell_command)
+        # Produce a report output.
         with open(report_file, 'w+') as report:
             report.write('--CMD---' + '-' * 80 + '\n')
             report.write(shell_command)
-            (stdoutdata, stderrdata) = invoke(shell_command)
             if len(stdoutdata) > 0:
                 report.write('-STDOUT-' + '-' * 80 + '\n')
                 report.write(stdoutdata)
             if len(stderrdata) > 0:
-                report.write('-STDERR-' + '-' * 80 + '\n')
+                report.write('\n-STDERR-' + '-' * 80 + '\n')
                 report.write(stderrdata)
+        # Fail submission if the child process ended up badly.
+        if len(stderrdata) > 0:
+            raise BrainyProcessError(
+                message='Process job produced some error(s). '
+                        'Inspect the report %s' % report_file,
+                output=stderrdata,
+                job_report=report_file,
+            )
         return ('Command was successfully executed: "%s"\n' +
                 'Report file is written to: %s') % \
                (shell_command, report_file)

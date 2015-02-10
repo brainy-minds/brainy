@@ -16,8 +16,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 extend_path(ROOT, '')
 extend_path(ROOT, 'src')
 from brainy.config import BRAINY_USER_CONFIG_TPL
-from brainy.project import BrainyProject
-from brainy.pipes import PipesManager
+from brainy.project.base import BrainyProject
+from brainy.pipes.manager import PipesManager
 from brainy.scheduler import BrainyScheduler
 from brainy.log import setup_logging
 setup_logging('silent')  # Otherwise output capturing will not work
@@ -99,7 +99,7 @@ class BrainyTest(unittest.TestCase):
         # self.stop_capturing()
 
     def get_report_content(self):
-        # raise Exception(self.captured_output)
+        raise Exception(self.captured_output)
         match = re.search('^Report file is written to:\s*([^\s\<]+)',
                           self.captured_output, re.MULTILINE)
         report_file = match.group(1)

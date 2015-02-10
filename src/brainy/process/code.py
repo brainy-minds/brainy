@@ -1,5 +1,5 @@
-from brainy.process import BrainyProcess
-from brainy.utils import invoke, escape_xml
+from brainy.utils import invoke
+from brainy.process.base import BrainyProcess
 from brainy.project.report import BrainyReporter
 
 
@@ -11,16 +11,18 @@ class CanCheckData(object):
         data. Code is baked into a script and invoked in the shell. Method will
         interpret any output as error.
         '''
-        if not 'check_data_call' in self.description:
+        if 'check_data_call' not in self.description:
             return
         bake_code = getattr(self, 'bake_%s_code' % self.code_language)
         script = bake_code(self.description['check_data_call'])
-        output = invoke(script)
-        if len(output.strip()) > 0:
+        (stdoutdata, stderrdata) = invoke(script)
+        any_output = (stdoutdata + stderrdata).strip()
+        if len(any_output) > 0:
             # Interpret any output as error.
-            print '<!-- Checking data consistency failed: %s -->' % \
-                  escape_xml(output)
-            return False
+            BrainyReporter.append_warning(
+                message='Checking data consistency failed',
+                output=any_output,
+            )
         return True
 
 
@@ -36,15 +38,10 @@ class CodeProcess(BrainyProcess, CanCheckData):
         get_code = getattr(self, 'get_%s_code' % self.code_language)
 
         submission_result = submit_code_job(get_code())
-
-        print('''
-            <status action="%(step_name)s">submitting
-            <output>%(submission_result)s</output>
-            </status>
-        ''' % {
-            'step_name': self.step_name,
-            'submission_result': escape_xml(submission_result),
-        })
+        BrainyReporter.append_message(
+            message='Submitting new job',
+            output=submission_result
+        )
 
         self.set_flag('submitted')
 
@@ -53,15 +50,10 @@ class CodeProcess(BrainyProcess, CanCheckData):
         get_code = getattr(self, 'get_%s_code' % self.code_language)
 
         resubmission_result = submit_code_job(get_code(), is_resubmitting=True)
-
-        print('''
-            <status action="%(step_name)s">resubmitting
-            <output>%(resubmission_result)s</output>
-            </status>
-        ''' % {
-            'step_name': self.step_name,
-            'resubmission_result': escape_xml(resubmission_result),
-        })
+        BrainyReporter.append_message(
+            message='Resubmitting job',
+            output=resubmission_result
+        )
 
         self.set_flag('resubmitted')
         BrainyProcess.resubmit(self)
@@ -84,41 +76,3 @@ class PythonCodeProcess(CodeProcess):
 
     def __init__(self):
         super(PythonCodeProcess, self).__init__('python')
-
-
-# class JsonProcess(BrainyProcess, CanCheckData):
-
-#     def __init__(self, code_language):
-#         BrainyProcess.__init__(self)
-#         self.code_language = code_language
-
-#     @property
-#     def map(self):
-#         bake_code = getattr(self, 'bake_%s_code' % self.code_language)
-#         script = bake_code(self.map_call)
-#         return json.loads(invoke(script))
-
-#     def submit(self,):
-#         bake_code = getattr(self, 'bake_%s_code' % self.code_language)
-#         #submit_code_job = getattr(self, 'submit_%s_job' % self.code_language)
-#         for key, value in self.map.iteritems():
-#             accepting_json_code = '''
-
-#             '''
-
-#              % {
-#                 'bash_call': self.bash_call,
-#                 'input':
-#             }
-#             submission_result = submit_code_job(code)
-
-#             print('''
-#                 <status action="%(step_name)s">submitting
-#                 <output>%(submission_result)s</output>
-#                 </status>
-#             ''' % {
-#                 'step_name': self.step_name,
-#                 'submission_result': escape_xml(submission_result),
-#             })
-
-#             self.set_flag('submitted')

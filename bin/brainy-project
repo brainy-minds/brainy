@@ -27,7 +27,8 @@ extend_path(ROOT, '')
 extend_path(ROOT, 'src')
 extend_path(ROOT, 'lib/python')
 # Import brainy modules.
-from brainy.project import BrainyProject, BrainyProjectError
+from brainy.project.base import BrainyProject
+from brainy.errors import BrainyProjectError
 from brainy.workflows import WORKFLOWS
 from brainy.log import setup_logging, LOGGING_OPTIONS
 
