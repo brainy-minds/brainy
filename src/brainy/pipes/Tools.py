@@ -204,7 +204,6 @@ class LinkFiles(PythonCodeProcess):
         description['file_patterns']. If pattern string starts and ends with
         '/' then it is a regexp, otherwise it is fnmatch.
         '''
-        print source_path
         assert os.path.exists(source_path)
         if not os.path.exists(target_path):
             os.makedirs(target_path)

@@ -11,11 +11,30 @@
     <title>brainy-project</title>
 
     <!-- Minified brainy-project CSS -->
-    <link href="assets/css/brainy-project.css" rel="stylesheet">    
+    <link href="assets/css/bootstrap-theme.css.map" rel="stylesheet">
+    <link href="assets/css/bootstrap.css.map" rel="stylesheet">
+    <link href="assets/css/brainy-project.css" rel="stylesheet">
   </head>
 
   <body role="document">
-    <div id="rendered"></div>
+    <!-- Rendered -->
+    <div id="rendered"></div>    
+    <!-- Modal -->
+    <div class="modal fade bs-output-modal-lg" tabindex="-1" role="dialog" aria-labelledby="largeModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="largeModalLabel">Output</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal"> Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Template -->
     <div id="template" style="display: none;">
     <!-- Fixed navbar -->
     <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -119,16 +138,11 @@
                   <button type="button" class="btn btn-warning">0</button>
                 </div>
                 </div>
-              </div>              
-              <br>              
-              <div class="list-group">
-                {{#processes}}
-                <a href="#" class="list-group-item">
-                  <h4 class="list-group-item-heading">{{name}}</h4>
-                  <p class="list-group-item-text">Messages:</p>
-                </a>
-                {{/processes}}
               </div>
+              <br>              
+              {{#processes}}                                  
+                  {{{renderProcess}}}                
+              {{/processes}}              
             </div>
           </div>
         </div>
@@ -138,6 +152,6 @@
   </div> <!-- /container -->
   </div>
     <!-- brainy project core JavaScript -->
-    <script src="assets/js/brainy-project.min.js"></script>
+    <script src="assets/js/brainy-project.min.js"></script>        
   </body>
 </html>

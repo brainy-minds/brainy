@@ -162,6 +162,9 @@ class PipesManager(FlagManager):
         BrainyReporter.start_report()
         previous_pipeline = None
         for pipeline in self.pipelines:
+            # Start by expecting failure free run.
+            pipeline.has_failed = False
+
             # Check if current pipeline is dependent on previous one.
             depends_on_previous = False
             if previous_pipeline is not None:
@@ -184,8 +187,6 @@ class PipesManager(FlagManager):
                 continue
 
             # Execute current pipeline.
-            if pipeline.has_failed is True:
-                raise Exception('Pipeline failed before running')
             self.execute_pipeline(pipeline)
 
             # Remember as previous.

@@ -10,7 +10,7 @@ Starts a web server in command line, providing a full scale GUI.
 
 @license: The MIT License (MIT)
 
-Copyright (c) 2014 Pelkmans Lab
+Copyright (c) 2014-2015 Pelkmans Lab
 '''
 import os
 import sys
@@ -23,7 +23,8 @@ extend_path(ROOT, '')
 extend_path(ROOT, 'src')
 extend_path(ROOT, 'lib/python')
 # Import brainy modules.
-from brainy.project import BrainyProject, BrainyProjectError
+from brainy.project.base import BrainyProject
+from brainy.errors import BrainyProjectError
 from brainy.webserver import serve_brainy_project
 from brainy.log import setup_logging, LOGGING_OPTIONS
 

@@ -172,19 +172,21 @@ class TestFileLinking(BrainyTest):
         # file system.
         data_path, old_data_path, expected_files = \
             self.fetch_expected_files(pipes)
+        raise
         sub_old = os.path.join(old_data_path, 'DATA_old')
         os.makedirs(sub_old)
         # Run the pipes.
-        pipes.process_pipelines()
+        with LogCapture() as logs:
+            pipes.process_pipelines()
         # Check output.
         self.stop_capturing()
-        #print self.captured_output
-        #print self.get_report_content()
-        #assert False
-        assert 'Linking ' in self.get_report_content()
+        # print self.captured_output
+        # print self.get_report_content()
+        # assert False
+        assert 'Linking ' in self.get_report_content(output=str(logs))
         result_link = os.path.join(pipes.env['plate_path'], 'DATA_old')
         assert os.path.exists(result_link) and os.path.islink(result_link)
-        #assert False
+        # assert False
 
     def test_relative_symlinking(self):
         parent = tempfile.mkdtemp()

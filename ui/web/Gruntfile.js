@@ -84,7 +84,8 @@ module.exports = function(grunt) {
         files: [
           // includes files within path
           {src: 'bower_components/bootstrap/dist/css/bootstrap.css.map', dest: 'assets/css/bootstrap.css.map'},
-          {src: 'bower_components/bootstrap/dist/css/bootstrap-theme.css.map', dest: 'assets/css/bootstrap-theme.css.map'}
+          {src: 'bower_components/bootstrap/dist/css/bootstrap-theme.css.map', dest: 'assets/css/bootstrap-theme.css.map'},
+          {expand: true, cwd: 'bower_components/bootstrap/dist/fonts/', src: '*', dest: 'assets/fonts/'}
         ]
       }
   	}
