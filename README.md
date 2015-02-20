@@ -27,7 +27,7 @@ Go inside the project folder and adjust settings in your pipelines. Afterwards r
 
 ```
 cd PureAwesomeness
-# Adjust settings in .brainy and hello.br YAML files
+# Adjust settings in .brainy <project settings> and hello.br <pipe description> YAML files
 brainy run project
 ```
 
