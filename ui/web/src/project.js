@@ -47,19 +47,21 @@ jQuery(document).ready(function(){
 				itemClass = 'danger';
 			} else if (message.type == 'warning') {
 				itemClass = 'warning';
+			} else if (message.message == 'complete') {
+				itemClass = 'success';
 			}
-			// console.log(message.message);
+			console.log(message);
 			var html = '';
 			html += '<a href="#" class="list-group-item list-group-item-' + itemClass + '">';
-			html += '<button type="button" class="btn btn-default btn-sm"';
 			if ("output" in message && message.output.length > 0) {
-				// html += ' data-toggle="modal" data-placement="bottom" data-title="Output" data-container="body" data-html="true" data-content="';
+				html += '<button type="button" class="btn btn-default btn-sm"';				
 				html += ' data-toggle="modal" data-target=".bs-output-modal-lg" data-content="';
 				html += escapeHtml(message.output);
 				html += '"';
+  				html += '><span class="glyphicon glyphicon-new-window" aria-hidden="true"></span></button>';
+  				html += ' ';
 			}
-  			html += '><span class="glyphicon glyphicon-new-window" aria-hidden="true"></span></button>';
-			html += ' '+ message.message + '</a>';
+			html += message.message + '</a>';
 			return html;
 	}
 
