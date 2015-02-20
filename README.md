@@ -11,20 +11,23 @@ iBRAIN is a software framework for scientific computation primarily applied for 
 ##Documentation
   * [User manual](https://github.com/pelkmanslab/brainy/wiki/User-Manual)
   * [Developer Documentation](https://github.com/pelkmanslab/brainy/wiki/Developer-Documentation)
+   
+  > Tip: get help about the commands you need by saying `brainy help` or `brainy help project`
+
 
 ##Getting started
 
 Create you first project
 
 ```
-brainy create project PureAwesomeness
+brainy create project PureAwesomeness --from demo
 ```
 
 Go inside the project folder and adjust settings in your pipelines. Afterwards run the project.
 
 ```
 cd PureAwesomeness
-#adjust settings in .brainy and hello.br YAML files
+# Adjust settings in .brainy and hello.br YAML files
 brainy run project
 ```
 
