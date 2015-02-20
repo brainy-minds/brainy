@@ -6340,3 +6340,9 @@ button.close {
 .brainy-stati {
 	background-color: #777;
 }
+
+#brainy-logo {
+	margin-top: 114px;
+	margin-left: 38px;
+	position: absolute;	
+}

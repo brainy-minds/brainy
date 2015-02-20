@@ -17,8 +17,10 @@
   </head>
 
   <body role="document">
+    <!-- Floating brainy logo -->
+    <div id="brainy-logo"><img width="96" height="96" src="assets/images/brainy_logo.png" /></div>
     <!-- Rendered -->
-    <div id="rendered"></div>    
+    <div id="rendered"></div>
     <!-- Modal -->
     <div class="modal fade bs-output-modal-lg" tabindex="-1" role="dialog" aria-labelledby="largeModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-lg">
@@ -36,7 +38,7 @@
     </div>
     <!-- Template -->
     <div id="template" style="display: none;">
-    <!-- Fixed navbar -->
+    <!-- Fixed navbar -->    
     <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
       <div class="container">
         <div class="navbar-header">
@@ -45,12 +47,11 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href="http://brainy.github.io">brainy</a>
+          </button>          
         </div>
         <div id="navbar" class="navbar-collapse collapse">
-          <ul class="nav navbar-nav">
-            <li class="active"><a href="#">Report</a></li>            
+          <ul class="nav navbar-nav">          
+            <li class="active"><a href="#">Report</a></li>
             <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Pipes <span class="caret"></span></a>
               <ul class="dropdown-menu" role="menu">
@@ -64,8 +65,19 @@
                 <li><a href="#">restart</a></li> -->
               </ul>
             </li>
-            <li><a href="#about">About</a></li>
+            <li><a href="#about">Project Info</a></li>
             <li><a href="#contact">Contact</a></li>
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><strong>Help</strong><span class="caret"></span></a>
+              <ul class="dropdown-menu" role="menu">
+               <li class="dropdown-header">brainy</li>
+              <li><a href="https://github.com/pelkmanslab/brainy#documentation">Documentation</a></li>
+              <li><a href="https://github.com/pelkmanslab/brainy#faq">FAQ</a></li>
+              <li><a href="https://github.com/pelkmanslab/brainy#github">GitHub</a></li>
+              <li class="dropdown-header">iBRAIN</li>
+              <li><a href="https://github.com/pelkmanslab/iBRAIN#tutorials">Tutorials</a></li>
           </ul>
         </div><!--/.nav-collapse -->
       </div>
