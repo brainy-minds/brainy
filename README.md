@@ -1,4 +1,4 @@
-<img src="https://raw.githubusercontent.com/pelkmanslab/brainy/master/ui/web/assets/images/brainy_logo.png?token=AAYG9r6YOighwycsd6Almw_cRhM2zeugks5U8HTowA%3D%3D" alt="logo" height="96" width="96">
+<p align="center"><img src="https://raw.githubusercontent.com/pelkmanslab/brainy/master/ui/web/assets/images/brainy_logo.png?token=AAYG9r6YOighwycsd6Almw_cRhM2zeugks5U8HTowA%3D%3D" alt="logo" height="121" width="121"></p>
 
 ##About *brainy*
 
