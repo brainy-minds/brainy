@@ -1,8 +1,8 @@
-![brainy](https://raw.githubusercontent.com/pelkmanslab/brainy/master/ui/web/assets/images/brainy_logo.png?token=AAYG9r6YOighwycsd6Almw_cRhM2zeugks5U8HTowA%3D%3D "logo")
----
-##About
+<img src="https://raw.githubusercontent.com/pelkmanslab/brainy/master/ui/web/assets/images/brainy_logo.png?token=AAYG9r6YOighwycsd6Almw_cRhM2zeugks5U8HTowA%3D%3D" alt="logo" height="96" width="96">
 
-A nimble workflow managing tool, at the core of iBRAIN functionality. It allows creation of projects according to the expected framework layout. It also oversees the execution of the projects and provides monitoring of any relevant progress of the conducted computation.
+##About *brainy*
+
+*brainy* is a nimble workflow managing tool, at the core of iBRAIN functionality. It allows creation of projects according to the expected framework layout. It also oversees the execution of the projects and provides monitoring of any relevant progress of the conducted computation.
 
 ##iBRAIN
 
