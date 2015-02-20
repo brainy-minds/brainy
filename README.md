@@ -24,5 +24,5 @@ pip install brainy
 To run nose tests navigate into
 
 ```
-cd tests && nose -s
+cd tests && nosetests -s
 ```
