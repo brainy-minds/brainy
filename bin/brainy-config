@@ -18,8 +18,6 @@ Copyright (c) 2014 Pelkmans Lab
 '''
 import os
 import sh
-# Requires: npm install -g js-yaml
-jsyaml = sh.Command('js-yaml')
 import sys
 import logging
 import argparse
@@ -72,6 +70,12 @@ if __name__ == '__main__':
             except Exception as error:
                 sys.stderr.write('%s\n' % str(error))
                 exit(1)
+            # Requires: npm install -g js-yaml
+            try:
+                jsyaml = sh.Command('js-yaml')
+            except sh.CommandNotFound:
+                sys.stderr.write('Missing `js-yaml`. Installed it with: '
+                                 'npm install -g js-yaml')
             jsyaml(BRAINY_USER_CONFIG_PATH)
             if args.file:
                 jsyaml(args.file)
