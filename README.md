@@ -11,20 +11,23 @@ iBRAIN is a software framework for scientific computation primarily applied for 
 ##Documentation
   * [User manual](https://github.com/pelkmanslab/brainy/wiki/User-Manual)
   * [Developer Documentation](https://github.com/pelkmanslab/brainy/wiki/Developer-Documentation)
+   
+  > Tip: get help about the commands you need by saying `brainy help` or `brainy help project`
+
 
 ##Getting started
 
 Create you first project
 
 ```
-brainy create project PureAwesomeness
+brainy create project PureAwesomeness --from demo
 ```
 
 Go inside the project folder and adjust settings in your pipelines. Afterwards run the project.
 
 ```
 cd PureAwesomeness
-#adjust settings in .brainy and hello.br YAML files
+# Adjust settings in .brainy <project settings> and hello.br <pipe description> YAML files
 brainy run project
 ```
 
@@ -40,6 +43,15 @@ If things are looking good, continue by submitting your project into the *cloud*
 ```
 pip install brainy
 ```
+
+Once installed, make sure you put a config file into your ~/.brainy/config folder by calling
+
+```
+brainy init config
+```
+
+You will have to edit the template that has been copied according to your cluster scheduler settings and so on.
+
 ##Tests
 
 To run nose tests navigate into
