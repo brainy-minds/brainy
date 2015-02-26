@@ -16,3 +16,48 @@ Copyright (c) 2014 Pelkmans Lab
 
 '''
 from brainy.version import __version__, brainy_version
+
+
+# Mapping command shortcuts to brainy bin scripts.
+DUTIES = {
+    'brainy-project': {
+        'imperatives': [
+            'help',
+            'create',
+            'restart',
+            'run',
+            'clean',
+            'init',
+        ],
+        'subjectives': [
+            'project',
+            'projects',
+        ],
+        'description': 'Manage brainy projects: create new onces, '
+                       'run existing.',
+    },
+    'brainy-config': {
+        'imperatives': [
+            'help',
+            'init',
+            'test',
+        ],
+        'subjectives': [
+            'config',
+        ],
+        'description': 'Init brainy configuration in ~/.brainy/config.',
+    },
+    'brainy-web': {
+        'imperatives': [
+            'help',
+            'serve',
+        ],
+        'subjectives': [
+            'web',
+            'ui',
+            'http',
+        ],
+        'description': 'Starts a local web server and opens a GUI in browser.',
+        'use_exec': True,
+    },
+}

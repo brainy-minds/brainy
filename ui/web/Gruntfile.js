@@ -26,7 +26,7 @@ module.exports = function(grunt) {
       },
       dist: {
         files: {
-          'assets/js/<%= pkg.name %>.min.js': ['dist/_bower.js', 'src/*.js'],
+          'assets/js/<%= pkg.name %>-core.min.js': ['dist/_bower.js', 'dist/bind.js'],
         }
       }
     },
@@ -82,6 +82,8 @@ module.exports = function(grunt) {
     copy: {
       main: {
         files: [
+          // don't uglify the project code
+          {src: 'src/project.js', dest: 'assets/js/<%= pkg.name %>-main.js'},
           // includes files within path
           {src: 'bower_components/bootstrap/dist/css/bootstrap.css.map', dest: 'assets/css/bootstrap.css.map'},
           {src: 'bower_components/bootstrap/dist/css/bootstrap-theme.css.map', dest: 'assets/css/bootstrap-theme.css.map'},

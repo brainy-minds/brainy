@@ -1,5 +1,4 @@
 import os
-import json
 import yaml
 import shutil
 from glob import glob
@@ -35,7 +34,7 @@ class BrainyReporter(object):
         report_data['log'] = json_handler.houtput.root  # points to dictionary
 
     @classmethod
-    def save_report(cls, report_filepath, produce_json=True):
+    def save_report(cls, report_filepath):
         reports_folder = os.path.dirname(report_filepath)
         if not os.path.exists(reports_folder):
             logger.info('Creating missing reports folder: %s' % reports_folder)
@@ -46,12 +45,6 @@ class BrainyReporter(object):
         with open(yaml_report_filepath, 'w+') as yaml_reportfile:
             yaml_reportfile.write(yaml.dump(report_data,
                                   default_flow_style=False))
-        # Optionally duplicate it as a json.
-        if produce_json:
-            json_report_filepath = '%s-report-%s.json' % (report_filepath,
-                                                          now_str)
-            with open(json_report_filepath, 'w+') as json_reportfile:
-                json_reportfile.write(json.dumps(report_data))
 
     @classmethod
     def update_or_generate_static_html(cls, reports_folder_path):
@@ -72,15 +65,16 @@ class BrainyReporter(object):
             logger.info('Updating static html to browse reports.')
         # Generated/update reports.json
         report_list = glob(os.path.join(reports_folder_path,
-                           '*-report-*.json'))
+                           '*-report-*.yaml'))
         report_list = sorted(report_list, reverse=True)
         reports = {
             'modified_at': cls.get_now_str(),
             'reports_list': report_list,
         }
-        with open(os.path.join(html_path, 'reports.json'), 'w+') \
+        with open(os.path.join(html_path, 'reports.yaml'), 'w+') \
                 as reportsfile:
-            reportsfile.write(json.dumps(reports))
+            reportsfile.write(yaml.dump(reports,
+                              default_flow_style=False))
 
     @classmethod
     def get_current_report_pipe(cls):

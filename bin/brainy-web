@@ -54,6 +54,7 @@ if __name__ == '__main__':
         if args.action == 'serve':
             project_name = os.path.basename(args.path)
             brainy_project = BrainyProject(project_name, args.path)
+            print 'Serving the project in: %s' % brainy_project.path
             serve_brainy_project(brainy_project, args.port)
     except BrainyProjectError as error:
         sys.stderr.write('%s\n' % str(error))

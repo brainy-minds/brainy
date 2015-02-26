@@ -17,8 +17,8 @@ def readme():
 
 
 def get_version():
-    src_path = os.path.join(os.path.dirname(__file__), 'src')
-    sys.path.append(src_path)
+    src_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'src')
+    sys.path = [src_path] + sys.path
     from brainy.version import brainy_version
     return brainy_version
 
@@ -34,7 +34,12 @@ setup(
     author_email='eugeny.yakimovitch@gmail.com',
     url='https://github.com/pelkmanslab/iBRAIN',
     license='MIT',
-    scripts=['brainy'],
+    scripts=[
+        'brainy',
+        'bin/brainy-config',
+        'bin/brainy-project',
+        'bin/brainy-web',
+    ],
     packages=[
         'brainy',
         'brainy.apps',
@@ -43,7 +48,7 @@ setup(
         'brainy.scheduler',
         'brainy.workflows',
     ],
-    package_dir = {'':'src'},
+    package_dir={'': 'src'},
     package_data={
         '': ['*.html', '*.svg', '*.js'],
     },

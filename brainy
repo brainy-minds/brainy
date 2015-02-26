@@ -24,21 +24,19 @@ Copyright (c) 2014 Pelkmans Lab
 '''
 import os
 import sys
-import json
 from subprocess import (PIPE, Popen)
-# We include <pkg_root>/src, <pkg_root>/lib/python
-extend_path = lambda root_path, folder: sys.path.insert(
-    0, os.path.join(root_path, folder))
-ROOT = os.path.dirname(__file__)
-extend_path(ROOT, '')
-extend_path(ROOT, 'src')
-extend_path(ROOT, 'lib/python')
+# # We include <pkg_root>/src, <pkg_root>/lib/python
+# extend_path = lambda root_path, folder: sys.path.insert(
+#     0, os.path.join(root_path, folder))
+# ROOT = os.path.dirname(__file__)
+# extend_path(ROOT, '')
+# extend_path(ROOT, 'src')
+# extend_path(ROOT, 'lib/python')
 # Import brainy modules.
+import brainy
 from brainy.version import brainy_version
 
 
-COMMANDS_PATH = os.path.join(os.path.dirname(__file__), 'bin')
-DUTIES_CONF = os.path.join(COMMANDS_PATH, 'brainy_duties.conf')
 GUESS_ERROR = '''{program}: '{arg1}' or '{arg2}' are unknown {program}
 command(s). See '{program} --help'.
 
@@ -78,7 +76,8 @@ class Duty(object):
             and subjective in self.subjectives
 
     def do(self, imperative, subjective, arguments_tail):
-        sub_program_path = os.path.join(COMMANDS_PATH, self.sub_program)
+        # sub_program_path = os.path.join(COMMANDS_PATH, self.sub_program)
+        sub_program_path = self.sub_program
         pass_subj_imp = '-i %s -s %s' % (imperative, subjective)
         if self.use_exec:
             args = ' '.join([sub_program_path, pass_subj_imp] + arguments_tail)
@@ -187,7 +186,7 @@ def print_version():
 
 
 if __name__ == '__main__':
-    duties = json.loads(open(DUTIES_CONF).read())
+    duties = brainy.DUTIES
     program = os.path.basename(sys.argv[0])
     prefect = Praefect(duties)
     if len(sys.argv) < 3:

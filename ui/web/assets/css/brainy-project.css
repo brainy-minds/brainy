@@ -6342,6 +6342,7 @@ button.close {
 }
 
 #brainy-logo {
+	display: none;
 	margin-top: 114px;
 	margin-left: 38px;
 	position: absolute;	
