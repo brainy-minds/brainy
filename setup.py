@@ -58,6 +58,7 @@ setup(
         'pipette>=0.1.2',
         'tree_output>=0.1.2',
         'sh>=1.09',
+        'PyYAML>=3.11',
     ],
     classifiers=[
         'Topic :: System :: Distributed Computing',
