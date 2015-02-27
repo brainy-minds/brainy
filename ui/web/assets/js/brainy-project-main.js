@@ -38,6 +38,16 @@ function addReportNames(reports) {
 	return reports;
 }
 
+function parseYaml(value) {
+	try {
+		return jsyaml.load(value);
+	} catch (ex) {
+		console.log('Failed to parse the following YAML:');
+		console.log(value);
+		console.error(ex.message);
+	}_
+}
+
 
 jQuery(document).ready(function(){
 
@@ -89,13 +99,13 @@ jQuery(document).ready(function(){
 	};
 
 	$.get('reports.yaml', function(reports_yaml){
-		var reports = jsyaml.load(reports_yaml);
-		console.log(reports);
+		var reports = parseYaml(reports_yaml);
+		// console.log(reports);
 		data.reports = addReportNames(reports);
 		// console.log(reports);
 		var report_file = basename(reports.reports_list[0]);
 		$.get('/reports/' + report_file, function(report_yaml) {
-			var report = jsyaml.load(report_yaml);
+			var report = parseYaml(report_yaml);
 			console.log(report);
 			$('#brainy-logo').show();
 			data.report = report;
