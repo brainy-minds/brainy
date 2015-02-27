@@ -42,11 +42,21 @@ class Lsf(BrainyScheduler):
 
     def submit_job(self, shell_command, queue, report_file):
         '''Submit job using *bsub* command.'''
-        return self.bsub(
-            '-W', queue,
-            '-o', report_file,
-            shell_command,
-        )
+        try:
+            self.bsub(
+                '-W', queue,
+                '-o', report_file,
+                shell_command,
+            )
+        except Exception as error:
+            logger.exception(error)
+            return 'Failed to submit new job: %s' % shell_command
+
+        logger.info('Submitting new job: %s', shell_command)
+        logger.info('Report file will be written to: %s' % report_file)
+        return ('Submitting new job: "%s"\n' +
+                'Report file will be written to: %s') % \
+               (shell_command, report_file)
 
     def count_working_jobs(self, key=None):
         '''
