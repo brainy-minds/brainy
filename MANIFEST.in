@@ -1,1 +1,1 @@
-recursive-include lib *
+recursive-include src/brainy/lib *

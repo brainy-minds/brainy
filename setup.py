@@ -172,7 +172,7 @@ setuptools.setup(
     author_email='yauhen.yakimovich@uzh.ch',
     url='https://github.com/pelkmanslab/brainy',
     license='MIT',
-    platforms=['Linux', 'OS-X', 'Windows'],
+    platforms=['Linux', 'OS-X'],
     classifiers=[
         'Topic :: System :: Distributed Computing',
         'Topic :: Scientific/Engineering :: Image Recognition',

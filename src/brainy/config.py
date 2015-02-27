@@ -67,8 +67,8 @@ project_parameters:
     'brainy_user': getuser(),
     'cellprofiler2_path': os.path.expanduser('~/CellProfiler2'),
     'brainy_lib_path': os.path.join(
-        os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
-        'lib'
+        os.path.dirname(__file__),
+        'lib',
     ),
 }
 BRAINY_USER_CONFIG_PATH = os.path.expanduser('~/.brainy/config')
