@@ -1,11 +1,6 @@
-{
-    # Define iBRAIN pipe type
-    "type": "CustomCode.CustomPipe",
-    # Define chain of processes - single steps
-    "chain": [
-        {
-            "type": "CustomCode.MatlabCall",
-            "submit_call": "disp('I am a mock custom matlab call')",
-        }
-    ]
-}
+---
+  type: "CustomCode.CustomPipe"
+  chain: 
+    - 
+      type: "CustomCode.MatlabCall"
+      submit_call: "disp('I am a mock custom matlab call')"
