@@ -65,7 +65,8 @@ project_parameters:
 ''' % {
     'brainy_version': brainy_version,
     'brainy_user': getuser(),
-    'cellprofiler2_path': os.path.expanduser('~/CellProfiler2'),
+    'cellprofiler2_path': os.path.expanduser(
+        '~/iBRAINFramework/tools/CellProfiler2'),
     'brainy_lib_path': os.path.join(
         os.path.dirname(__file__),
         'lib',

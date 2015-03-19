@@ -116,15 +116,19 @@ class BrainyProcess(pipette.Process, FlagManager):
 
     def restrict_to_safe_path(self, pathname):
         '''Restrict every relative pathname to point within the plate path'''
-        safe_path = self.project_path
-        if not safe_path.endswith('/'):
-            safe_path += '/'
-        if '../../' in pathname:
-            pathname = pathname.replace('../../', safe_path, 1)
-        pathname = pathname.replace('..', '')
-        # The actual jailing withing the safe_path.
-        assert pathname.startswith(safe_path)
-        return pathname
+        try:
+            safe_path = self.project_path
+            if not safe_path.endswith('/'):
+                safe_path += '/'
+            if '../../' in pathname:
+                pathname = pathname.replace('../../', safe_path, 1)
+            pathname = pathname.replace('..', '')
+            # The actual jailing withing the safe_path.
+            assert pathname.startswith(safe_path)
+            return pathname
+        except Exception as error:
+            logger.exception(error)
+            raise error
 
     @property
     def process_path(self):
@@ -240,13 +244,17 @@ class BrainyProcess(pipette.Process, FlagManager):
             value = getattr(self, property_name)
             user_path = value.split(':')
             for subfolder in user_path:
-                folder_path = self.restrict_to_safe_path(subfolder)
+                if '~/' in subfolder:
+                    subfolder = os.path.expanduser(subfolder)
+                folder_path = subfolder
                 if not os.path.exists(folder_path):
                     logger.warning('The custom code path does not exist: %s' %
                                    folder_path)
                     continue
                 valid_folders.append(folder_path)
         # Pack result as colon separated string
+        logger.info('Using custom folder path for %s: %s' %
+                    (lang, valid_folders))
         return ':'.join(valid_folders)
 
     def format_with_params(self, param_name, value):
@@ -533,6 +541,8 @@ PYTHON_CODE''' % {
                                      job_report=report_filepath)
 
     def run(self):
+        logger.info('running process <%s> with parameters: %s' %
+                    (self.name, self.parameters))
         # print self.get_job_reports()
         # print self.working_jobs_count()
         # Skip if ".complete" flag was found.
