@@ -10,7 +10,7 @@ iBRAIN is a software framework for scientific computation primarily applied for 
 
 ##Documentation
 
-A really good place to understand what is brainy is to read user manual.
+A really good place to understand what is `brainy` is to read the *user manual*:
 
   * [User manual](https://github.com/pelkmanslab/brainy/wiki/User-Manual)
   * [Developer Documentation](https://github.com/pelkmanslab/brainy/wiki/Developer-Documentation)
