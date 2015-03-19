@@ -9,6 +9,9 @@
 iBRAIN is a software framework for scientific computation primarily applied for BigData extraction and analysis in context of HPC and HTS as well as large bioinformatical analysis.
 
 ##Documentation
+
+A really good place to understand what is brainy is to read user manual.
+
   * [User manual](https://github.com/pelkmanslab/brainy/wiki/User-Manual)
   * [Developer Documentation](https://github.com/pelkmanslab/brainy/wiki/Developer-Documentation)
    
