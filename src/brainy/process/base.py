@@ -1,8 +1,8 @@
 import os
 import re
 import logging
+import pprint
 from datetime import datetime
-from cStringIO import StringIO
 import pipette
 from brainy.flags import FlagManager
 from brainy.scheduler import SHORT_QUEUE, NORM_QUEUE
@@ -127,6 +127,7 @@ class BrainyProcess(pipette.Process, FlagManager):
             assert pathname.startswith(safe_path)
             return pathname
         except Exception as error:
+            logger.error('Safe check failed: %s' % pathname)
             logger.exception(error)
             raise error
 
@@ -541,8 +542,9 @@ PYTHON_CODE''' % {
                                      job_report=report_filepath)
 
     def run(self):
-        logger.info('running process <%s> with parameters: %s' %
-                    (self.name, self.parameters))
+        logger.info('running process <%s> with the following parameters:' %
+                    self.name)
+        logger.info(pprint.pformat(self.parameters))
         # print self.get_job_reports()
         # print self.working_jobs_count()
         # Skip if ".complete" flag was found.

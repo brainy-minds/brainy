@@ -5,6 +5,7 @@ from __future__ import with_statement
 import os
 import pipette
 import logging
+import pprint
 from brainy.errors import (BrainyProcessError, ProccessEndedIncomplete,
                            BrainyPipeFailure)
 from brainy.project.report import BrainyReporter
@@ -61,6 +62,11 @@ class BrainyPipe(pipette.Pipe):
         parameters = dict()
         parameters['pipes_manager'] = self.pipes_manager
         parameters['process_path'] = self.get_process_path()
+        # Update them with project-wide parameters
+        project = self.pipes_manager.project
+        logger.info('Applying project-wide parameters.')
+        logger.debug(pprint.pformat(project.config['project_parameters']))
+        parameters.update(project.config['project_parameters'])
         return parameters
 
     def execute_process(self, process, parameters):
