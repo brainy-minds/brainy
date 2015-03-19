@@ -26,7 +26,7 @@ class FlagManager(object):
 
     def reset_submitted(self):
         '''
-        If no no jobs are found for this project, module, or step, waiting is
+        If no jobs are found for this project, module, or step, waiting is
         senseless. Remove ".submitted" file and try again.
         '''
         self.reset_flag('submitted')
