@@ -43,8 +43,12 @@ If things are looking good, continue by submitting your project into the *cloud*
 
 ##Installation
 
+>It is recommended to use [conda](http://conda.pydata.org/docs/) as python 2.7+ environment.
+
+The package is available on [PyPI](https://pypi.python.org/pypi/brainy-mind/).
+
 ```
-pip install brainy
+pip install brainy-mind
 ```
 
 Once installed, make sure you put a config file into your ~/.brainy/config folder by calling

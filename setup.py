@@ -162,11 +162,11 @@ if scripts is None: scripts = find_scripts()
 
 
 setuptools.setup(
-    name='brainy',
+    name='brainy-mind',
     version=get_version(),
-    description='The nimble workflow managing tool which is a part of iBRAIN '
-                'framework for scientific computation primarily applied for '
-                'BigData analysis in context of HPC and HTS',
+    description='brainy is a nimble workflow managing tool which is a part of '
+                'iBRAIN framework for scientific computation primarily '
+                'applied for BigData analysis in context of HPC and HTS',
     long_description=readme(),
     author='Yauhen Yakimovich',
     author_email='yauhen.yakimovich@uzh.ch',
