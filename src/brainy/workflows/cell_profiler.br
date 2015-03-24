@@ -1,6 +1,23 @@
 ---
-  type: "CustomCode.CustomPipe"
+  type: "CellProfiler.Pipe"
+  after: "illum_corr"
   chain: 
     - 
-      type: "CustomCode.MatlabCall"
-      submit_call: "disp('I am a mock custom matlab call')"
+      type: "CellProfiler.PreCluster"
+      filename: "PreCluster_*.mat"
+      default_parameters: 
+        job_submission_queue: "8:00"
+        job_resubmission_queue: "36:00"
+        batch_path: "../../BATCH"
+    - 
+      type: "CellProfiler.CPCluster"
+      default_parameters: 
+        job_submission_queue: "8:00"
+        job_resubmission_queue: "36:00"
+        batch_path: "../../BATCH"
+    - 
+      type: "CellProfiler.CPDataFusion"
+      default_parameters: 
+        job_submission_queue: "8:00"
+        job_resubmission_queue: "36:00"
+        batch_path: "../../BATCH"
