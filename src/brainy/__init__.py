@@ -20,6 +20,31 @@ from brainy.version import __version__, brainy_version
 
 # Mapping command shortcuts to brainy bin scripts.
 DUTIES = {
+    'brainy-config': {
+        'imperatives': [
+            'help',
+            'init',
+            'test',
+        ],
+        'subjectives': [
+            'config',
+        ],
+        'description': 'Init brainy configuration in ~/.brainy user-path.',
+    },
+    'brainy-frames': {
+        'imperatives': [
+            'help',
+            'update',
+            'install',
+            'list',
+            'search',
+        ],
+        'subjectives': [
+            'frame',
+            'frames',
+        ],
+        'description': 'Package management system for brainy.',
+    },
     'brainy-project': {
         'imperatives': [
             'help',
@@ -35,17 +60,6 @@ DUTIES = {
         ],
         'description': 'Manage brainy projects: create new onces, '
                        'run existing.',
-    },
-    'brainy-config': {
-        'imperatives': [
-            'help',
-            'init',
-            'test',
-        ],
-        'subjectives': [
-            'config',
-        ],
-        'description': 'Init brainy configuration in ~/.brainy/config.',
     },
     'brainy-web': {
         'imperatives': [

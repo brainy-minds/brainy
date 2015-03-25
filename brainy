@@ -185,8 +185,8 @@ class Praefect(object):
 
 
 def print_version():
-    print ('brainy %s  Brainy is nimble workflow manager and a super CLI tool'
-           ' for iBRAIN') % brainy_version
+    print (u'brainy (%s) \u2734 is a nimble workflow manager and a super '
+           u'CLI tool at the core of iBRAIN \u2734') % brainy_version
 
 
 if __name__ == '__main__':

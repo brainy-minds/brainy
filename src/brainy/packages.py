@@ -11,8 +11,8 @@ NB Yes, it is totally inspired by `brew`.
 Copyright (c) 2015 Pelkmans Lab
 '''
 import os
-import sys
 from sh import git
+import shutil
 import yaml
 try:
     from yaml import CLoader as Loader, CDumper as Dumper
@@ -26,13 +26,30 @@ logger = logging.getLogger(__name__)
 user_config = brainy.config.load_user_config()
 
 
+def parse_frame(frame):
+    '''Init with defaults. Guess empty fields from URL or fail.'''
+    result = dict()
+    result.update(frame)
+    result['version'] = frame.get('version', 'master')
+    result['access_method'] = frame.get('access_method', 'git')
+    return result
+
+
+class FramesError(Exception):
+    '''High-level brainy frames error. Can be handled and reported.'''
+
+
 class Frames(object):
     '''
-    A frame is a package.
+    A frame is a package. Frames take care of frameworks installations
+    (like iBRAIN) into user space.
     '''
 
-    def __init__(self, location, framework_location=None):
-        # Framework location, e.g. ~/iBRAIN
+    def __init__(self, framework, location):
+        '''
+        location is Framework location, e.g. ~/iBRAIN
+        '''
+        self.framework = framework
         self.location = location
         self._packages = None
 
@@ -78,10 +95,12 @@ class Frames(object):
                         self.location)
             self.packages = list()
 
-    def update_index(self, framework='iBRAIN'):
+    def update_index(self):
         '''
         Brainy user configuration provides an URL to get
         project index.
+
+        A value of framework can be `iBRAIN`.
         '''
         # TODO replace this hardcoded index by URL download
         packages_index = '''
@@ -109,26 +128,102 @@ packages:
 
     -
         name: iBRAINModules
-        url: 'pelkmanslab_github:pelkmanslab/iBRAINModules'коменте
+        url: 'pelkmanslab_github:pelkmanslab/iBRAINModules'
 
-'''     # Write index to ~/.brainy/<framework>.packages_index
-        brainy.config.update_packages_index(framework,
+'''
+        # Write index to ~/.brainy/<framework>.packages_index
+        brainy.config.update_packages_index(self.framework,
                                             yaml_data=packages_index)
 
-    def install_frame(self, frame):
-        '''Implemented by package.'''
-        logger.info('Downloading (%s) %s <- %s', frame.access_method,
-                    frame.name, frame.url)
-        package_frame_path = ''
+    def find_frames_in_index(self, name, partial_match=True):
+        packages_index = brainy.config.load_packages_index(self.framework)
+        found = list()
+        for frame in packages_index['packages']:
+            # Put in the default values.
+            frame = parse_frame(frame)
+            # Match.
+            name_is_a_match = name in frame['name'] if partial_match \
+                else name == frame['name']
+            if name_is_a_match:
+                logger.info('Found frame: %s' % frame['name'])
+                found.append(frame)
+        return found
+
+    def get_formula(self, formula_path):
+        if not os.path.exists(formula_path):
+            raise FramesError('Missing formula in the package!')
+        try:
+            # Attempt to execute package frame with class code.
+            execfile(formula_path, globals={}, locals={})
+            # We expect it to instantiate formula object and define it as
+            # formula variable.
+            if 'formula' not in locals():
+                FramesError('Package does not define a formula!')
+            formula.install(frames=self)
+        except SystemExit:
+            logger.error('Got SystemExit error')
+            raise FramesError('Failed to execute frame installation formula.')
+        return formula
+
+    def download_frame(self, frame, package_path):
+        logger.info('Downloading (%s) %s <- %s', frame['access_method'],
+                    frame['name'], frame['url'])
+        if frame['access_method'].lower() == 'git':
+            res = git.clone(frame['url'], package_path)
+            if res.exit_code != 0:
+                raise FramesError('Git clone failed: %s' % frame['url'])
+        else:
+            raise FramesError('Unknown access method: %s' %
+                              frame['access_method'])
+
+    def install_frame(self, frame, force_reinstall):
+        '''Download package and run frame installation formula.'''
+        package_path = os.path.join(self.cache_location, frame['name'])
+        if os.path.exists(package_path):
+            if force_reinstall:
+                logger.warn('Purging package from cache: %s' % package_path)
+                shutil.rmtree(package_path)
+            else:
+                raise FramesError('Package is already installed: %s ' %
+                                  package_path + ' (maybe --force ?)')
+        # Download package.
+        self.download_frame(frame, package_path)
+        assert os.path.exists(package_path)
+        # Get its formula.
+        formula_path = os.path.join(package_path, frame['name'] + '.frame')
+        formula = self.get_formula(formula_path)
+        # Checked that formula version and name are correct.
+        assert frame['name'] == formula.name
+        # TODO: proper version comparison
+        # assert frame.version >= formula.version
+        # Install the frame from formula.
+
+        # Finally save it into list of installed packages.
+        self.packages = self.packages + [frame]
+
+        # Done.
+        logger.info(('Package "%s" version "%s" was successfully '
+                     'installed into: %s') %
+                    (formula.name, formula.version, package_path))
 
 
-class Frame(object):
+class FrameFormula(object):
     '''
     Describes how to install the frame. Place it inside framework.
     Note: more less equivalent to `Formula` in `brew`.
+
+    Effectively a frame is just a piece of python code kept in each packaged.
+    After downloading the package brainy frames try to execute this code and
+    let it cook the rest of installation.
+
+    Frames object is passed into the routine with information like location of
+    the framework.
+
+    Each derived object is called like: `FooFrame` where foo is a name of the
+    package.
     '''
 
-    def __init__(self, name, url='', namespace='', version='',
+    def __init__(self, name, url, namespace='', version='',
                  homepage='', sha1='', md5='', access_method='git'):
         self.name = name
         self.url = url
@@ -138,25 +233,19 @@ class Frame(object):
         self.sha1 = sha1
         self.md5 = md5
         self.access_method = access_method
-
-    def download(self, frames):
-        if self.access_method == 'git':
-            res = git.clone(self.url, os.path.join(
-                            frames.cache_location, self.name))
-            if not res.exit_code == 0:
-                riase Exception('Failed to clone %s from: %s' %
-                                (self.name, self.url))
-        else:
-            raise Exception('Unknown access method: %s' % self.access_method)
-
-    def parse_url(self):
-        '''Guess empty fields from URL or fail.'''
-
+        self.parse_url()
 
     def as_dict(self):
         return {
             'name': self.name,
             'url': self.url,
             'namespace': self.namespace,
+            'version': self.version,
+            'homepage': self.homepage,
+            'sha1': self.sha1,
+            'md5': self.md5,
+            'access_method': self.access_method,
         }
 
+    def install(self, frames):
+        '''Implement it in derived classes of package formulas.'''

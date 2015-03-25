@@ -198,7 +198,6 @@ class PipesManager(FlagManager):
                 logger.info('Pipeline {%s} run without fatal errors.' %
                             pipeline.name)
 
-
         # Finalize the report.
         BrainyReporter.finalize_report()
         BrainyReporter.save_report(self.project.report_prefix_path)

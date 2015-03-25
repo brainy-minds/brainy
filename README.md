@@ -61,6 +61,8 @@ brainy init config
 
 You will have to edit the template that has been copied according to your cluster scheduler settings and so on.
 
+> Supported OS/platforms are **Linux** and **Mac OSX**.
+
 ##Tests
 
 To run nose tests navigate into

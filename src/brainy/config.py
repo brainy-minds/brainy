@@ -33,8 +33,8 @@ brainy:
     lib_path: '%(brainy_lib_path)s'
     pipe_extension: '.br'
     admin_email: 'root@localhost'
-    framework:
-        location: '%(framework_location)s'
+    default_framework: 'iBRAIN'
+
 
 # Which scheduling API to use by default?
 scheduling:
@@ -203,3 +203,11 @@ def update_packages_index(framework_name, yaml_data):
     }
     with open(index_filepath, 'w+') as packages_index:
         packages_index.write(yaml_data)
+
+
+def load_packages_index(framework_name):
+    index_filepath = BRAINY_USER_PACKAGES_INDEX_PATH_TPL % {
+        'framework_name': framework_name,
+    }
+    with open(index_filepath) as stream:
+        return yaml.load(stream, Loader=Loader)
