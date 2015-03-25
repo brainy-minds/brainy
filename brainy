@@ -14,6 +14,10 @@ brainy CLI
 is a super CLI tool for iBRAIN. It provides a DSL-like syntaxes to do
 quite advanced and more human-like command handling.
 
+
+Important: if you need to add a new "duty" for the CLI, i.e.
+           a new bin/brainy-foo command, see brainy.DUTIES
+
 @author: Yauhen Yakimovich <yauhen.yakimovich@uzh.ch>,
          Pelkmans Lab <https://www.pelkmanslab.org>
 

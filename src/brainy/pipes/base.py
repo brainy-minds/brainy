@@ -6,19 +6,18 @@ import os
 import pipette
 import logging
 import pprint
+import brainy.config
 from brainy.errors import (BrainyProcessError, ProccessEndedIncomplete,
                            BrainyPipeFailure)
 from brainy.project.report import BrainyReporter
 logger = logging.getLogger(__name__)
 
 
-PROCESS_NAMESPACE = 'brainy.pipes'
-
-
 class BrainyPipe(pipette.Pipe):
 
     def __init__(self, pipes_manager, definition=None):
-        super(BrainyPipe, self).__init__(PROCESS_NAMESPACE, definition)
+        process_namespaces = brainy.config.load_process_namespaces()
+        super(BrainyPipe, self).__init__(process_namespaces, definition)
         self.pipes_manager = pipes_manager
         self.has_failed = False
         self.previous_process_params = None
