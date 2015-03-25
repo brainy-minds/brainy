@@ -151,14 +151,16 @@ packages:
 
     def get_formula(self, formula_path):
         if not os.path.exists(formula_path):
-            raise FramesError('Missing formula in the package!')
+            raise FramesError('Missing formula (%s) in the package!' %
+                              formula_path)
         try:
             # Attempt to execute package frame with class code.
             execfile(formula_path, globals={}, locals={})
             # We expect it to instantiate formula object and define it as
             # formula variable.
             if 'formula' not in locals():
-                FramesError('Package does not define a formula!')
+                FramesError('Package does not define a formula (%s)!' %
+                            formula_path)
             formula.install(frames=self)
         except SystemExit:
             logger.error('Got SystemExit error')
