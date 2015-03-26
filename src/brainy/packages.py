@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''
 Manages frameworks and frames (packages).
 
@@ -155,17 +156,18 @@ packages:
                               formula_path)
         try:
             # Attempt to execute package frame with class code.
-            execfile(formula_path, globals={}, locals={})
+            script_globals = {}
+            script_locals = {}
+            execfile(formula_path, script_globals   , script_locals)
             # We expect it to instantiate formula object and define it as
             # formula variable.
-            if 'formula' not in locals():
+            if 'formula' not in script_locals:
                 FramesError('Package does not define a formula (%s)!' %
                             formula_path)
-            formula.install(frames=self)
+            return script_locals['formula']
         except SystemExit:
             logger.error('Got SystemExit error')
             raise FramesError('Failed to execute frame installation formula.')
-        return formula
 
     def download_frame(self, frame, package_path):
         logger.info('Downloading (%s) %s <- %s', frame['access_method'],
@@ -192,13 +194,14 @@ packages:
         self.download_frame(frame, package_path)
         assert os.path.exists(package_path)
         # Get its formula.
-        formula_path = os.path.join(package_path, frame['name'] + '.frame')
+        formula_path = os.path.join(package_path, frame['name'] + '_frame.py')
         formula = self.get_formula(formula_path)
         # Checked that formula version and name are correct.
         assert frame['name'] == formula.name
         # TODO: proper version comparison
         # assert frame.version >= formula.version
         # Install the frame from formula.
+        formula.install(frames=self)
 
         # Finally save it into list of installed packages.
         self.packages = self.packages + [frame]
@@ -235,7 +238,6 @@ class FrameFormula(object):
         self.sha1 = sha1
         self.md5 = md5
         self.access_method = access_method
-        self.parse_url()
 
     def as_dict(self):
         return {

@@ -1,4 +1,5 @@
 #!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
 '''
 brainy-frames
 ==============
@@ -43,7 +44,7 @@ if __name__ == '__main__':
         parser.add_argument('packages', help='Package(s) to be installed.',
                             nargs='+')
 
-    parser.add_argument('--force', help='Force option',     action='store_true')
+    parser.add_argument('--force', help='Force option', action='store_true')
 
     # brainy frames can operate on more than one framework.
     parser.add_argument('-f', '--framework', help='Specify framework name',

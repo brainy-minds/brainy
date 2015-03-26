@@ -23,7 +23,7 @@ Important: if you need to add a new "duty" for the CLI, i.e.
 
 @license: The MIT License (MIT)
 
-Copyright (c) 2014 Pelkmans Lab
+Copyright (c) 2014-2015 Pelkmans Lab
 
 '''
 import os
