@@ -196,6 +196,17 @@ def load_process_namespaces():
     return NAMESPACES
 
 
+def append_process_namespaces(namespace):
+    namespaces = load_process_namespaces()
+    if namespace in namespaces:
+        logger.warn('Namespace already added')
+        return
+    # Put new namespace to a namespaces and save them
+    namespaces.append(namespace)
+    with open(BRAINY_USER_NAMESPACES_PATH, 'w+') as output:
+        output.writelines(namespaces)
+
+
 def update_packages_index(framework_name, yaml_data):
     '''Write packages index to disk'''
     index_filepath = BRAINY_USER_PACKAGES_INDEX_PATH_TPL % {

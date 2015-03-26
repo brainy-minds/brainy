@@ -31,7 +31,7 @@ extend_path(ROOT, 'src')
 extend_path(ROOT, 'lib/python')
 # Import brainy modules.
 from brainy.config import (write_user_config, load_user_config,
-                           BRAINY_USER_CONFIG_PATH)
+                           BRAINY_USER_CONFIG_PATH, append_process_namespaces)
 
 
 def setup_logging():
@@ -64,6 +64,8 @@ if __name__ == '__main__':
             # configuration.
             logger.info('Initializing brainy config in user home.')
             write_user_config()
+            # Namespaces are extended by packages.
+            append_process_namespaces('brainy.pipes')
         elif args.action == 'test' and args.what == 'config':
             # Valid config files.
             try:
