@@ -38,6 +38,7 @@ DUTIES = {
             'install',
             'list',
             'search',
+            'apply',
         ],
         'subjectives': [
             'frame',

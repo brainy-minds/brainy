@@ -46,14 +46,16 @@ if __name__ == '__main__':
 
     parser.add_argument('--force', help='Force option', action='store_true')
 
+    parser.add_argument('--formula', help='Running formula from a file')
+
     # brainy frames can operate on more than one framework.
-    parser.add_argument('-f', '--framework', help='Specify framework name',
+    parser.add_argument('--framework', help='Specify framework name',
                         default=user_config['brainy']['default_framework'])
 
     # Expected by super CLI.
     parser.add_argument('-i', '--imperative', dest='action',
                         choices=['install', 'search', 'list', 'update',
-                                 'help'],
+                                 'apply', 'help'],
                         help='Action')
     parser.add_argument('-s', '--subjective')
     parser.add_argument('--logging', dest='logging_option',
@@ -84,6 +86,14 @@ if __name__ == '__main__':
                     exit()
                 assert len(found) == 1
                 frames.install_frame(found[0], force_reinstall=args.force)
+        elif args.action == 'apply':
+            if args.formula:
+                logger.info('Running formula from a file: %s' %
+                            args.formula)
+                frames.apply_formula(args.formula, frame=None)
+            else:
+                logger.info('Nothing to apply (Maybe --formula is missing?)')
+
         elif args.action == 'search':
             package_name = args.packages[0]
             logger.info('Searching for package(s) name: %s' % package_name)

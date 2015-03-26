@@ -183,6 +183,20 @@ packages:
             raise FramesError('Unknown access method: %s' %
                               frame['access_method'])
 
+    def apply_formula(self, formula_path, frame):
+        formula = self.get_formula(formula_path)
+
+        # Compare with frame information.
+        if frame:
+            # Checked that formula version and name are correct.
+            assert frame['name'] == formula.name
+            # TODO: proper version comparison
+            # assert frame.version >= formula.version
+
+        # Install the frame from formula.
+        formula.install(frames=self)
+        return formula
+
     def install_frame(self, frame, force_reinstall):
         '''Download package and run frame installation formula.'''
         package_path = os.path.join(self.cache_location, frame['name'])
@@ -198,13 +212,7 @@ packages:
         assert os.path.exists(package_path)
         # Get its formula.
         formula_path = os.path.join(package_path, frame['name'] + '_frame.py')
-        formula = self.get_formula(formula_path)
-        # Checked that formula version and name are correct.
-        assert frame['name'] == formula.name
-        # TODO: proper version comparison
-        # assert frame.version >= formula.version
-        # Install the frame from formula.
-        formula.install(frames=self)
+        formula = self.apply_formula(formula_path, frame)
 
         # Finally save it into list of installed packages.
         self.packages = self.packages + [frame]
