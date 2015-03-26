@@ -200,11 +200,13 @@ def load_process_namespaces():
 
 
 def append_process_namespaces(namespace):
+    global NAMESPACES
     namespaces = load_process_namespaces()
     if namespace in namespaces:
         logger.warn('Namespace already added')
         return
     # Put new namespace to a namespaces and save them
+    logger.warn('Appending new pipes/process namespace: %s' % namespace)
     namespaces.append(namespace)
     with open(BRAINY_USER_NAMESPACES_PATH, 'w+') as output:
         output.writelines(namespaces)
