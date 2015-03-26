@@ -198,7 +198,7 @@ setuptools.setup(
     download_url='https://github.com/pelkmanslab/brainy/tarball/master',
     install_requires=[
         'pipette>=0.1.5',
-        'tree_output>=0.1.2',
+        'tree_output>=0.1.4',
         'sh>=1.09',
         'PyYAML>=3.11',
         'requests>=2.6.0',

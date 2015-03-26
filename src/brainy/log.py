@@ -1,6 +1,6 @@
 import logging
 import atexit
-from tree_output import HierarchicalOutput
+from tree_output.houtput import HierarchicalOutput
 from tree_output.log_handler import HierarchicalOutputHandler
 LOGGING_OPTIONS = ('silent', 'console', 'json')
 
