@@ -186,6 +186,9 @@ def load_process_namespaces():
     '''
     global NAMESPACES
     # Cache
+    if not os.path.exists(BRAINY_USER_NAMESPACES_PATH):
+        NAMESPACES = list()
+        return NAMESPACES
     if NAMESPACES is None:
         NAMESPACES = [line for line in
                       open(BRAINY_USER_NAMESPACES_PATH).readlines()
@@ -205,6 +208,8 @@ def append_process_namespaces(namespace):
     namespaces.append(namespace)
     with open(BRAINY_USER_NAMESPACES_PATH, 'w+') as output:
         output.writelines(namespaces)
+    # Update cache.
+    NAMESPACES = namespaces
 
 
 def update_packages_index(framework_name, yaml_data):
