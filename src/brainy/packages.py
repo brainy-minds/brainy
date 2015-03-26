@@ -71,6 +71,9 @@ class Frames(object):
         Returns a list of dicts.
         '''
         if self._packages is None:
+            if not os.path.exists(self.package_list_path):
+                self._packages = list()
+                return self._packages
             logger.info('Loading list of installed packaged: %s' %
                         self.package_list_path)
             with open(self.package_list_path) as stream:
@@ -79,7 +82,7 @@ class Frames(object):
 
     @packages.setter
     def packages(self, value):
-        assert type(value) == dict
+        assert type(value) == list
         self._packages = value
         yaml_list = yaml.dump(value, default_flow_style=True)
         logging.info('Saving list of installed packaged: %s' %
