@@ -115,17 +115,17 @@ packages:
         name: 'iBRAIN'
 
         # Default value 'master'
-        # version: 'master'
+        version: 'master'
 
         # Namespace of the package is parsed from URL if possible.
         # In case of the GITHUB workflow it corresponds to the project owner.
-        # namespace: 'pelkmanslab'
-        # url: 'https://github.com/pelkmanslab/iBRAIN'
+        namespace: 'pelkmanslab'
 
         # Also see https://github.com/pelkmanslab/iBRAIN/blob/master/README.md
         # on how to get access to pelkmanslab_github
 
         # If URL does ends with .tar.gz or .zip then git is assumed.
+        # url: 'https://github.com/pelkmanslab/iBRAIN'
         url: 'pelkmanslab_github:pelkmanslab/iBRAIN'
 
         # More keys: homepage, sha1, md5
