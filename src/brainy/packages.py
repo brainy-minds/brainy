@@ -74,7 +74,7 @@ class Frames(object):
             if not os.path.exists(self.package_list_path):
                 self._packages = list()
                 return self._packages
-            logger.info('Loading list of installed packaged: %s' %
+            logger.info('Loading list of installed packages: %s' %
                         self.package_list_path)
             with open(self.package_list_path) as stream:
                 self._packages = yaml.load(stream, Loader=Loader)
