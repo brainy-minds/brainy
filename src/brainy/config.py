@@ -78,7 +78,7 @@ project_parameters:
 BRAINY_USER_CONFIG_PATH = os.path.expanduser('~/.brainy/config')
 
 BRAINY_USER_NAMESPACES_PATH = os.path.expanduser('~/.brainy/namespaces')
-NAMESPACE_REGEXP = r'\S*'
+NAMESPACE_REGEXP = re.compile(r'\S*')
 # Cache
 NAMESPACES = None
 
