@@ -1,10 +1,11 @@
 import os
 import shutil
 import logging
+import brainy.config
 from brainy.flags import FlagManager
 from brainy.utils import Timer
 from brainy.project.report import BrainyReporter, report_data
-from brainy.pipes.base import PROCESS_NAMESPACE, BrainyPipe
+from brainy.pipes.base import BrainyPipe
 from brainy.errors import BrainyPipeFailure, ProccessEndedIncomplete
 logger = logging.getLogger(__name__)
 
@@ -13,7 +14,8 @@ class PipesManager(FlagManager):
 
     def __init__(self, project):
         self.project = project
-        self.pipes_namespace = PROCESS_NAMESPACE
+        # For simplicity pipes_namespaces == process_namespaces
+        self.pipes_namespaces = brainy.config.load_process_namespaces()
         self.pipes_folder_files = [
             os.path.join(self.project_path, filename)
             for filename in os.listdir(self.project_path)
@@ -41,9 +43,17 @@ class PipesManager(FlagManager):
         return self.project.config['brainy']['pipe_extension']
 
     def get_class(self, pipe_type):
-        pipe_type = self.pipes_namespace + '.' + pipe_type
-        module_name, class_name = pipe_type.rsplit('.', 1)
-        module = __import__(module_name, {}, {}, [class_name])
+        module = None
+        for pipes_namespace in self.pipes_namespaces:
+            pipe_type = pipes_namespace + '.' + pipe_type
+            module_name, class_name = pipe_type.rsplit('.', 1)
+            try:
+                module = __import__(module_name, {}, {}, [class_name])
+            except ImportError:
+                pass
+        if module is None:
+            raise ImportError('Failed to find/import pipe type: %s in %s' %
+                              (pipe_type, self.pipes_namespaces))
         return getattr(module, class_name)
 
     @property
