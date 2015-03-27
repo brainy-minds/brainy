@@ -211,7 +211,7 @@ class PipesManager(FlagManager):
                 logger.warn('Recursively clean/remove subfolder: %s' %
                             pipeline.output_path)
                 shutil.rmtree(pipeline.output_path)
-
+#[MF] this takes care of running the pipes that are succession of YAML file encoded instructions
     def run(self, command):
         if not hasattr(self, command):
             logger.error('Pipes manager does not know command called: %s' %

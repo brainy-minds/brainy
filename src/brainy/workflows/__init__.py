@@ -22,7 +22,8 @@ WORKFLOWS = {
     'empty': [],
 }
 
-
+# [MF]Put in the project a standard iBRAIN workflow (.PIPE) made of the different YAML files
+# [MF]described by the descriptor workflow_name. By default this workflow is called 'canonical'.
 def bootstrap_workflow(project_path, workflow_name):
     logger.info('Bootstraping project with an iBRAIN workflow: {%s}' %
                 workflow_name)
@@ -33,3 +34,5 @@ def bootstrap_workflow(project_path, workflow_name):
         dst_path = os.path.join(project_path, workflow_filename)
         logger.info('%s -> %s' % (src_path, dst_path))
         shutil.copy(src_path, dst_path)
+        #[MF]once this has been done, the project can be evaluated by the command 
+        #[MF]"run (in project.base)"
