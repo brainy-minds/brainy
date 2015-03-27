@@ -1,0 +1,107 @@
+#!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
+'''
+brainy-frames
+==============
+
+Package management system for brainy.
+
+@author: Yauhen Yakimovich <yauhen.yakimovich@uzh.ch>,
+         Pelkmans Lab  <https://www.pelkmanslab.org>
+
+@license: The MIT License (MIT)
+
+Copyright (c) 2015 Pelkmans Lab
+'''
+import os
+import sys
+import logging
+import argparse
+# We include <pkg_root>/src, <pkg_root>/lib/python
+extend_path = lambda root_path, folder: sys.path.insert(
+    0, os.path.join(root_path, folder))
+ROOT = os.path.dirname(os.path.dirname(__file__))
+extend_path(ROOT, '')
+extend_path(ROOT, 'src')
+extend_path(ROOT, 'lib/python')
+# Import brainy modules.
+from brainy.config import load_user_config
+from brainy.log import setup_logging, LOGGING_OPTIONS
+from brainy.packages import Frames, FramesError
+
+
+logger = logging.getLogger('brainy.frames')
+
+
+# Now parse and handle command line.
+if __name__ == '__main__':
+    user_config = load_user_config()
+    program = os.path.basename(sys.argv[0])
+    parser = argparse.ArgumentParser(description='brainy frames - '
+                                     'a package manager')
+
+    if 'install' in sys.argv or 'search' in sys.argv:
+        parser.add_argument('packages', help='Package(s) to be installed.',
+                            nargs='+')
+
+    parser.add_argument('--force', help='Force option', action='store_true')
+
+    parser.add_argument('--formula', help='Running formula from a file')
+
+    # brainy frames can operate on more than one framework.
+    parser.add_argument('--framework', help='Specify framework name',
+                        default=user_config['brainy']['default_framework'])
+
+    # Expected by super CLI.
+    parser.add_argument('-i', '--imperative', dest='action',
+                        choices=['install', 'search', 'list', 'update',
+                                 'apply', 'help'],
+                        help='Action')
+    parser.add_argument('-s', '--subjective')
+    parser.add_argument('--logging', dest='logging_option',
+                        choices=LOGGING_OPTIONS, default='console')
+
+    args = parser.parse_args()
+
+    if args.action == 'help':
+        parser.print_help()
+        exit()
+
+    setup_logging(args.logging_option)
+
+    try:
+        framework_location = os.path.expanduser('~/%s' % args.framework)
+        frames = Frames(args.framework, framework_location)
+        if args.action == 'update':
+            logger.info('Updating package index..')
+            frames.update_index()
+            logger.info('Done')
+        elif args.action == 'install':
+            logger.info('Installing package(s): %s' % args.packages)
+            for package_name in args.packages:
+                found = frames.find_frames_in_index(package_name,
+                                                    partial_match=False)
+                if not found:
+                    logger.info('Package was not found: %s' % package_name)
+                    exit()
+                assert len(found) == 1
+                frames.install_frame(found[0], force_reinstall=args.force)
+        elif args.action == 'apply':
+            if args.formula:
+                logger.info('Running formula from a file: %s' %
+                            args.formula)
+                frames.apply_formula(args.formula, frame=None)
+            else:
+                logger.info('Nothing to apply (Maybe --formula is missing?)')
+
+        elif args.action == 'search':
+            package_name = args.packages[0]
+            logger.info('Searching for package(s) name: %s' % package_name)
+            found = frames.find_frames_in_index(package_name)
+            logger.info('Found: %s' % found)
+
+        # elif args.action == 'list':
+
+    except FramesError as error:
+        # sys.stderr.write('%s\n' % str(error))
+        logger.error(error)

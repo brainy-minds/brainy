@@ -43,11 +43,14 @@ If things are looking good, continue by submitting your project into the *cloud*
 
 ##Installation
 
+> On Ubuntu (debian): sudo apt-get install python-setuptools git && sudo easy_install pip
+
+> On Mac: brew install libyaml
+
 >It is recommended to use [conda](http://conda.pydata.org/docs/) as python 2.7+ environment.
 
 The package is available on [PyPI](https://pypi.python.org/pypi/brainy-mind/).
 
-> On Mac: brew install libyaml
 
 ```
 pip install brainy-mind
@@ -60,6 +63,8 @@ brainy init config
 ```
 
 You will have to edit the template that has been copied according to your cluster scheduler settings and so on.
+
+> Supported OS/platforms are **Linux** and **Mac OSX**.
 
 ##Tests
 

@@ -14,12 +14,16 @@ brainy CLI
 is a super CLI tool for iBRAIN. It provides a DSL-like syntaxes to do
 quite advanced and more human-like command handling.
 
+
+Important: if you need to add a new "duty" for the CLI, i.e.
+           a new bin/brainy-foo command, see brainy.DUTIES
+
 @author: Yauhen Yakimovich <yauhen.yakimovich@uzh.ch>,
          Pelkmans Lab <https://www.pelkmanslab.org>
 
 @license: The MIT License (MIT)
 
-Copyright (c) 2014 Pelkmans Lab
+Copyright (c) 2014-2015 Pelkmans Lab
 
 '''
 import os
@@ -181,8 +185,8 @@ class Praefect(object):
 
 
 def print_version():
-    print ('brainy %s  Brainy is nimble workflow manager and a super CLI tool'
-           ' for iBRAIN') % brainy_version
+    print (u'brainy (%s) \u2734 is a nimble workflow manager and a super '
+           u'CLI tool at the core of iBRAIN \u2734') % brainy_version
 
 
 if __name__ == '__main__':

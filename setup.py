@@ -135,6 +135,7 @@ def get_version():
 scripts = [
     'brainy',
     'bin/brainy-config',
+    'bin/brainy-frames',
     'bin/brainy-project',
     'bin/brainy-web',
 ]
@@ -196,10 +197,11 @@ setuptools.setup(
     include_package_data=True,
     download_url='https://github.com/pelkmanslab/brainy/tarball/master',
     install_requires=[
-        'pipette>=0.1.2',
-        'tree_output>=0.1.2',
+        'pipette>=0.1.5',
+        'tree_output>=0.1.4',
         'sh>=1.09',
         'PyYAML>=3.11',
+        'requests>=2.6.0',
     ],
     tests_require=['nose>=1.0'],
     test_suite='nose.collector',

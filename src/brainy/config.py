@@ -11,6 +11,7 @@ Save and load configuration files.
 Copyright (c) 2014 Pelkmans Lab
 '''
 import os
+import re
 import yaml
 try:
     from yaml import CLoader as Loader, CDumper as Dumper
@@ -32,6 +33,8 @@ brainy:
     lib_path: '%(brainy_lib_path)s'
     pipe_extension: '.br'
     admin_email: 'root@localhost'
+    default_framework: 'iBRAIN'
+
 
 # Which scheduling API to use by default?
 scheduling:
@@ -74,6 +77,13 @@ project_parameters:
 }
 BRAINY_USER_CONFIG_PATH = os.path.expanduser('~/.brainy/config')
 
+BRAINY_USER_NAMESPACES_PATH = os.path.expanduser('~/.brainy/namespaces')
+NAMESPACE_REGEXP = re.compile(r'\S*')
+# Cache
+NAMESPACES = None
+
+BRAINY_USER_PACKAGES_INDEX_PATH_TPL = os.path.expanduser(
+    '~/.brainy/%(framework_name)s.packages_index')
 
 # Project specific configuration
 BRAINY_PROJECT_CONFIG_TPL = '''
@@ -166,3 +176,62 @@ def load_project_config(project_path, config_name=BRAINY_PROJECT_CONFIG_NAME):
 def project_has_config(project_path, config_name=BRAINY_PROJECT_CONFIG_NAME):
     config_path = os.path.join(project_path, config_name)
     return os.path.exists(config_path)
+
+
+def load_process_namespaces():
+    '''
+    Every time we instantiate Pipes and Processes according to the type
+    defined in YAML files, brainy will look up over the python PATH for
+    classes which fully-qualified class datatype is restricted by the list
+    of namespaces returned by this config function.
+
+    See brainy.pipes.base. and pipette.Pipe.find_process_class()
+
+    Each package if it contains any Pipes or Processes will append
+    its own namespace to text file usually located: ~/.brainy/namespaces
+    '''
+    global NAMESPACES
+    # Cache
+    if not os.path.exists(BRAINY_USER_NAMESPACES_PATH):
+        NAMESPACES = list()
+        return NAMESPACES
+    if NAMESPACES is None:
+        NAMESPACES = [line for line in
+                      open(BRAINY_USER_NAMESPACES_PATH).readlines()
+                      if len(line.strip()) > 0]
+        for namespace in NAMESPACES:
+            if not NAMESPACE_REGEXP.match(namespace):
+                raise Exception('Wrong namespace: %s' % namespace)
+    return NAMESPACES
+
+
+def append_process_namespaces(namespace):
+    global NAMESPACES
+    namespaces = load_process_namespaces()
+    if namespace in namespaces:
+        logger.warn('Namespace already added')
+        return
+    # Put new namespace to a namespaces and save them
+    logger.warn('Appending new pipes/process namespace: %s' % namespace)
+    namespaces.append(namespace)
+    with open(BRAINY_USER_NAMESPACES_PATH, 'w+') as output:
+        output.writelines(namespaces)
+    # Update cache.
+    NAMESPACES = namespaces
+
+
+def update_packages_index(framework_name, yaml_data):
+    '''Write packages index to disk'''
+    index_filepath = BRAINY_USER_PACKAGES_INDEX_PATH_TPL % {
+        'framework_name': framework_name,
+    }
+    with open(index_filepath, 'w+') as packages_index:
+        packages_index.write(yaml_data)
+
+
+def load_packages_index(framework_name):
+    index_filepath = BRAINY_USER_PACKAGES_INDEX_PATH_TPL % {
+        'framework_name': framework_name,
+    }
+    with open(index_filepath) as stream:
+        return yaml.load(stream, Loader=Loader)
