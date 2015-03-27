@@ -202,6 +202,8 @@ setuptools.setup(
         'sh>=1.09',
         'PyYAML>=3.11',
         'requests>=2.6.0',
+        'findtools>=1.0.3',
+        'twisted>=14.0.2',
     ],
     tests_require=['nose>=1.0'],
     test_suite='nose.collector',
