@@ -112,7 +112,8 @@ project_parameters:
 }
 BRAINY_PROJECT_CONFIG_NAME = '.brainy'
 
-
+#[MF]this function is called at different levels, during "create (in project.base)" call
+#[MF]to drop a YAML file, empty or not.
 def write_config(config_path, value):
     logger.info('Writing config: %s' % config_path)
     if type(value) == dict:
@@ -120,7 +121,8 @@ def write_config(config_path, value):
     with open(config_path, 'w+') as stream:
         stream.write(value)
 
-
+# [MF]function called during "run (in project.base)"
+# [MF] load the actual config file and returns it
 def load_config(config_path):
     logger.info('Loading config: %s' % config_path)
     with open(config_path) as stream:
@@ -140,11 +142,14 @@ def write_user_config(user_config_path=BRAINY_USER_CONFIG_PATH):
         return
     write_config(user_config_path, BRAINY_USER_CONFIG_TPL)
 
-
+# [MF]function called during "run (in project.base)"
+# [MF]defines the user config path.
 def load_user_config():
     return load_config(BRAINY_USER_CONFIG_PATH)
 
 
+# [MF]write_project_config : serves when there is a need to produce YAML files. 
+# [MF]Called by the master function "create (in project.base)"
 def write_project_config(project_path, config_name=BRAINY_PROJECT_CONFIG_NAME,
                          inherit_config={}, override_config={}):
     config_path = os.path.join(project_path, config_name)
@@ -155,13 +160,14 @@ def write_project_config(project_path, config_name=BRAINY_PROJECT_CONFIG_NAME,
         if override_config:
             value = merge_dicts(value, override_config)
     else:
-        value = BRAINY_PROJECT_CONFIG_TPL
+        value = BRAINY_PROJECT_CONFIG_TPL #[MF]likely empty then :)
     write_config(
         config_path=config_path,
         value=value,
     )
 
-
+# [MF]function called during "run (in project.base)"
+# [MF]defines the project config path, the workflow basically
 def load_project_config(project_path, config_name=BRAINY_PROJECT_CONFIG_NAME):
     config_path = os.path.join(project_path, config_name)
     return load_config(config_path)
