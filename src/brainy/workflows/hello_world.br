@@ -3,4 +3,4 @@
   chain: 
     - 
       type: "CustomCode.PythonCall"
-      submit_call: "print 'hello world'"
+      call: "print 'hello world'"

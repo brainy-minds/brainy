@@ -8,7 +8,7 @@
       type: "CustomCode.MatlabCall"
       default_parameters:
         images_path: "{project_path}/raw_images"
-      submit_call: "prepare_batch_measure_illcor_stats('{images_path}');"
+      call: "prepare_batch_measure_illcor_stats('{images_path}');"
     -
       name: "illumination_statistics"
       type: "CustomCode.MatlabCall"
@@ -18,4 +18,4 @@
         var: "illcor_settings_file"
         in: "find {data_path} -name 'batch_illcor*.mat'"
         using: "bash"
-      submit_call: "batch_measure_illcor_stats('{images_path}','{illcor_settings_file}');"
+      call: "batch_measure_illcor_stats('{images_path}','{illcor_settings_file}');"

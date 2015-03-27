@@ -5,7 +5,7 @@
     "chain": [
         {
             "type": "CustomCode.MatlabCall",
-            "submit_call": "disp('I am a mock custom matlab call')",
+            "call": "disp('I am a mock custom matlab call')",
         }
     ]
 }
