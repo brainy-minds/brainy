@@ -44,14 +44,20 @@ class PipesManager(FlagManager):
 
     def get_class(self, pipe_type):
         module = None
+        exceptions = list()
         for pipes_namespace in self.pipes_namespaces:
             pipe_type = pipes_namespace + '.' + pipe_type
             module_name, class_name = pipe_type.rsplit('.', 1)
             try:
                 module = __import__(module_name, {}, {}, [class_name])
-            except ImportError:
-                pass
+            except ImportError as error:
+                exceptions.append(error)
+                # This may lead to hiding the nested imports like
+                # missing packages. So we report the list of errors if the
+                # search failed.
         if module is None:
+            for exception in exceptions:
+                logger.warn(str(exception))
             raise ImportError('Failed to find/import pipe type: %s in %s' %
                               (pipe_type, self.pipes_namespaces))
         return getattr(module, class_name)

@@ -46,7 +46,7 @@ class BrainyPipe(pipette.Pipe):
         if not self.previous_process_params['previous_process_params'] is None:
             # Avoid chaining the back up to the first process. Such linking
             # can motivate a very bad programming practices. Only one step
-            # before is allowed to memorize. Everything else is just to
+            # before is allowed to memorize. Everything else is just too
             # complicated. So we unlink previous of previous here.
             self.previous_process_params['previous_process_params'] = None
         return self.previous_process_params
