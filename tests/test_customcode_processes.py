@@ -38,7 +38,7 @@ def bake_a_working_mock_pipe():
     "chain": [
         {
             "type": "CustomCode.PythonCall",
-            "submit_call": "print 'I am a mock custom python call'",
+            "call": "print 'I am a mock custom python call'",
             "default_parameters": {
                 "job_submission_queue": "8:00",
                 "job_resubmission_queue": "36:00",
@@ -59,7 +59,7 @@ def bake_a_bash_pipe():
     "chain": [
         {
             "type": "CustomCode.BashCall",
-            "submit_call": "echo 'I am a mock custom bash call'",
+            "call": "echo 'I am a mock custom bash call'",
             "default_parameters": {
                 "job_submission_queue": "8:00",
                 "job_resubmission_queue": "36:00",
@@ -80,7 +80,7 @@ def bake_a_matlab_pipe():
     "chain": [
         {
             "type": "CustomCode.MatlabCall",
-            "submit_call": "disp('I am a mock custom matlab call')",
+            "call": "disp('I am a mock custom matlab call')",
             "default_parameters": {
                 "job_submission_queue": "8:00",
                 "job_resubmission_queue": "36:00"
@@ -100,7 +100,7 @@ def bake_pipe_with_matlab_user_path_extend():
     "chain": [
         {
             "type": "CustomCode.MatlabCall",
-            "submit_call": "disp(['Call result is: ' foo()])",
+            "call": "disp(['Call result is: ' foo()])",
             "default_parameters": {
                 "job_submission_queue": "8:00",
                 "job_resubmission_queue": "36:00"
@@ -108,7 +108,21 @@ def bake_pipe_with_matlab_user_path_extend():
         }
     ]
 }
-    \n''')
+\n''')
+
+def bake_pipe_with_foreach():
+    return MockPipesManager('''
+"type": "CustomCode.Pipe"
+"chain":
+    -
+    "type": "CustomCode.PythonCall",
+    foreach:
+        var: "jobid"
+        in: "['1', '2', '3']"
+        using: "yaml"
+    "call": "print '{jobid}'"
+
+\n''')
 
 
 class TestCustomCode(BrainyTest):
@@ -123,7 +137,7 @@ class TestCustomCode(BrainyTest):
         # Check output.
         self.stop_capturing()
         # print logs
-        assert 'Missing "submit_call" key in YAML descriptor' \
+        assert 'Missing "call" key in YAML descriptor' \
             in str(logs)
 
     def test_a_basic_python_call(self):

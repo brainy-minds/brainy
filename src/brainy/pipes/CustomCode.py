@@ -19,38 +19,39 @@ class Submittable(object):
     @property
     @format_with_params
     @require_key_in_description
-    def submit_call(self):
-        'Main code to be submitted.'
+    def call(self):
+        'Main code to be submitted as a job.'
 
 
-class BashCall(BashCodeProcess, Submittable):
+class Parallel(Submittable):
+    '''Implementing foreach calls as parallel.'''
+
+    # def is_parallel(self):
+    #     return 'foreach' in self.description
+
+    # # def get_
+
+    # def submit(self):
+    #     submit_single_job = super(ParallelCall, self).submit
+    #     for
+
+
+class BashCall(BashCodeProcess, Parallel):
     '''Bake and call bash as a single job.'''
 
     def get_bash_code(self):
-        return self.submit_call
+        return self.call
 
 
-class MatlabCall(MatlabCodeProcess, Submittable):
+class MatlabCall(MatlabCodeProcess, Parallel):
     '''Bake and call python as a single job.'''
 
     def get_matlab_code(self):
-        return self.submit_call
+        return self.call
 
 
-class PythonCall(PythonCodeProcess, Submittable):
+class PythonCall(PythonCodeProcess, Parallel):
     '''Bake and call python as a single job.'''
 
     def get_python_code(self):
-        return self.submit_call
-
-
-# class MapPython(JsonProcess):
-#
-#     @property
-#     def map(self):
-#         bake_code = getattr(self, 'bake_%s_code' % self.code_language)
-#         script = bake_code(self.map_call)
-#         return json.loads(invoke(script))
-#
-# class Reduce(object):
-#     pass
+        return self.call
