@@ -12,9 +12,6 @@ from brainy.process.decorator import (
 logger = logging.getLogger(__name__)
 
 
-KNOWN_MICROSCOPES = ['CV7K']
-
-
 def get_timestamp_str():
     return datetime.now().strftime('%Y%m%d%H%M%S')
 
@@ -79,57 +76,6 @@ class BackupPreviousBatch(PythonCodeProcess):
         for item in previous_backups:
             return True
         return False
-
-
-def move_microscope_metadata(tiff_path, metadata_path):
-    # Make sure folders exist.
-    if not os.path.exists(tiff_path):
-        raise IOError('TIFF path was not found: %s' % tiff_path)
-    if not os.path.exists(metadata_path):
-        raise IOError('METADATA path was not found: %s' % metadata_path)
-
-    # Roll over possible types.
-    for microscope_type in KNOWN_MICROSCOPES:
-        print '<!-- Checking if %s meta data is present -->' % microscope_type
-        microscope_metadata_path = os.path.join(metadata_path, microscope_type)
-        if microscope_type == 'CV7K':
-            masks = [
-                'geometry_parameter.xml',
-                'MeasurementData.mlf',
-                'MeasurementDetail.mrf',
-                # e.g.: 1038402001_Greiner_#781091.wpp
-                '*.wpp',
-                # e.g.: 140314_InSituGFP.mes
-                '*.mes',
-                # e.g.: 140324-pilot-GFP-InSitu-gfp.wpi
-                '*.wpi',
-                # e.g.: DC_Andor #1_CAM1.tif
-                r'/DC_Andor\ \#.*_CAM\d\.(tif|png)$/',
-                # e.g.: SC_BP445-45_40x_M10_CH01.tif
-                r'/SC_BP.*?CH\d*?\.(tif|png)$/',
-            ]
-            metadata_files = list(
-                find_files(
-                    path=tiff_path,
-                    match=MatchAnyPatternsAndTypes(
-                        filetypes=['f'],
-                        names=masks,
-                    ),
-                )
-            )
-            if len(metadata_files) > 0:
-                # Detected files for the microscope.
-                if not os.path.exists(microscope_metadata_path):
-                    os.mkdir(microscope_metadata_path)
-                # Move files
-                for metadata_file in metadata_files:
-                    destination = os.path.join(
-                        microscope_metadata_path,
-                        os.path.basename(metadata_file),
-                    )
-                    print '<!-- Moving %s metadata: %s -&gt; %s -->' %\
-                          (microscope_type, metadata_file, destination)
-                    os.rename(metadata_file, destination)
 
 
 def relative_symlink(source, target):
@@ -219,7 +165,7 @@ class LinkFiles(PythonCodeProcess):
         if link_type == 'hardlink' and file_type == 'f':
             make_link = os.link
         elif link_type == 'symlink':
-            #make_link = os.symlink
+            # make_link = os.symlink
             make_link = relative_symlink
         else:
             raise IOError('Unsupported link type: %s' % link_type)
