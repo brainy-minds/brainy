@@ -19,9 +19,10 @@ except ImportError:
     from yaml import Loader, Dumper
 from getpass import getuser
 import logging
-logger = logging.getLogger(__name__)
 from brainy.version import brainy_version
 from brainy.utils import merge_dicts
+
+logger = logging.getLogger(__name__)
 
 
 # User-wide (global) configuration
@@ -112,18 +113,25 @@ project_parameters:
 }
 BRAINY_PROJECT_CONFIG_NAME = '.brainy'
 
-#[MF]this function is called at different levels, during "create (in project.base)" call
-#[MF]to drop a YAML file, empty or not.
+
 def write_config(config_path, value):
+    '''
+    This function is called at different levels, e.g. by BrainyProject.create()
+    (in brainy.project.base)" to drop a YAML file into a project folder.
+    '''
     logger.info('Writing config: %s' % config_path)
     if type(value) == dict:
             value = yaml.dump(value, default_flow_style=True)
     with open(config_path, 'w+') as stream:
         stream.write(value)
 
-# [MF]function called during "run (in project.base)"
-# [MF] load the actual config file and returns it
+
 def load_config(config_path):
+    '''
+    This function is called at different levels, e.g. by BrainyProject.run
+    to load the actual config file(s) and return it as a nested key-value
+    dictionary.
+    '''
     logger.info('Loading config: %s' % config_path)
     with open(config_path) as stream:
         return yaml.load(stream, Loader=Loader)
@@ -142,16 +150,20 @@ def write_user_config(user_config_path=BRAINY_USER_CONFIG_PATH):
         return
     write_config(user_config_path, BRAINY_USER_CONFIG_TPL)
 
-# [MF]function called during "run (in project.base)"
-# [MF]defines the user config path.
+
 def load_user_config():
+    '''
+    This function is called by BrainyProject.run to load from user-wide
+    configuraiton, usually ~/.brainy/config
+    '''
     return load_config(BRAINY_USER_CONFIG_PATH)
 
 
-# [MF]write_project_config : serves when there is a need to produce YAML files. 
-# [MF]Called by the master function "create (in project.base)"
 def write_project_config(project_path, config_name=BRAINY_PROJECT_CONFIG_NAME,
                          inherit_config={}, override_config={}):
+    '''
+    Serves the need to produce YAML files. Called by BrainyProject.create()
+    '''
     config_path = os.path.join(project_path, config_name)
     if inherit_config or override_config:
         value = yaml.load(BRAINY_PROJECT_CONFIG_TPL)
@@ -160,15 +172,18 @@ def write_project_config(project_path, config_name=BRAINY_PROJECT_CONFIG_NAME,
         if override_config:
             value = merge_dicts(value, override_config)
     else:
-        value = BRAINY_PROJECT_CONFIG_TPL #[MF]likely empty then :)
+        value = BRAINY_PROJECT_CONFIG_TPL
     write_config(
         config_path=config_path,
         value=value,
     )
 
-# [MF]function called during "run (in project.base)"
-# [MF]defines the project config path, the workflow basically
+
 def load_project_config(project_path, config_name=BRAINY_PROJECT_CONFIG_NAME):
+    '''
+    Called by BrainyProject.run() to load project specific settings, i.e.
+    defined only for the evaluated project and applied to the project workflow.
+    '''
     config_path = os.path.join(project_path, config_name)
     return load_config(config_path)
 

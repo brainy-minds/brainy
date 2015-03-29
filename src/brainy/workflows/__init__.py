@@ -22,17 +22,22 @@ WORKFLOWS = {
     'empty': [],
 }
 
-# [MF]Put in the project a standard iBRAIN workflow (.PIPE) made of the different YAML files
-# [MF]described by the descriptor workflow_name. By default this workflow is called 'canonical'.
+
 def bootstrap_workflow(project_path, workflow_name):
-    logger.info('Bootstraping project with an iBRAIN workflow: {%s}' %
+    '''
+    Put in the project a standard iBRAIN workflow made of the multiple YAML
+    files (.br) grouped by the `workflow_name`. By default the workflow
+    called 'canonical' will be deployed.
+    '''
+    logger.info('Bootstrapping project with an iBRAIN workflow: {%s}' %
                 workflow_name)
-    if not workflow_name in WORKFLOWS:
+    if workflow_name not in WORKFLOWS:
         raise Exception('Unknown workflow: %s' % workflow_name)
     for workflow_filename in WORKFLOWS[workflow_name]:
         src_path = os.path.join(WORKFLOW_PATH, workflow_filename)
         dst_path = os.path.join(project_path, workflow_filename)
         logger.info('%s -> %s' % (src_path, dst_path))
         shutil.copy(src_path, dst_path)
-        #[MF]once this has been done, the project can be evaluated by the command 
-        #[MF]"run (in project.base)"
+        # Once this has been done, the project can be evaluated by the command:
+        # > brainy run project
+        # Also see brainy.project.base.BrainyProject.run()

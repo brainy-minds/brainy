@@ -55,9 +55,13 @@ class BrainyProject(object):
             'name': self.name,
             'pipes': [],
         }
-        #[MF]this function works with "create", if there is no YAML file, in the case of a fresh project,
-        #[MF]it puts some inside using "write_project_config (contained in brainy.config.py)"
+
     def init(self, inherit_config={}, override_config={}):
+        '''
+        This function works with "create", if there is no YAML file, in the
+        case of a fresh project, it puts one inside using
+        brainy.config.write_project_config()
+        '''
         # Make project dir.
         if not os.path.exists(self.path):
             raise BrainyProjectError('Project folder does not exists: %s' %
@@ -67,12 +71,14 @@ class BrainyProject(object):
         write_project_config(self.path, inherit_config=inherit_config,
                              override_config=override_config)
 
-
-        # [MF]This function "create" is the first one to be run by the deamon when a new 
-        # [MF]project is given to process. Its goal: to create the .PIPE file (succession of YAML files)
-        # [MF]that will define the workflow. This PIPE file is then evaluated by the "run" function
     def create(self, from_workflow='canonical', inherit_config={},
                override_config={}):
+        '''
+        The first method to be run by the daemon when a new project is given
+        to process. Its goal: to create the `.br` files (succession of YAML
+        files also called pipes) that will define the workflow. Those PIPE
+        files is then evaluated by the BrainyProject.run() function
+        '''
         # Make project dir.
         if not os.path.exists(self.path):
             logger.info('Creating new project folder: %s' % self.path)
@@ -82,16 +88,19 @@ class BrainyProject(object):
                                      self.path)
         self.init(inherit_config=inherit_config,
                   override_config=override_config)
-        # [MF]Put in the project a standard iBRAIN workflow (.PIPE) made of the different YAML files
-        # [MF]described by the descriptor workflow_name. By default this workflow is called 'canonical'.
+        # Put a standard iBRAIN workflow (.PIPE) made of the different YAML
+        # files determined by the workflow_name into the project. By default
+        # this workflow is called 'canonical'.
         bootstrap_workflow(self.path, workflow_name=from_workflow)
 
     def is_a_valid_project_folder(self):
         return project_has_config(self.path)
 
     def load_config(self):
-        self.config = load_user_config() #[MF]in brainy.config.py, load the user's project descriptors
-        project_config = load_project_config(self.path)#[MF]in brainy.config.py, load the project's workflow
+        # In brainy.config.py: load the user's project descriptors.
+        self.config = load_user_config()
+        # In brainy.config.py, load the project's workflow.
+        project_config = load_project_config(self.path)
         logger.info('Overwriting global configuration with project specific.')
         self.config = merge_dicts(self.config, project_config)
 
@@ -109,10 +118,12 @@ class BrainyProject(object):
             shutil.rmtree(self.report_folder_path)
         logger.info('<Done>')
 
-        # [MF] this function is the core of Brainy, looks at the .PIPE workflow made of loaded YAML files
-        # [MF] and executes the tasks according to the YAML encoded protocol, through flag management
     def run(self, manager_cls=PipesManager, command='process_pipelines'):
         '''
+        This function is the core of `brainy`, looks at the workflow made of
+        loaded YAML files and executes the tasks according to the YAML encoded
+        protocol, through flag management.
+
         Load project configuration. Discover and process pipelines using the
         specified scheduler.
         '''
