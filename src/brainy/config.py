@@ -11,7 +11,6 @@ Save and load configuration files.
 Copyright (c) 2014-2015 Pelkmans Lab
 '''
 import os
-import re
 from getpass import getuser
 import logging
 from brainy.version import brainy_version
@@ -33,8 +32,7 @@ BRAINY_MERGED_PATHNAMES = [
 #
 # Note that all %(user_home)s are replaced by expanded full path to home
 # folder.
-BRAINY_USER_CONFIG_TPL = '''
-# brainy user config
+BRAINY_USER_CONFIG_TPL = '''# brainy user config
 brainy:
   version: '%(brainy_version)s'
   admin_email: 'root@localhost'
@@ -52,7 +50,7 @@ brainy:
   # It contains folders (name of the folder == name of the workflow)
   # each having multiple .br files (pipes === YAML files with parts of the
   #                                 workflow description)
-  workflows: ['~/.brainy/workflows']
+  workflows: ['%(user_home)s/.brainy/workflows']
 
   # iBRAIN is a framework_name iBRAIN will look for by default.
   default_framework: 'iBRAIN'
@@ -95,8 +93,7 @@ BRAINY_USER_PACKAGES_INDEX_PATH_TPL = os.path.expanduser(
     '~/.brainy/%(framework_name)s.packages_index')
 
 # Project specific configuration
-BRAINY_PROJECT_CONFIG_TPL = '''
-# brainy project config
+BRAINY_PROJECT_CONFIG_TPL = '''# brainy project config
 brainy:
   version: '%(brainy_version)s'
 
@@ -163,7 +160,8 @@ def merge_config(*configs):
         raise Exception('Not all configs are dicts.')
     result = dict()
     for config in configs:
-        result = merge_dicts(result, config)
+        result = merge_dicts(result, config,
+                             append_lists=BRAINY_MERGED_PATHNAMES)
     return result
 
 
@@ -193,6 +191,10 @@ def load_user_config():
     This function is called by BrainyProject.run to load from user-wide
     configuraiton, usually ~/.brainy/config
     '''
+    if not os.path.exists(BRAINY_USER_CONFIG_PATH):
+        logger.error('Missing "%s". Have you forgot `brainy config init` ?' %
+                     BRAINY_USER_CONFIG_PATH)
+        exit()
     return load_config(BRAINY_USER_CONFIG_PATH)
 
 
@@ -245,3 +247,23 @@ def load_packages_index(framework_name):
     }
     with open(index_filepath) as stream:
         return load_yaml(stream.read())
+
+
+def load_brainy_config():
+    '''
+    Merge user-wide config and every framework config.
+
+    This does not include project specific or workflow (pipe specific)
+    settings.
+    '''
+    config = load_user_config()
+    # For now we merge only one framework.
+    frameworks = [config['brainy']['default_framework']]
+    configs = [config]
+    for framework in frameworks:
+        # Such path formation might change in the future.
+        framework_config_path = os.path.expanduser('~/%s/config.yaml' %
+                                                   framework)
+        logger.info('Merging config: %s' % framework_config_path)
+        configs.append(load_config(framework_config_path))
+    return merge_config(*configs)

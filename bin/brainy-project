@@ -28,14 +28,17 @@ extend_path(ROOT, '')
 extend_path(ROOT, 'src')
 extend_path(ROOT, 'lib/python')
 # Import brainy modules.
+from brainy.config import load_brainy_config
 from brainy.project.base import BrainyProject
 from brainy.errors import BrainyProjectError
-from brainy.workflows import WORKFLOWS
 from brainy.log import setup_logging, LOGGING_OPTIONS
+from brainy.workflows import WorkflowLocations
 
 
 # Now parse and handle command line.
 if __name__ == '__main__':
+    # Load user config plus frameworks.
+
     program = os.path.basename(sys.argv[0])
     parser = argparse.ArgumentParser(description='Manage brainy projects')
     parser.add_argument('project_name', nargs='?',
@@ -49,9 +52,10 @@ if __name__ == '__main__':
                         help='Action')
     parser.add_argument('-s', '--subjective')
     parser.add_argument('--from', dest='workflow_name',
-                        choices=WORKFLOWS.keys(),
+                        # choices=workflow_locations.workflows.keys(),
                         default='canonical',
                         help='Specify name of the workflow')
+    # TODO: add argument to list/discover known workflows.
     parser.add_argument('--logging', dest='logging_option',
                         choices=LOGGING_OPTIONS, default='console')
 
@@ -70,8 +74,14 @@ if __name__ == '__main__':
         parser.print_help()
         exit()
 
-    brainy_project = BrainyProject(args.project_name, args.path)
+    # Preparing main entities.
     setup_logging(args.logging_option)
+    brainy_config = load_brainy_config()
+    workflow_locations = WorkflowLocations(brainy_config)
+    brainy_project = BrainyProject(args.project_name, args.path,
+                                   workflow_locations=workflow_locations)
+
+    # Handle actions.
     try:
         if args.action == 'create':
             brainy_project.create(from_workflow=args.workflow_name)

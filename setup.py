@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 ''' distribute- and pip-enabled setup.py '''
+from __future__ import print_function
 
 import sys
 import logging
 import os
 import re
+import shutil
 
 # ----- overrides -----
 
@@ -162,6 +163,21 @@ if package_data is None: package_data = find_package_data(packages)
 if scripts is None: scripts = find_scripts()
 
 
+def copy_package_data(brainy_folder_path):
+    if os.path.exists(brainy_folder_path):
+        print('Warning! brainy user folder already exists: %s.. ' %
+              brainy_folder_path +
+              '\nSkipping package data copying')
+        return
+    os.makedirs(brainy_folder_path)
+    PREFIX = os.path.dirname(__file__)
+    # Copy workflows
+    for folder in ['empty', 'demo']:
+        source = os.path.join(PREFIX, 'src', 'brainy', 'workflows', folder)
+        dest = os.path.join(brainy_folder_path, 'workflows', folder)
+        logging.debug('Copying data %   s -> %s' % (source, dest))
+        shutil.copytree(source, dest)
+
 setuptools.setup(
     name='brainy-mind',
     version=get_version(),
@@ -208,3 +224,7 @@ setuptools.setup(
     tests_require=['nose>=1.0'],
     test_suite='nose.collector',
 )
+
+
+# Copy data into ~/.brainy
+copy_package_data(os.path.expanduser('~/.brainy'))

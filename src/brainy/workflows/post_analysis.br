@@ -1,7 +1,0 @@
----
-  type: "CustomCode.CustomPipe"
-  after: "cell_profiler"
-  chain: 
-    - 
-      type: "CustomCode.MatlabCall"
-      call: "disp('I am a mock custom matlab call')"
