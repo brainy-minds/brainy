@@ -14,8 +14,6 @@ class PipesManager(FlagManager):
 
     def __init__(self, project):
         self.project = project
-        # For simplicity pipes_namespaces == process_namespaces
-        self.pipes_namespaces = brainy.config.load_process_namespaces()
         self.pipes_folder_files = [
             os.path.join(self.project_path, filename)
             for filename in os.listdir(self.project_path)
@@ -35,6 +33,34 @@ class PipesManager(FlagManager):
     def project_path(self):
         return self.project.path
 
+    @property
+    def pipe_namespaces(self):
+        '''
+        A list of prefixes of python class names where brainy looks for pipe
+        and process types.
+
+        YAML description of the pipe workflow contains 'type' keys. Each type
+        mentioned is a shorthand. `brainy` will attempt the full python type
+        (class) name discovery by looking/prepending every prefix from this
+        list.
+
+        The list is flexible. It can be defined in user configuration and
+        extended in framework configuration. Later this can be also extended in
+        project configuration.
+        '''
+        return self.config['brainy']['pipe_namespaces']
+
+    @property
+    def process_namespaces(self):
+        '''
+        See pipe_namespaces. For simplicity
+
+            pipe_namespaces == process_namespaces
+
+        Separate process namespacing is envisioned for future development.
+        '''
+        return self.pipe_namespaces
+
     def _get_flag_prefix(self):
         return self.__flag_prefix
 
@@ -45,8 +71,8 @@ class PipesManager(FlagManager):
     def get_class(self, pipe_type):
         module = None
         exceptions = list()
-        for pipes_namespace in self.pipes_namespaces:
-            pipe_type = pipes_namespace + '.' + pipe_type
+        for pipe_namespace in self.pipe_namespaces:
+            pipe_type = pipe_namespace + '.' + pipe_type
             module_name, class_name = pipe_type.rsplit('.', 1)
             try:
                 module = __import__(module_name, {}, {}, [class_name])
@@ -59,7 +85,7 @@ class PipesManager(FlagManager):
             for exception in exceptions:
                 logger.warn(str(exception))
             raise ImportError('Failed to find/import pipe type: %s in %s' %
-                              (pipe_type, self.pipes_namespaces))
+                              (pipe_type, self.pipe_namespaces))
         return getattr(module, class_name)
 
     @property

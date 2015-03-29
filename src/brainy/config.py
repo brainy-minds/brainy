@@ -8,80 +8,88 @@ Save and load configuration files.
 
 @license: The MIT License (MIT)
 
-Copyright (c) 2014 Pelkmans Lab
+Copyright (c) 2014-2015 Pelkmans Lab
 '''
 import os
 import re
-import yaml
-try:
-    from yaml import CLoader as Loader, CDumper as Dumper
-except ImportError:
-    from yaml import Loader, Dumper
 from getpass import getuser
 import logging
 from brainy.version import brainy_version
-from brainy.utils import merge_dicts
+from brainy.utils import (merge_dicts, load_yaml, dump_yaml,
+                          replace_template_params)
 
 logger = logging.getLogger(__name__)
 
+# A list of config pathnames that are merged (lists that are glued)
+# when multiple configs are merged into one.
+BRAINY_MERGED_PATHNAMES = [
+    # Note that a path name is a list of keys in the nested dict.
+    ['brainy', 'pipe_namespaces'],
+    ['brainy', 'workflows'],
+]
 
-# User-wide (global) configuration
+
+# User-wide brainy configuration template.
+#
+# Note that all %(user_home)s are replaced by expanded full path to home
+# folder.
 BRAINY_USER_CONFIG_TPL = '''
 # brainy user config
 brainy:
-    version: '%(brainy_version)s'
-    user: '%(brainy_user)s'
-    lib_path: '%(brainy_lib_path)s'
-    pipe_extension: '.br'
-    admin_email: 'root@localhost'
-    default_framework: 'iBRAIN'
+  version: '%(brainy_version)s'
+  admin_email: 'root@localhost'
+  user: '%(brainy_user)s'
+  lib_path: '%(user_home)s/.brainy/lib'
 
+  pipe_extension: '.br'
+
+  # A list of prefixes of python class names where brainy looks for pipe
+  # and process types. See brainy.pipes.manager.PipesManager.pipe_namespaces
+  pipe_namespaces: ['brainy.pipes']
+
+  # A list of paths to multiple possible workflow locations.
+  # Each folder in the path has a simple format.
+  # It contains folders (name of the folder == name of the workflow)
+  # each having multiple .br files (pipes === YAML files with parts of the
+  #                                 workflow description)
+  workflows: ['~/.brainy/workflows']
+
+  # iBRAIN is a framework_name iBRAIN will look for by default.
+  default_framework: 'iBRAIN'
 
 # Which scheduling API to use by default?
 scheduling:
-    # Possible choices are: {'shellcmd', 'lsf', 'slurm'}
-    engine: 'shellcmd'
+  # Possible choices are: {'shellcmd', 'lsf', 'slurm'}
+  engine: 'shellcmd'
 
-# Preliminary tools and programming languages
-tools:
-    python:
-        cmd: '/usr/bin/env python2.7'
-    matlab:
-        cmd: '/usr/bin/env matlab -singleCompThread -nodisplay -nojvm'
-    ruby:
-        cmd: '/usr/bin/env ruby'
-    node:
-        cmd: '/usr/bin/env node'
-    bash:
-        cmd: '/bin/bash'
+# Preliminary programming languages. Note that each `path` entry
+# for a corresponding language is a setting that brainy prependeds
+# to the environment of submitted jobs.
+languages:
+  python:
+    cmd: '/usr/bin/env python2.7'
+  matlab:
+    cmd: '/usr/bin/env matlab -singleCompThread -nodisplay -nojvm'
+  ruby:
+    cmd: '/usr/bin/env ruby'
+  node:
+    cmd: '/usr/bin/env node'
+  bash:
+    cmd: '/bin/bash'
 
-
-# Integrated application
-apps:
-    CellProfiler2:
-        path: '%(cellprofiler2_path)s'
 
 # Default project parameters
 project_parameters:
-    job_submission_queue: '8:00'
-    job_resubmission_queue: '36:00'
+  job_submission_queue: '8:00'
+  job_resubmission_queue: '36:00'
 
 ''' % {
     'brainy_version': brainy_version,
     'brainy_user': getuser(),
-    'cellprofiler2_path': os.path.expanduser(
-        '~/iBRAINFramework/tools/CellProfiler2'),
-    'brainy_lib_path': os.path.join(
-        os.path.dirname(__file__),
-        'lib',
-    ),
+    'user_home': os.path.expanduser('~'),
 }
-BRAINY_USER_CONFIG_PATH = os.path.expanduser('~/.brainy/config')
 
-BRAINY_USER_NAMESPACES_PATH = os.path.expanduser('~/.brainy/namespaces')
-NAMESPACE_REGEXP = re.compile(r'\S*')
-# Cache
-NAMESPACES = None
+BRAINY_USER_CONFIG_PATH = os.path.expanduser('~/.brainy/config')
 
 BRAINY_USER_PACKAGES_INDEX_PATH_TPL = os.path.expanduser(
     '~/.brainy/%(framework_name)s.packages_index')
@@ -90,7 +98,7 @@ BRAINY_USER_PACKAGES_INDEX_PATH_TPL = os.path.expanduser(
 BRAINY_PROJECT_CONFIG_TPL = '''
 # brainy project config
 brainy:
-    version: '%(brainy_version)s'
+  version: '%(brainy_version)s'
 
 # Parameters below will affect the whole project. In particular, that defines
 # how jobs in every step of each pipe will be submitted, which folder names
@@ -103,10 +111,10 @@ brainy:
 #     engine: 'lsf'
 
 project_parameters:
-    # job_submission_queue: '8:00'
-    # job_resubmission_queue: '36:00'
-    batch_path: 'data_of_{name}'
-    tiff_path: 'images_of_{name}'
+  # job_submission_queue: '8:00'
+  # job_resubmission_queue: '36:00'
+  batch_path: 'data_of_{name}'
+  tiff_path: 'images_of_{name}'
 
 ''' % {
     'brainy_version': brainy_version,
@@ -121,7 +129,7 @@ def write_config(config_path, value):
     '''
     logger.info('Writing config: %s' % config_path)
     if type(value) == dict:
-            value = yaml.dump(value, default_flow_style=True)
+        value = dump_yaml(value)
     with open(config_path, 'w+') as stream:
         stream.write(value)
 
@@ -133,8 +141,37 @@ def load_config(config_path):
     dictionary.
     '''
     logger.info('Loading config: %s' % config_path)
-    with open(config_path) as stream:
-        return yaml.load(stream, Loader=Loader)
+    with open(config_path) as template_stream:
+        # Replace all %(user_home)s by expanded full path to home folder.
+        stream = replace_template_params(template_stream, {
+            'user_home': os.path.expanduser('~'),
+        })
+        return load_yaml(stream.read())
+
+
+def merge_config(*configs):
+    '''
+    A brainy-specifics and config aware way to deep-merge nested key-value
+    pairs of dictionaries (usually stored as YAML format).
+
+    Important: use this only for loading and don't write back to YAML since
+    it will not preserve comments.
+    '''
+    if len(configs) < 2:
+        raise Exception('Two or more configs are expected as arguments.')
+    if not all([type(config) == dict for config in configs]):
+        raise Exception('Not all configs are dicts.')
+    result = dict()
+    for config in configs:
+        result = merge_dicts(result, config)
+    return result
+
+
+def append_to_list_in_config(yaml_filepath, key_path, value):
+    '''
+    Load YAML. Find the key or a sub key. It must be a list.
+    Append the value the end of the list.
+    '''
 
 
 def write_user_config(user_config_path=BRAINY_USER_CONFIG_PATH):
@@ -166,7 +203,7 @@ def write_project_config(project_path, config_name=BRAINY_PROJECT_CONFIG_NAME,
     '''
     config_path = os.path.join(project_path, config_name)
     if inherit_config or override_config:
-        value = yaml.load(BRAINY_PROJECT_CONFIG_TPL)
+        value = load_yaml(BRAINY_PROJECT_CONFIG_TPL)
         if inherit_config:
             value = merge_dicts(inherit_config, value)
         if override_config:
@@ -193,48 +230,6 @@ def project_has_config(project_path, config_name=BRAINY_PROJECT_CONFIG_NAME):
     return os.path.exists(config_path)
 
 
-def load_process_namespaces():
-    '''
-    Every time we instantiate Pipes and Processes according to the type
-    defined in YAML files, brainy will look up over the python PATH for
-    classes which fully-qualified class datatype is restricted by the list
-    of namespaces returned by this config function.
-
-    See brainy.pipes.base. and pipette.Pipe.find_process_class()
-
-    Each package if it contains any Pipes or Processes will append
-    its own namespace to text file usually located: ~/.brainy/namespaces
-    '''
-    global NAMESPACES
-    # Cache
-    if not os.path.exists(BRAINY_USER_NAMESPACES_PATH):
-        NAMESPACES = list()
-        return NAMESPACES
-    if NAMESPACES is None:
-        NAMESPACES = [line for line in
-                      open(BRAINY_USER_NAMESPACES_PATH).readlines()
-                      if len(line.strip()) > 0]
-        for namespace in NAMESPACES:
-            if not NAMESPACE_REGEXP.match(namespace):
-                raise Exception('Wrong namespace: %s' % namespace)
-    return NAMESPACES
-
-
-def append_process_namespaces(namespace):
-    global NAMESPACES
-    namespaces = load_process_namespaces()
-    if namespace in namespaces:
-        logger.warn('Namespace already added')
-        return
-    # Put new namespace to a namespaces and save them
-    logger.warn('Appending new pipes/process namespace: %s' % namespace)
-    namespaces.append(namespace)
-    with open(BRAINY_USER_NAMESPACES_PATH, 'w+') as output:
-        output.writelines(namespaces)
-    # Update cache.
-    NAMESPACES = namespaces
-
-
 def update_packages_index(framework_name, yaml_data):
     '''Write packages index to disk'''
     index_filepath = BRAINY_USER_PACKAGES_INDEX_PATH_TPL % {
@@ -249,4 +244,4 @@ def load_packages_index(framework_name):
         'framework_name': framework_name,
     }
     with open(index_filepath) as stream:
-        return yaml.load(stream, Loader=Loader)
+        return load_yaml(stream.read())

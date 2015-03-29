@@ -16,8 +16,8 @@ logger = logging.getLogger(__name__)
 class BrainyPipe(pipette.Pipe):
 
     def __init__(self, pipes_manager, definition=None):
-        process_namespaces = brainy.config.load_process_namespaces()
-        super(BrainyPipe, self).__init__(process_namespaces, definition)
+        super(BrainyPipe, self).__init__(pipes_manager.process_namespaces,
+                                         definition)
         self.pipes_manager = pipes_manager
         self.has_failed = False
         self.previous_process_params = None

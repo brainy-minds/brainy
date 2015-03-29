@@ -1,9 +1,14 @@
 import os
 import shutil
 import logging
+
 logger = logging.getLogger(__name__)
 
-
+# A colon separated path to multiple possible workflow locations.
+# Each folder in the path has a simple format.
+# It contains folders (name of the folder == name of the workflow)
+# each having multiple .br files (pipes === YAML files with parts of the
+#                                 workflow description)
 WORKFLOW_PATH = os.path.join(os.path.dirname(__file__))
 
 WORKFLOWS = {

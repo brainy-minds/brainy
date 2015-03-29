@@ -194,26 +194,39 @@ class BrainyProcess(pipette.Process, FlagManager):
     def bash_call(self):
         return self.parameters.get(
             'bash_call',
-            self.config['tools']['bash']['cmd'],
+            self.config['languages']['bash']['cmd'],
         )
 
     @property
     def matlab_call(self):
         return self.parameters.get(
             'matlab_call',
-            self.config['tools']['matlab']['cmd'],
+            self.config['languages']['matlab']['cmd'],
         )
 
     @property
     def python_call(self):
         return self.parameters.get(
             'python_call',
-            self.config['tools']['python']['cmd'],
+            self.config['languages']['python']['cmd'],
         )
 
     def get_brainy_lib_path(self, lang):
-        return os.path.join(self.config['brainy']['lib_path'],
-                            lang.lower())
+        '''
+        Path entry for a corresponding language is a setting that brainy
+        prependeds to the environment of submitted jobs.
+        '''
+        lang_env_path = [
+            os.path.join(self.config['brainy']['lib_path'],
+                         lang.lower()),
+        ]
+        # Extend path with values from config. E.g.
+        # ['languges']['matlab']['path'] must be list
+        if 'path' in self.config['languages'][lang.lower()]:
+            config_lang_path = self.config['languages'][lang.lower()]['path']
+            assert type(config_lang_path) == list
+            lang_env_path = config_lang_path + lang_env_path
+        return lang_env_path
 
     @property
     def user_bash_path(self):
