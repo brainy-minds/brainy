@@ -45,13 +45,16 @@ except ImportError:
     # distribute_setup.py was not in this directory
     if not (setup_tools_fallback):
         import setuptools
-        if not (hasattr(setuptools,'_distribute') and \
-                setuptools._distribute):
-            raise ImportError("distribute was not found and fallback to setuptools was not allowed")
+        if not (hasattr(setuptools, '_distribute')
+                and setuptools._distribute):
+            raise ImportError("distribute was not found and fallback to "
+                              "setuptools was not allowed")
         else:
-            logging.debug("distribute_setup.py not found, defaulted to system distribute")
+            logging.debug("distribute_setup.py not found, defaulted to "
+                          "system distribute")
     else:
-        logging.debug("distribute_setup.py not found, defaulting to system setuptools")
+        logging.debug("distribute_setup.py not found, defaulting to system "
+                      "setuptools")
 
 
 import setuptools
@@ -171,11 +174,17 @@ def copy_package_data(brainy_folder_path):
         return
     os.makedirs(brainy_folder_path)
     PREFIX = os.path.dirname(__file__)
-    # Copy workflows
+    # Copy workflows.
     for folder in ['empty', 'demo']:
         source = os.path.join(PREFIX, 'src', 'brainy', 'workflows', folder)
         dest = os.path.join(brainy_folder_path, 'workflows', folder)
-        logging.debug('Copying data %   s -> %s' % (source, dest))
+        logging.debug('Copying data %s -> %s' % (source, dest))
+        shutil.copytree(source, dest)
+    # Copy lib.
+    for folder in ['matlab', 'python']:
+        source = os.path.join(PREFIX, 'src', 'brainy', 'lib', folder)
+        dest = os.path.join(brainy_folder_path, 'lib', folder)
+        logging.debug('Copying data %s -> %s' % (source, dest))
         shutil.copytree(source, dest)
 
 setuptools.setup(

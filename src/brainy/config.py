@@ -4,7 +4,7 @@ brainy.config
 Save and load configuration files.
 
 @author: Yauhen Yakimovich <yauhen.yakimovich@uzh.ch>,
-         Pelkmans Lab  <https://www.pelkmanslab.org>
+         Pelkmans Lab <https://www.pelkmanslab.org>
 
 @license: The MIT License (MIT)
 
