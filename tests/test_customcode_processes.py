@@ -5,6 +5,7 @@ Usage example:
     nosetests -vv -x --pdb test_customcode_processes
 '''
 import os
+from glob import glob
 from brainy_tests import MockPipesManager, BrainyTest
 from testfixtures import LogCapture
 
@@ -112,15 +113,16 @@ def bake_pipe_with_matlab_user_path_extend():
 
 def bake_pipe_with_foreach():
     return MockPipesManager('''
-"type": "CustomCode.Pipe"
-"chain":
+type: "CustomCode.CustomPipe"
+chain:
     -
-    "type": "CustomCode.PythonCall",
-    foreach:
+      name: "test_foreach"
+      type: "CustomCode.PythonCall"
+      foreach:
         var: "jobid"
         in: "['1', '2', '3']"
         using: "yaml"
-    "call": "print '{jobid}'"
+      call: "print '{jobid}'"
 
 \n''')
 
@@ -197,3 +199,22 @@ end
         # print self.captured_output
         # assert False
         assert 'Call result is: foo' in self.get_report_content()
+
+    def test_foreach(self):
+        '''Test parallel foreach section handling'''
+        self.start_capturing()
+        # Run pipes.
+        pipes = bake_pipe_with_foreach()
+        # Place new matlab function into extending location.
+        pipes.process_pipelines()
+        # Check output.
+        self.stop_capturing()
+
+        reports_pattern = os.path.join(pipes.project.path, 'mock_test',
+                                       'job_reports_of_test_foreach',
+                                       'test_foreach*.job_report')
+        # print reports_pattern
+        report_files = glob(reports_pattern)
+        # print report_files
+        assert len(report_files) == 3
+

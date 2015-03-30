@@ -16,6 +16,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 extend_path(ROOT, '')
 extend_path(ROOT, 'src')
 from brainy.config import BRAINY_USER_CONFIG_TPL
+from brainy.workflows import WorkflowLocations
 from brainy.project.base import BrainyProject
 from brainy.pipes.manager import PipesManager
 from brainy.scheduler import BrainyScheduler
@@ -25,27 +26,27 @@ setup_logging('silent')  # Otherwise output capturing will not work
 
 class MockProject(BrainyProject):
 
-    def __init__(self, name):
+    def __init__(self, name, brainy_config):
         '''bootstrap test project folder in temporary path'''
         path = tempfile.mkdtemp()
-        BrainyProject.__init__(self, name, path)
+        workflow_locations = WorkflowLocations(brainy_config)
+        BrainyProject.__init__(self, name, path, workflow_locations)
         self.seed_report_data()
 
 
 class MockPipesManager(PipesManager):
 
     def __init__(self, mock_pipe_yaml, pipe_name='mock_test'):
-        self.project = MockProject('mock_project')
-
+        brainy_config = yaml.load(BRAINY_USER_CONFIG_TPL)
         # Bootstrap test project.
-        inherit_config = yaml.load(BRAINY_USER_CONFIG_TPL)
         override_config = {
         }
+        self.project = MockProject('mock_project', brainy_config)
         self.project.create(from_workflow='empty',
-                            inherit_config=inherit_config,
+                            inherit_config=brainy_config,
                             override_config=override_config)
 
-        self.project.load_config()
+        self.project.load_config(brainy_config)
         self.project.scheduler = BrainyScheduler.build_scheduler(
             self.project.config['scheduling']['engine'])
 

@@ -6,7 +6,6 @@ import os
 import pipette
 import logging
 import pprint
-import brainy.config
 from brainy.errors import (BrainyProcessError, ProccessEndedIncomplete,
                            BrainyPipeFailure)
 from brainy.project.report import BrainyReporter
@@ -111,6 +110,10 @@ class BrainyPipe(pipette.Pipe):
                     logger.error('Inspect error details in job report: %s' %
                                  error.extra['job_report'])
                 raise BrainyPipeFailure('Execution failed')
+
+        except Exception as error:
+            # Log all unmatched exceptions
+            logger.exception(error)
 
         finally:
 

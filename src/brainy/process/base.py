@@ -77,6 +77,7 @@ class BrainyProcess(pipette.Process, FlagManager):
             'job_resubmission_queue',
         ]
         self.compiled_params = dict()
+        self.report_name_postfix = ''
 
     @property
     def pipes_manager(self):
@@ -251,12 +252,18 @@ class BrainyProcess(pipette.Process, FlagManager):
             valid_folders = list()
         # Brainy path from deployed code.
         brainy_lib_path = self.get_brainy_lib_path(lang)
-        valid_folders.append(brainy_lib_path)
+        valid_folders += brainy_lib_path
         # User path from config.
         property_name = 'user_%s_path' % lang.lower()
         if hasattr(self, property_name):
             value = getattr(self, property_name)
-            user_path = value.split(':')
+            # If it is not a list then it must be a colon separated string
+            if isinstance(value, basestring):
+                user_path = value.split(':')
+            elif type(user_path) == list:
+                user_path = value
+            else:
+                raise Exception('User path must be either a string or a list.')
             for subfolder in user_path:
                 if '~/' in subfolder:
                     subfolder = os.path.expanduser(subfolder)
@@ -313,6 +320,7 @@ class BrainyProcess(pipette.Process, FlagManager):
         return self.__reports
 
     def list_batch_dir(self):
+        # FIXME: Does this function still make sense for listing outputs?
         if self.__batch_listing is None:
             logger.info('Listing batch folder. Please wait.. ')
             self.__batch_listing = list()
@@ -323,6 +331,12 @@ class BrainyProcess(pipette.Process, FlagManager):
             # sys.stdout.write('\n')
             # sys.stdout.flush()
         return self.__batch_listing
+
+    def make_report_filename(self):
+        return os.path.join(
+            self.reports_path, '%s%s_%s.job_report' %
+            (self.name, self.report_name_postfix,
+             datetime.now().strftime('%y%m%d%H%M%S')))
 
     def submit_job(self, shell_command, queue=None, report_file=None,
                    is_resubmitting=False):
@@ -335,9 +349,7 @@ class BrainyProcess(pipette.Process, FlagManager):
                 queue = self.job_submission_queue
         # Form a unique report file path.
         if not report_file:
-            report_file = os.path.join(
-                self.reports_path, '%s_%s.job_report' %
-                (self.name, datetime.now().strftime('%y%m%d%H%M%S')))
+            report_file = self.make_report_filename()
         elif not report_file.startswith('/'):
             report_file = os.path.join(self.reports_path, report_file)
         assert os.path.exists(os.path.dirname(report_file))

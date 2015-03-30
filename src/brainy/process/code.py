@@ -1,6 +1,9 @@
+import logging
 from brainy.utils import invoke
 from brainy.process.base import BrainyProcess
 from brainy.project.report import BrainyReporter
+
+logger = logging.getLogger(__name__)
 
 
 class CanCheckData(object):
@@ -38,6 +41,7 @@ class CodeProcess(BrainyProcess, CanCheckData):
         get_code = getattr(self, 'get_%s_code' % self.code_language)
 
         submission_result = submit_code_job(get_code())
+        logger.debug('Submission result:\n%s' % submission_result)
         BrainyReporter.append_message(
             message='Submitting new job',
             output=submission_result
