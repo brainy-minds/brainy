@@ -1,5 +1,14 @@
 '''
-iBRAINPipes is an integration of pipette processes into iBRAIN modules.
+brainy.pipes is an integration of pipette processes into iBRAIN modules.
+
+
+@author: Yauhen Yakimovich <yauhen.yakimovich@uzh.ch>,
+         Pelkmans Lab <https://www.pelkmanslab.org>
+
+@license: The MIT License (MIT). Read a copy of LICENSE distributed with
+          this code.
+
+Copyright (c) 2014-2015 Pelkmans Lab
 '''
 from __future__ import with_statement
 import os

@@ -1,0 +1,31 @@
+#!/bin/sh
+#/etc/init.d/br
+#
+# Boot time script to run brainy on debian-like system.
+BRAINY=/usr/local/bin/brainy
+GRP=www-data
+USER=br
+SUDO="/usr/bin/sudo -g $GRP -u $USER -i"
+
+# Some things that run always
+touch /var/lock/br
+
+# Carry out specific functions when asked to by the system
+case "$1" in
+  start)
+    echo "Starting script br "
+    $SUDO $BRAINY daemon start
+    ;;
+  stop)
+    # echo "Cleaning state of the system"
+    # $SUDO $BRAINY clean all
+    echo "Stopping script br"
+    $SUDO $BRAINY daemon stop
+    ;;
+  *)
+    echo "Usage: /etc/init.d/br {start|stop}"
+    exit 1
+    ;;
+esac
+
+exit 0

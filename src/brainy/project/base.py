@@ -1,12 +1,11 @@
 '''
-brainy.project
-
-Manage projects.
+brainy.project helps to manage projects, run and monitor workflows.
 
 @author: Yauhen Yakimovich <yauhen.yakimovich@uzh.ch>,
          Pelkmans Lab <https://www.pelkmanslab.org>
 
-@license: The MIT License (MIT)
+@license: The MIT License (MIT). Read a copy of LICENSE distributed with
+          this code.
 
 Copyright (c) 2014-2015 Pelkmans Lab
 '''

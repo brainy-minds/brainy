@@ -10,9 +10,10 @@ relevant progress of the conducted computation.
 @author: Yauhen Yakimovich <yauhen.yakimovich@uzh.ch>,
          Pelkmans lab <https://www.pelkmanslab.org>
 
-@license: The MIT License (MIT)
+@license: The MIT License (MIT). Read a copy of LICENSE distributed with
+          this code.
 
-Copyright (c) 2014 Pelkmans Lab
+Copyright (c) 2014-2015 Pelkmans Lab
 
 '''
 from brainy.version import __version__, brainy_version

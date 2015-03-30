@@ -1,3 +1,15 @@
+'''
+brainy.process on of the central building blocks of brainy.
+
+@author: Yauhen Yakimovich <yauhen.yakimovich@uzh.ch>,
+         Pelkmans Lab <https://www.pelkmanslab.org>
+
+@license: The MIT License (MIT). Read a copy of LICENSE distributed with
+          this code.
+
+Copyright (c) 2014-2015 Pelkmans Lab
+'''
+
 import os
 import re
 import logging
