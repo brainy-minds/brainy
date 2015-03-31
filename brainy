@@ -1,4 +1,5 @@
 #!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
 '''
 brainy
 ======
@@ -29,6 +30,7 @@ Copyright (c) 2014-2015 Pelkmans Lab
 '''
 import os
 import sys
+from datetime import datetime
 from subprocess import (PIPE, Popen)
 # # We include <pkg_root>/src, <pkg_root>/lib/python
 # extend_path = lambda root_path, folder: sys.path.insert(
@@ -91,6 +93,7 @@ class Duty(object):
             command = ' '.join([sub_program_path, pass_subj_imp] +
                                arguments_tail)
             return self.invoke(command)
+
 
 
 class Praefect(object):
@@ -205,6 +208,9 @@ if __name__ == '__main__':
         exit(1)
     try:
         prefect.carry_out_duties(program, sys.argv[1:])
+    except KeyboardInterrupt as error:
+        sys.stderr.write(' Interrupted by user at %s.\nGood bye! 😈\n' %
+                         datetime.now().strftime('%H:%M:%S [%d.%m.%y]'))
     except PraefectFailure as error:
         sys.stderr.write(str(error) +
                          ' See: \n\n  %s help\n\n' % program)

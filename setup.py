@@ -138,6 +138,7 @@ def get_version():
 
 scripts = [
     'brainy',
+    'bin/brainy-daemon',
     'bin/brainy-config',
     'bin/brainy-frames',
     'bin/brainy-project',
@@ -229,6 +230,7 @@ setuptools.setup(
         'requests>=2.6.0',
         'findtools>=1.0.3',
         'twisted>=14.0.2',
+        'DaemonCxt>=1.5.7',
     ],
     tests_require=['nose>=1.0'],
     test_suite='nose.collector',

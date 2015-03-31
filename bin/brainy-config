@@ -13,7 +13,8 @@ A part of brainy CLI:
 @author: Yauhen Yakimovich <yauhen.yakimovich@uzh.ch>,
          Pelkmans Lab  <https://www.pelkmanslab.org>
 
-@license: The MIT License (MIT)
+@license: The MIT License (MIT). Read a copy of LICENSE distributed with
+          this code.
 
 Copyright (c) 2014-2015 Pelkmans Lab
 '''
@@ -28,7 +29,7 @@ extend_path = lambda root_path, folder: sys.path.insert(
 ROOT = os.path.dirname(os.path.dirname(__file__))
 extend_path(ROOT, '')
 extend_path(ROOT, 'src')
-extend_path(ROOT, 'lib/python')
+
 # Import brainy modules.
 from brainy.config import (write_user_config, load_brainy_config,
                            BRAINY_USER_CONFIG_PATH)
@@ -67,7 +68,7 @@ if __name__ == '__main__':
         elif args.action == 'test' and args.what == 'config':
             # Valid config files.
             try:
-                laod_brainy_config()
+                load_brainy_config()
             except Exception as error:
                 sys.stderr.write('%s\n' % str(error))
                 exit(1)

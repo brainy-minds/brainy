@@ -24,7 +24,7 @@ extend_path = lambda root_path, folder: sys.path.insert(
 ROOT = os.path.dirname(os.path.dirname(__file__))
 extend_path(ROOT, '')
 extend_path(ROOT, 'src')
-extend_path(ROOT, 'lib/python')
+
 # Import brainy modules.
 from brainy.config import load_user_config
 from brainy.log import setup_logging, LOGGING_OPTIONS

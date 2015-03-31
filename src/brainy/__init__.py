@@ -21,6 +21,20 @@ from brainy.version import __version__, brainy_version
 
 # Mapping command shortcuts to brainy bin scripts.
 DUTIES = {
+    'brainy-daemon': {
+        'imperatives': [
+            'help',
+            'start',
+            'stop',
+            'restart',
+            'status',
+        ],
+        'subjectives': [
+            'daemon',
+        ],
+        'description': 'The daemon of brainy. Runs in the background to '
+                       'oversee projects',
+    },
     'brainy-config': {
         'imperatives': [
             'help',
@@ -77,3 +91,4 @@ DUTIES = {
         'use_exec': True,
     },
 }
+
