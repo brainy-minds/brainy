@@ -89,8 +89,14 @@ if __name__ == '__main__':
         elif args.action == 'init':
             brainy_project.init()
         elif args.action == 'run':
+            if not brainy_project.is_a_valid_project_folder():
+                raise BrainyProjectError(
+                    'Path is not a valid brainy project: %s' %
+                    brainy_project.path +
+                    '\n Have you done: `brainy create project?`')
+
             brainy_project.run(brainy_config)
         elif args.action == 'clean':
             brainy_project.clean(brainy_config)
     except BrainyProjectError as error:
-        sys.stderr.write('%s\n' % str(error))
+        sys.stderr.write('Error: %s\n' % str(error))
