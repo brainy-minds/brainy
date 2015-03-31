@@ -30,11 +30,7 @@ extend_path(ROOT, 'src')
 # Import brainy modules.
 from brainy.daemon import get_daemon_app
 from daemoncxt.runner import DaemonRunner, DaemonRunnerStopFailureError
-
-
-def setup_logging():
-    FORMAT = '[%(asctime)-15s] %(name)23s: %(message)s'
-    logging.basicConfig(format=FORMAT, level=logging.INFO)
+from brainy.log import setup_logging
 
 
 # Now parse and handle command line.
@@ -59,7 +55,7 @@ if __name__ == '__main__':
         parser.print_help()
         exit()
 
-    setup_logging()
+    setup_logging('console')
     try:
         # Get app that can do all the {start, stop, restart, ...}
         daemon_app = get_daemon_app(debug=True)
@@ -93,4 +89,4 @@ if __name__ == '__main__':
         sys.stderr.write('%s\n' % str(error))
 
     if args.action == 'stop':
-            print 'Good bye! 😈'
+            print 'Goodbye! 😈'
