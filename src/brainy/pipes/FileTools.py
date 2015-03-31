@@ -1,9 +1,9 @@
 import os
 import shutil
 import logging
-from datetime import datetime
 from findtools.find_files import (find_files, Match, MatchAnyPatternsAndTypes,
                                   MatchAllPatternsAndTypes)
+from brainy.utils import get_timestamp_str
 from brainy.errors import BrainyProcessError
 from brainy.process.code import PythonCodeProcess
 from brainy.process.decorator import (
@@ -11,9 +11,6 @@ from brainy.process.decorator import (
     require_key_in_description)
 logger = logging.getLogger(__name__)
 
-
-def get_timestamp_str():
-    return datetime.now().strftime('%Y%m%d%H%M%S')
 
 
 def backup_batch_folder(data_path, backups_path):

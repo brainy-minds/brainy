@@ -26,6 +26,8 @@ BRAINY_MERGED_PATHNAMES = [
     # Note that a path name is a list of keys in the nested dict.
     ['brainy', 'pipe_namespaces'],
     ['brainy', 'workflows'],
+    ['languages', 'python', 'path'],
+    ['languages', 'matlab', 'path'],
 ]
 
 

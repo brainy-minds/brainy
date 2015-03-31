@@ -72,9 +72,12 @@ class PipesManager(FlagManager):
         module = None
         exceptions = list()
         for pipe_namespace in self.pipe_namespaces:
-            pipe_type = pipe_namespace + '.' + pipe_type
-            module_name, class_name = pipe_type.rsplit('.', 1)
+            pipe_type_ = pipe_namespace + '.' + pipe_type
+            module_name, class_name = pipe_type_.rsplit('.', 1)
             try:
+                # Uncomment to debug:
+                # logger.info('from %s import %s' %
+                #             (module_name, class_name))
                 module = __import__(module_name, {}, {}, [class_name])
             except ImportError as error:
                 exceptions.append(error)
@@ -84,6 +87,7 @@ class PipesManager(FlagManager):
         if module is None:
             for exception in exceptions:
                 logger.warn(str(exception))
+            logger.info('Tip: check that module on PYTHON PATH!')
             raise ImportError('Failed to find/import pipe type: %s in %s' %
                               (pipe_type, self.pipe_namespaces))
         return getattr(module, class_name)

@@ -2,6 +2,7 @@ import re
 import time
 from xml.sax.saxutils import escape as escape_xml_special_chars
 from subprocess import (PIPE, Popen)
+from datetime import datetime
 import yaml
 try:
     from yaml import CLoader as Loader, CDumper as Dumper
@@ -112,3 +113,7 @@ def replace_template_params(template_stream, parameters):
     Replace parameters in string template stream.
     '''
     return StringIO(str(template_stream.read() % parameters))
+
+
+def get_timestamp_str():
+    return datetime.now().strftime('%Y%m%d%H%M%S')

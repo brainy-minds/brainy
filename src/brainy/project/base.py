@@ -11,6 +11,7 @@ Copyright (c) 2014-2015 Pelkmans Lab
 '''
 
 import os
+import sys
 import shutil
 import logging
 from glob import glob
@@ -112,6 +113,19 @@ class BrainyProject(object):
     def is_a_valid_project_folder(self):
         return project_has_config(self.path)
 
+    def extend_python_path(self):
+        '''
+        This subrouting will extend path based on configuration in order for
+        pluggable and extendable framework and project logic to work.
+        '''
+        if 'path' not in self.config['languages']['python']:
+            return
+        prepend_path = self.config['languages']['python']['path']
+        assert type(prepend_path) == list
+        if len(prepend_path) > 0:
+            logger.info('Extending sys.path with: %s' % prepend_path)
+            sys.path = prepend_path + sys.path
+
     def load_config(self, brainy_config):
         '''
         Pass global merged brainy config to be overridden by project config.
@@ -120,6 +134,7 @@ class BrainyProject(object):
         project_config = load_project_config(self.path)
         logger.info('Overwriting global configuration with project specific.')
         self.config = merge_dicts(brainy_config, project_config)
+        self.extend_python_path()
 
     def clean(self, brainy_config, manager_cls=PipesManager):
         '''Clean the project house.'''
