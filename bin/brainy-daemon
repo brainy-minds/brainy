@@ -1,0 +1,96 @@
+#!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
+'''
+brainy-daemon
+==============
+
+The daemon of brainy. Runs in the background to oversee projects 😈
+
+
+@author: Yauhen Yakimovich <yauhen.yakimovich@uzh.ch>,
+         Pelkmans Lab  <https://www.pelkmanslab.org>
+
+@license: The MIT License (MIT). Read a copy of LICENSE distributed with
+          this code.
+
+Copyright (c) 2014-2015 Pelkmans Lab
+'''
+import os
+import sys
+import logging
+import argparse
+from datetime import datetime
+# We include <pkg_root>/src, <pkg_root>/lib/python
+extend_path = lambda root_path, folder: sys.path.insert(
+    0, os.path.join(root_path, folder))
+ROOT = os.path.dirname(os.path.dirname(__file__))
+extend_path(ROOT, '')
+extend_path(ROOT, 'src')
+
+# Import brainy modules.
+from brainy.daemon import get_daemon_app
+from daemoncxt.runner import DaemonRunner, DaemonRunnerStopFailureError
+
+
+def setup_logging():
+    FORMAT = '[%(asctime)-15s] %(name)23s: %(message)s'
+    logging.basicConfig(format=FORMAT, level=logging.INFO)
+
+
+# Now parse and handle command line.
+if __name__ == '__main__':
+    program = os.path.basename(sys.argv[0])
+    logger = logging.getLogger(program)
+    parser = argparse.ArgumentParser(description='The daemon of brainy.')
+    parser.add_argument('-i', '--imperative', dest='action',
+                        choices=['start', 'stop', 'status', 'restart',
+                                 'help'],
+                        help='Action')
+    parser.add_argument('-s', '--subjective', dest='what',
+                        choices=['daemon'])
+    parser.add_argument('-f', '--foreground', dest='run_in_foreground',
+                        help='Combined with `start -f` will run daemon in '
+                             'foreground.',
+                        action='store_true')
+
+    args = parser.parse_args()
+
+    if args.action == 'help':
+        parser.print_help()
+        exit()
+
+    setup_logging()
+    try:
+        # Get app that can do all the {start, stop, restart, ...}
+        daemon_app = get_daemon_app(debug=True)
+
+        if args.action == 'start' and args.run_in_foreground:
+            daemon_app.run()
+            exit()
+        # Be chatty.
+        if args.action == 'start':
+            print 'Detaching brainy daemon to run in background 😈'
+        elif args.action == 'stop':
+            print 'Stopping brainy daemon from running in background.'
+        sys.stdout.flush()
+        # Note: picostack daemon app will find pid and kill the process or
+        # start a new one. We just need to pass the action.
+        app_argv = [sys.argv[0], args.action]
+        daemon_runner = DaemonRunner(daemon_app, app_argv)
+        # Pass action to be performed.
+        daemon_runner.do_action()
+
+    except DaemonRunnerStopFailureError as err:
+        print 'No brainy daemon is running. %s' % str(err)
+
+    except KeyboardInterrupt as error:
+        pass
+        # sys.stderr.write('[%s] Interrupted by user.\nGood bye!' %
+        #                  datetime.now().strftime('%y%m%d%H%M%S'))
+
+    except Exception as error:
+        raise
+        sys.stderr.write('%s\n' % str(error))
+
+    if args.action == 'stop':
+            print 'Good bye! 😈'
