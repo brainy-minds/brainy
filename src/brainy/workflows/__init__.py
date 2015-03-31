@@ -34,7 +34,6 @@ class WorkflowLocations(object):
         '''
         if self._workflows is None:
             self._workflows = dict()
-            print self.workflow_locations
             for location in self.workflow_locations:
                 if not os.path.exists(location):
                     logger.warn('Workflow location does not exists: %s' %
