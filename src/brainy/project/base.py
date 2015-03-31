@@ -13,6 +13,7 @@ Copyright (c) 2014-2015 Pelkmans Lab
 import os
 import shutil
 import logging
+from glob import glob
 from brainy.version import brainy_version
 from brainy.utils import merge_dicts
 from brainy.config import (write_project_config, load_project_config,
@@ -83,15 +84,30 @@ class BrainyProject(object):
             logger.info('Creating new project folder: %s' % self.path)
             os.mkdir(self.path)
         else:
-            raise BrainyProjectError('Project folder already exists: %s' %
-                                     self.path)
-        self.init(inherit_config=inherit_config,
-                  override_config=override_config)
+            logger.warn('Project folder already exists: %s' % self.path)
+
+        if not project_has_config(self.path):
+            self.init(inherit_config=inherit_config,
+                      override_config=override_config)
+        else:
+            logger.warn('It looks like project already contains configuration.'
+                        ' No configuration is copied.')
         # Put a standard iBRAIN workflow made of the different YAML files 3
         # determined by the workflow_name into the project. By default
         # this workflow is called 'canonical'.
+
+        # Does project has any `.br` (pipe YAML) files in it?
+        if self.has_any_workflow_files():
+            logger.warn('It looks like project already contains workflow '
+                        'files. No workflow is copied.')
+            return
+        # Otherwise we copy the workflow files.
         self.workflow_locations.bootstrap_workflow(self.path,
                                                    workflow_name=from_workflow)
+
+    def has_any_workflow_files(self):
+        # TODO take pipe_extension from the global config.
+        return len(glob(os.path.join(self.path, '*.br')))
 
     def is_a_valid_project_folder(self):
         return project_has_config(self.path)
