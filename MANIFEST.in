@@ -1,1 +1,2 @@
 recursive-include src/brainy/lib *
+recursive-include src/brainy/workflows *
