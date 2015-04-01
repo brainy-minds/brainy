@@ -54,3 +54,8 @@ docs/_build/
 
 
 tests/mock/images/*.png
+
+# Exclude web ui
+ui/web/bower_componenets
+ui/web/node_modules
+
