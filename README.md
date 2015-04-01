@@ -56,7 +56,16 @@ The package is available on [PyPI](https://pypi.python.org/pypi/brainy-mind/).
 pip install brainy-mind
 ```
 
-Once installed, make sure you put a config file into your ~/.brainy/config folder by calling
+For developer mode 
+
+```
+cd && git clone https://github.com/pelkmanslab/brainy
+cd brainy && pip install -e .
+```
+
+Once installed, inspect the state of configuration in `~/.brainy/` folder.
+
+Remember that you can generate `~/.brainy/config` from the template again by
 
 ```
 brainy init config
