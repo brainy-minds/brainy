@@ -214,9 +214,12 @@ class install(install_):
 
 # Is it pip or conda?
 if sys.argv != ['setup.py', 'install']:
-    print('Outside of setup.py')
-    install.copy_package_data()
-    install.init_config()
+    def post_installi():
+        print('Outside of setup.py')
+        install.copy_package_data()
+        install.init_config()
+    import atexit
+    atexit.register(post_installi)
 
 
 setuptools.setup(
@@ -253,6 +256,9 @@ setuptools.setup(
     package_data=package_data,
     include_package_data=True,
     download_url='https://github.com/pelkmanslab/brainy/tarball/master',
+    setup_requires=[
+        'PyYAML>=3.11',
+    ],
     install_requires=[
         'pipette>=0.1.8',
         'tree_output>=0.1.4',
