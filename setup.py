@@ -58,6 +58,7 @@ except ImportError:
 
 
 import setuptools
+from setuptools.command.install import install as install_
 
 
 def find_scripts():
@@ -167,26 +168,37 @@ if package_data is None: package_data = find_package_data(packages)
 if scripts is None: scripts = find_scripts()
 
 
-def copy_package_data(brainy_folder_path):
-    if os.path.exists(brainy_folder_path):
-        print('Warning! brainy user folder already exists: %s.. ' %
-              brainy_folder_path +
-              '\nSkipping package data copying')
-        return
-    os.makedirs(brainy_folder_path)
-    PREFIX = os.path.dirname(__file__)
-    # Copy workflows.
-    for folder in ['empty', 'demo']:
-        source = os.path.join(PREFIX, 'src', 'brainy', 'workflows', folder)
-        dest = os.path.join(brainy_folder_path, 'workflows', folder)
-        logging.debug('Copying data %s -> %s' % (source, dest))
-        shutil.copytree(source, dest)
-    # Copy lib.
-    for folder in ['matlab', 'python']:
-        source = os.path.join(PREFIX, 'src', 'brainy', 'lib', folder)
-        dest = os.path.join(brainy_folder_path, 'lib', folder)
-        logging.debug('Copying data %s -> %s' % (source, dest))
-        shutil.copytree(source, dest)
+class install(install_):
+    """Customized setuptools install command - prints a friendly greeting."""
+
+    def run(self):
+        print("Hello, brainy user :)")
+        install_.run(self)
+        print("Post install..")
+        self.copy_package_data()
+
+    def copy_package_data(self, brainy_folder_path=None):
+        if brainy_folder_path is None:
+            brainy_folder_path = os.path.expanduser('~/.brainy')
+        if os.path.exists(brainy_folder_path):
+            print('Warning! brainy user folder already exists: %s.. ' %
+                  brainy_folder_path +
+                  '\nSkipping package data copying')
+            return
+        os.makedirs(brainy_folder_path)
+        PREFIX = os.path.dirname(__file__)
+        # Copy workflows.
+        for folder in ['empty', 'demo']:
+            source = os.path.join(PREFIX, 'src', 'brainy', 'workflows', folder)
+            dest = os.path.join(brainy_folder_path, 'workflows', folder)
+            logging.debug('Copying data %s -> %s' % (source, dest))
+            shutil.copytree(source, dest)
+        # Copy lib.
+        for folder in ['matlab', 'python']:
+            source = os.path.join(PREFIX, 'src', 'brainy', 'lib', folder)
+            dest = os.path.join(brainy_folder_path, 'lib', folder)
+            logging.debug('Copying data %s -> %s' % (source, dest))
+            shutil.copytree(source, dest)
 
 setuptools.setup(
     name='brainy-mind',
@@ -232,10 +244,9 @@ setuptools.setup(
         'Twisted>=14.0.2',
         'DaemonCxt>=1.5.7',
     ],
+    cmdclass={
+        'install': install,
+    },
     tests_require=['nose>=1.0'],
     test_suite='nose.collector',
 )
-
-
-# Copy data into ~/.brainy
-copy_package_data(os.path.expanduser('~/.brainy'))
