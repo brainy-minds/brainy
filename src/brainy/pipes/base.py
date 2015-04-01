@@ -1,5 +1,5 @@
 '''
-brainy.pipes is an integration of pipette processes into iBRAIN modules.
+brainy.pipes is an integration of pipette pipes and processes into brainy.
 
 
 @author: Yauhen Yakimovich <yauhen.yakimovich@uzh.ch>,
@@ -12,16 +12,16 @@ Copyright (c) 2014-2015 Pelkmans Lab
 '''
 from __future__ import with_statement
 import os
-import pipette
 import logging
 import pprint
+from pipette.pipes import Pipe as PipettePipe
 from brainy.errors import (BrainyProcessError, ProccessEndedIncomplete,
                            BrainyPipeFailure)
 from brainy.project.report import BrainyReporter
 logger = logging.getLogger(__name__)
 
 
-class BrainyPipe(pipette.Pipe):
+class BrainyPipe(PipettePipe):
 
     def __init__(self, pipes_manager, definition=None):
         super(BrainyPipe, self).__init__(pipes_manager.process_namespaces,

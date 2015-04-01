@@ -15,7 +15,7 @@ import re
 import logging
 import pprint
 from datetime import datetime
-import pipette
+from pipette.pipes import Process as PipetteProcess
 from brainy.flags import FlagManager
 from brainy.scheduler import SHORT_QUEUE, NORM_QUEUE
 from brainy.errors import (UnknownError, KnownError, TermRunLimitError,
@@ -60,7 +60,7 @@ def format_code(code, lang='bash'):
     return result
 
 
-class BrainyProcess(pipette.Process, FlagManager):
+class BrainyProcess(PipetteProcess, FlagManager):
 
     def __init__(self):
         super(BrainyProcess, self).__init__()
