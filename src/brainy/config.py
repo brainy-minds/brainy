@@ -267,6 +267,8 @@ def load_brainy_config():
         # Such path formation might change in the future.
         framework_config_path = os.path.expanduser('~/%s/config.yaml' %
                                                    framework)
+        if not os.path.exists(framework_config_path):
+            return
         logger.info('Merging config: %s' % framework_config_path)
         configs.append(load_config(framework_config_path))
     return merge_config(*configs)
