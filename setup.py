@@ -176,6 +176,16 @@ class install(install_):
         install_.run(self)
         print("Post install..")
         self.copy_package_data()
+        self.init_config()
+
+    @classmethod
+    def init_config(cls):
+        src_path = os.path.join(os.path.abspath(os.path.dirname(__file__)),
+                                'src')
+        sys.path = [src_path] + sys.path
+        from brainy.config import write_user_config
+        print('Initializing brainy config in user home.')
+        write_user_config()
 
     @classmethod
     def copy_package_data(cls, brainy_folder_path=None):
@@ -206,6 +216,7 @@ class install(install_):
 if sys.argv != ['setup.py', 'install']:
     print('Outside of setup.py')
     install.copy_package_data()
+    install.init_config()
 
 
 setuptools.setup(
