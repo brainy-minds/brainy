@@ -177,13 +177,15 @@ class install(install_):
         print("Post install..")
         self.copy_package_data()
 
-    def copy_package_data(self, brainy_folder_path=None):
+    @classmethod
+    def copy_package_data(cls, brainy_folder_path=None):
         if brainy_folder_path is None:
             brainy_folder_path = os.path.expanduser('~/.brainy')
         if os.path.exists(brainy_folder_path):
             print('Warning! brainy user folder already exists: %s.. ' %
                   brainy_folder_path +
-                  '\nSkipping package data copying')
+                  '\nSkipping package data copying!' +
+                  'Consider `rm -rf  ~/.brainy/`?')
             return
         os.makedirs(brainy_folder_path)
         PREFIX = os.path.dirname(__file__)
@@ -199,6 +201,12 @@ class install(install_):
             dest = os.path.join(brainy_folder_path, 'lib', folder)
             logging.debug('Copying data %s -> %s' % (source, dest))
             shutil.copytree(source, dest)
+
+# Is it pip or conda?
+if sys.argv != ['setup.py', 'install']:
+    print('Outside of setup.py')
+    install.copy_package_data()
+
 
 setuptools.setup(
     name='brainy-mind',
