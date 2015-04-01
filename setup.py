@@ -213,7 +213,7 @@ class install(install_):
             shutil.copytree(source, dest)
 
 # Is it pip or conda?
-if sys.argv[0] != ['setup.py']:
+if sys.argv[0] != 'setup.py':
     def post_installi():
         print('Outside of setup.py')
         install.copy_package_data()
