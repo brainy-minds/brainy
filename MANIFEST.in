@@ -1,5 +1,3 @@
 recursive-include src/brainy/lib *
 recursive-include src/brainy/workflows *
-recursive-include ui/web/assets *
-recursive-include ui/web/src *
-recursive-include ui/web/index.html
+recursive-include ui *

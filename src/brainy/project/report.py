@@ -11,10 +11,7 @@ logger = logging.getLogger(__name__)
 # project report. It is mainly modified during `brainy run project` call.
 report_data = {}
 
-UI_WEB_PATH = os.path.join(
-    os.path.dirname(os.path.dirname(
-                    os.path.dirname(os.path.dirname(__file__)))),
-    'ui', 'web')
+UI_WEB_PATH = os.path.join(os.path.expanduser('~/.brainy'), 'ui', 'web')
 
 
 class BrainyReporter(object):
