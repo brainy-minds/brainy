@@ -28,6 +28,7 @@ class CliTest(BrainyTest):
         assert output.exit_code == 0
         assert 'Bootstrapping project' in output.stderr
         assert '<Done>' in output.stderr
+        assert 'ERROR' not in output.stderr
 
         # Run
         output = brainy_shell.project('run',
@@ -37,4 +38,3 @@ class CliTest(BrainyTest):
         print output.stdout
         assert output.exit_code == 0
         assert 'ERROR' not in output.stderr
-        assert False

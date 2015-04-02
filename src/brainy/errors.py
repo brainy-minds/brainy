@@ -18,7 +18,9 @@ class KnownError(Exception):
 
 
 class TermRunLimitError(KnownError):
-    '''Job exceeded time limit, resetting job and placing timeout flag file.'''
+    '''
+    Job exceeded time limit, resetting job and placing timeout flag file.
+    '''
 
 
 class OutOfMemoryError(KnownError):
@@ -27,7 +29,7 @@ class OutOfMemoryError(KnownError):
     '''
 
 
-#UNKNOWN_ERROR = re.compile('ERROR', re.IGNORECASE)
+# UNKNOWN_ERROR = re.compile('ERROR', re.IGNORECASE)
 UNKNOWN_ERROR = re.compile('Exited with exit code', re.IGNORECASE)
 
 
@@ -38,7 +40,7 @@ KNOWN_ERRORS = {
         'cause': 'Timed out too many times',
     },
     'out_of_memory': {
-        #'token': '"Out of memory. Type HELP MEMORY for your options."',
+        # 'token': '"Out of memory. Type HELP MEMORY for your options."',
         'token': 'Out of memory.',
         'cause': 'Job exceeded memory limit',
     },
