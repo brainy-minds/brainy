@@ -105,6 +105,7 @@ class BrainyProject(object):
         # Otherwise we copy the workflow files.
         self.workflow_locations.bootstrap_workflow(self.path,
                                                    workflow_name=from_workflow)
+        logger.info('<Done>')
 
     def has_any_workflow_files(self):
         # TODO take pipe_extension from the global config.

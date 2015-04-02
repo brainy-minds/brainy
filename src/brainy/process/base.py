@@ -73,18 +73,18 @@ class BrainyProcess(PipetteProcess, FlagManager):
         self.format_parameters = [
             'name',
             'step_name',
-            # 'plate_path',  # Deprecated
+            # 'plate_path', # Deprecated
             'project_path',
             'process_path',
             # 'pipes_path', # Deprecated
             'reports_path',
-            # 'batch_path',   # Deprecated
-            # 'tiff_path',   # Deprecated
+            # 'batch_path', # Deprecated
+            # 'tiff_path', # Deprecated
             'data_path',
             'images_path',
             'analysis_path',
-            # 'postanalysis_path',  # Deprecated
-            # 'jpg_path',  # Deprecated
+            # 'postanalysis_path', # Deprecated
+            # 'jpg_path', # Deprecated
             'job_submission_queue',
             'job_resubmission_queue',
         ]
@@ -99,7 +99,23 @@ class BrainyProcess(PipetteProcess, FlagManager):
 
     @property
     def config(self):
+        '''Note: is assigned externally, i.e. by pipes_manager'''
         return self.parameters['pipes_manager'].config
+
+    def extend_template_vars(self, extended_format_params_list=None):
+        '''
+        Extend the list of variables in process description (YAML keys) that
+        will be compiled (parsed and substituted)
+        '''
+        if extended_format_params_list is None:
+            # Grab params list from the config.
+            config = self.config['brainy']
+            if 'format_parameters' in config \
+                    and type(config['format_parameters']) == list:
+                extended_format_params_list = config['format_parameters']
+        logger.info('Extending allowed templates variables with: %s' %
+                    extended_format_params_list)
+        self.format_parameters.extend(extended_format_params_list)
 
     @property
     def scheduler(self):
@@ -191,6 +207,8 @@ class BrainyProcess(PipetteProcess, FlagManager):
 
     @property
     def job_submission_queue(self):
+        # TODO: rename into min_job_submission_time for broader scheduling
+        # adaptation.
         return self.parameters.get(
             'job_submission_queue',
             SHORT_QUEUE,

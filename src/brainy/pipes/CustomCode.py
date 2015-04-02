@@ -17,9 +17,24 @@ class CustomPipe(BrainyPipe):
     '''
 
 
-class Submittable(object):
+class Explained(object):
     '''
-    Run a piece of custom code given by user in self.description[submit_call].
+    Require user to document the processes.
+    '''
+
+    @property
+    @format_with_params
+    @require_key_in_description
+    def doc(self):
+        '''
+        Documentation put into detailed reports as brainy progresses
+        with project execution.
+        '''
+
+
+class Submittable(Explained):
+    '''
+    Run a piece of custom code given by user in self.description['call'].
     '''
 
     @property

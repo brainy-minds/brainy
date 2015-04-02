@@ -211,7 +211,7 @@ class install(install_):
             dest = os.path.join(brainy_folder_path, 'lib', folder)
             logging.debug('Copying data %s -> %s' % (source, dest))
             shutil.copytree(source, dest)
-        # Copy ui/web
+        # Copy ui/web.
         source = os.path.join(PREFIX, 'ui')
         dest = os.path.join(brainy_folder_path, 'ui')
         logging.debug('Copying data %s -> %s' % (source, dest))

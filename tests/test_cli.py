@@ -2,12 +2,13 @@
 Test command line interface (CLI) of brainy as it is integrated in shell.
 Like this we want to guarantee that brainy shell commands do not break.
 '''
+import os
 from sh import brainy as brainy_shell
-from unittest import TestCase
+from brainy_tests import BrainyTest
 import tempfile
 
 
-class CliTest(TestCase):
+class CliTest(BrainyTest):
 
     def setUp(self):
         self.prefix_path = tempfile.mkdtemp()
@@ -21,12 +22,19 @@ class CliTest(TestCase):
                                       '-p', self.prefix_path,
                                       'demo',
                                       '--from=demo')
-        print output.stderr
-        print output.stdout
+        # print self.captured_output
+        # print output.stderr
+        # print output.stdout
         assert output.exit_code == 0
+        assert 'Bootstrapping project' in output.stderr
+        assert '<Done>' in output.stderr
+
         # Run
         output = brainy_shell.project('run',
-                                      '-p', self.prefix_path)
+                                      '-p', os.path.join(self.prefix_path,
+                                                         'demo'))
         print output.stderr
         print output.stdout
         assert output.exit_code == 0
+        assert 'ERROR' not in output.stderr
+        assert False

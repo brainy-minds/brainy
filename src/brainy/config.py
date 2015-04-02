@@ -43,6 +43,7 @@ brainy:
   lib_path: '%(user_home)s/.brainy/lib'
 
   pipe_extension: '.br'
+  pipe_sequence_file: 'pipes'
 
   # A list of prefixes of python class names where brainy looks for pipe
   # and process types. See brainy.pipes.manager.PipesManager.pipe_namespaces
