@@ -635,6 +635,7 @@ PYTHON_CODE''' % {
             self.set_flag('complete')
 
     def reduce(self):
+        super(BrainyProcess, self).reduce()
         if self.results['step_status'] == 'completed':
             logger.info('Step {%s} was completed.' % self.step_name)
             BrainyReporter.append_message('complete', status='complete')

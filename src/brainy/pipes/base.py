@@ -40,8 +40,9 @@ class BrainyPipe(PipettePipe):
 
     def instantiate_process(self, process_description,
                             default_type=None):
+        default_process_type = self.pipes_manager.default_process_type
         process = super(BrainyPipe, self).instantiate_process(
-            process_description, default_type)
+            process_description, default_process_type)
         process.name_prefix = self.name
         return process
 

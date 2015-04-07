@@ -68,6 +68,14 @@ class PipesManager(FlagManager):
     def pipe_extension(self):
         return self.project.config['brainy']['pipe_extension']
 
+    @property
+    def default_pipe_type(self):
+        return self.project.config['brainy']['default_pipe_type']
+
+    @property
+    def default_process_type(self):
+        return self.project.config['brainy']['default_process_type']
+
     def get_class(self, pipe_type):
         module = None
         exceptions = list()
@@ -103,7 +111,9 @@ class PipesManager(FlagManager):
                     continue
                 pipe = BrainyPipe(self)
                 pipe.parse_definition_file(definition_filename)
-                cls = self.get_class(pipe.definition['type'])
+                pipe_type = pipe.definition.get('type',
+                                                self.default_pipe_type)
+                cls = self.get_class(pipe_type)
                 # Note that we pass itself as a pipes_manager
                 pipes[pipe.definition['name']] = cls(self, pipe.definition)
             self.__pipelines = self.sort_pipelines(pipes)

@@ -44,6 +44,9 @@ brainy:
 
   pipe_extension: '.br'
   pipe_sequence_file: 'pipes'
+  # If no type value was specified these are those taken by default.
+  default_pipe_type: 'CustomCode.CustomPipe'
+  default_process_type: 'CustomCode.BashCall'
 
   # A list of prefixes of python class names where brainy looks for pipe
   # and process types. See brainy.pipes.manager.PipesManager.pipe_namespaces
