@@ -43,7 +43,7 @@ brainy:
   lib_path: '%(user_home)s/.brainy/lib'
 
   pipe_extension: '.br'
-  pipe_sequence_file: 'pipes'
+  pipe_sequence_file: 'sequence'
   # If no type value was specified these are those taken by default.
   default_pipe_type: 'CustomCode.CustomPipe'
   default_process_type: 'CustomCode.BashCall'

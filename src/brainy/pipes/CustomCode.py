@@ -77,7 +77,8 @@ class Parallel(Submittable):
                 message='Evaluating foreach `in` values failed.',
                 output=error_output,
             )
-        values = '\n'.split((stdoutdata).strip())
+        # NEWLINE is a separator between values
+        values = stdoutdata.strip().split('\n')
         if not values:
             BrainyReporter.append_warning(
                 message='Section `foreach->in` returned an empty list.',
