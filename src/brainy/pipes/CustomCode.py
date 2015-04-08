@@ -60,14 +60,17 @@ class Parallel(Submittable):
         Returns a list of strings that would be value for `foreach` section.
         '''
         statement = self.foreach['in']
+        compiled_statement = self.format_with_params(
+            'compiled_statement', statement)
         # By default use YAML as `in` statement.
         language = self.foreach.get('using', 'yaml').lower()
         if language == 'yaml':
             return load_yaml(statement)
         # Else, bake the script for usual brainy environment.
         bake_code = getattr(self, 'bake_%s_code' % language.lower())
-        logger.debug('Evaluating `foreach-in` statement: %s' % statement)
-        script = bake_code(statement)
+        logger.debug('Evaluating `foreach-in` statement: %s' %
+                     compiled_statement)
+        script = bake_code(compiled_statement)
         logger.debug('Baked `foreach-in` script to invoke: %s' % script)
         (stdoutdata, stderrdata) = invoke(script)
         error_output = stderrdata.strip()
@@ -79,11 +82,14 @@ class Parallel(Submittable):
             )
         # NEWLINE is a separator between values
         values = stdoutdata.strip().split('\n')
-        if not values:
+        logger.info('Looping over %d value(s).' % len(values))
+        if len(stdoutdata.strip()) == 0 or not values:
             BrainyReporter.append_warning(
                 message='Section `foreach->in` returned an empty list.',
                 output='Foreach in: %s' % statement,
             )
+            logger.warn('Empty foreach-in list for script:\n %s' % script)
+            return []
         return values
 
     def paralell_submit(self, submit_single_job):
