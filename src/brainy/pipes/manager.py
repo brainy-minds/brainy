@@ -1,6 +1,7 @@
 import os
 import shutil
 import logging
+from pprint import pformat
 import brainy.config
 from brainy.flags import FlagManager
 from brainy.utils import Timer
@@ -20,6 +21,10 @@ class PipesManager(FlagManager):
         ]
         self.__flag_prefix = self.project_path
         self.__pipelines = None
+        # This option turns off the DAG resolution of pipes order.
+        # If this is true, then the `sequence` text file with comments is the
+        # only place to define the order.
+        self.__no_dag = True
 
     @property
     def scheduler(self):
@@ -119,8 +124,42 @@ class PipesManager(FlagManager):
             self.__pipelines = self.sort_pipelines(pipes)
         return self.__pipelines
 
+    @property
+    def pipe_sequence_filepath(self):
+        '''
+        By default the sequence of pipe YAML files is defined by the text file
+        called 'sequence'.
+        '''
+        pipe_sequence_filepath = self.config['brainy'].get(
+           'pipe_sequence_file', 'sequence')
+        return os.path.join(self.project_path, pipe_sequence_filepath)
+
+    def sort_pipelines_by_sequence(self, pipes):
+        result = list()
+        pipe_extension = self.config['brainy'].get
+        for pipe_filename in open(self.pipe_sequence_filepath).readlines():
+            if pipe_filename.startswith('#') or pipe_filename.strip:
+                # Skip empty lines or comments.
+                continue
+            # Remove the extension part.
+            pipename = pipe_filename.replace(pipe_extension, '')
+            if pipename not in pipes:
+                raise KeyError('Missing pipename defined by the ' +
+                               'sequence file: %s' % pipe_filename)
+            result.append(pipes[pipename])
+        logger.info('Loading a sequence of pipes: ')
+        logger.info(pformat(result))
+        return result
+
     def sort_pipelines(self, pipes):
         '''Reorder, tolerating declared dependencies found in definitions'''
+        if len(pipes) == 1:
+            # No sorting is required.
+            return [pipes[name] for name in pipes]
+        if self.__no_dag is True:
+            return self.sort_pipelines_by_sequence(pipes)
+        # Fallback to resolve order using 'before/after' language.
+        # TODO: 'before/after' is a deprecated syntax in pipe description.
         after_dag = dict()
         before_dag = dict()
         for depended_pipename in pipes:
@@ -189,9 +228,9 @@ class PipesManager(FlagManager):
                         return -1
             return 0
 
+        result = list()
         pipenames = list(pipes.keys())
         sorted_pipenames = sorted(pipenames, cmp=resolve_dependecy)
-        result = list()
         for pipename in sorted_pipenames:
             result.append(pipes[pipename])
         return result
