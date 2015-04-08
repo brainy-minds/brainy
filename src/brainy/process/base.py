@@ -85,8 +85,10 @@ class BrainyProcess(PipetteProcess, FlagManager):
             'analysis_path',
             # 'postanalysis_path', # Deprecated
             # 'jpg_path', # Deprecated
-            'job_submission_queue',
-            'job_resubmission_queue',
+            'job_submission_queue',  # Deprecated
+            'job_resubmission_queue',  # Deprecated
+            'min_job_submission_time',
+            'min_job_resubmission_time',
         ]
         self.compiled_params = dict()
         self.report_name_postfix = ''
