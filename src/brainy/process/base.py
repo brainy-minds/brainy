@@ -259,6 +259,7 @@ class BrainyProcess(PipetteProcess, FlagManager):
             config_lang_path = self.config['languages'][lang.lower()]['path']
             assert type(config_lang_path) == list
             lang_env_path = config_lang_path + lang_env_path
+        # logger.info('Extending path: %s' % lang_env_path)
         return lang_env_path
 
     @property

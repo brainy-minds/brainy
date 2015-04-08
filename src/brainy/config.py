@@ -28,6 +28,9 @@ BRAINY_MERGED_PATHNAMES = [
     ['brainy', 'workflows'],
     ['languages', 'python', 'path'],
     ['languages', 'matlab', 'path'],
+    ['languages', 'bash', 'path'],
+    ['languages', 'ruby', 'path'],
+    ['languages', 'node', 'path'],
 ]
 
 
@@ -114,11 +117,11 @@ brainy:
 # scheduling
 #     engine: 'lsf'
 
+# See developer documentation for details:
+# https://github.com/pelkmanslab/brainy/wiki/Developer-Documentation#list-of-template-variables
 project_parameters:
-  # job_submission_queue: '8:00'
-  # job_resubmission_queue: '36:00'
-  batch_path: 'data_of_{name}'
-  tiff_path: 'images_of_{name}'
+  data_path: '{project_path}/BATCH'
+  images_path: '{project_path}/images'
 
 ''' % {
     'brainy_version': brainy_version,
