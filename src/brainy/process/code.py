@@ -14,10 +14,10 @@ class CanCheckData(object):
         data. Code is baked into a script and invoked in the shell. Method will
         interpret any output as error.
         '''
-        if 'check_data_call' not in self.description:
-            return
+        if 'check_data' not in self.description:
+            return False
         bake_code = getattr(self, 'bake_%s_code' % self.code_language)
-        script = bake_code(self.description['check_data_call'])
+        script = bake_code(self.description['check_data'])
         (stdoutdata, stderrdata) = invoke(script)
         any_output = (stdoutdata + stderrdata).strip()
         if len(any_output) > 0:

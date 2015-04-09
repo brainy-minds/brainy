@@ -44,7 +44,7 @@ class ProjectManager(object):
                 raise KeyError('Path to a project is to specified.')
             if 'name' not in project:
                 # Assume from the path of the project.
-                project['name'] == os.path.basename(project['path'])
+                project['name'] = os.path.basename(project['path'])
             # Assert project path ends with the project name.
             if not project['path'].endswith(project['name']):
                 logger.warn('Project path does not end with the project name.')
@@ -82,7 +82,7 @@ class ProjectManager(object):
             self._projects = project_structure['registered_projects']
         else:
             # Project list is empty. Simply initialize it.
-            self._projects = []
+            self._projects = {'registered_projects': []}
             with open(self.project_list_path, 'w+') as stream:
                 stream.write(dump_yaml(self._projects))
 

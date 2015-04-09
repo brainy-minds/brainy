@@ -41,7 +41,7 @@ class Submittable(Explained):
     @format_with_params
     @require_key_in_description
     def call(self):
-        'Main code to be submitted as a job.'
+        '''Main code to be submitted as a job.'''
 
 
 class Parallel(Submittable):
