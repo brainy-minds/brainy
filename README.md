@@ -47,7 +47,7 @@ If things are looking good, continue by submitting your project into the *cloud*
 
 > On Mac: brew install libyaml
 
->It is recommended to use [conda](http://conda.pydata.org/docs/) as python 2.7+ environment.
+>It is strongly recommended to use [conda](http://conda.pydata.org/docs/) as python 2.7+ environment.
 
 The package is available on [PyPI](https://pypi.python.org/pypi/brainy-mind/).
 
