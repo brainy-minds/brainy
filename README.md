@@ -56,7 +56,7 @@ The package is available on [PyPI](https://pypi.python.org/pypi/brainy-mind/).
 pip install brainy-mind
 ```
 
-For developer mode 
+To get the bleedding edge version you have to clone the repository and install brainy in developer mode from local folder:
 
 ```
 cd && git clone https://github.com/pelkmanslab/brainy
