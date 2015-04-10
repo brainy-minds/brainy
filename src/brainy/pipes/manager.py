@@ -136,13 +136,13 @@ class PipesManager(FlagManager):
 
     def sort_pipelines_by_sequence(self, pipes):
         result = list()
-        pipe_extension = self.config['brainy'].get
         for pipe_filename in open(self.pipe_sequence_filepath).readlines():
-            if pipe_filename.startswith('#') or pipe_filename.strip:
+            pipe_filename = pipe_filename.strip()
+            if pipe_filename.startswith('#') or len(pipe_filename) == 0:
                 # Skip empty lines or comments.
                 continue
             # Remove the extension part.
-            pipename = pipe_filename.replace(pipe_extension, '')
+            pipename = pipe_filename.replace(self.pipe_extension, '')
             if pipename not in pipes:
                 raise KeyError('Missing pipename defined by the ' +
                                'sequence file: %s' % pipe_filename)
