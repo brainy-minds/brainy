@@ -135,7 +135,7 @@ class PipesManager(FlagManager):
         return os.path.join(self.project_path, pipe_sequence_filepath)
 
     def sort_pipelines_by_sequence(self, pipes):
-        result = list()
+        sorted_pipes = list()
         for pipe_filename in open(self.pipe_sequence_filepath).readlines():
             pipe_filename = pipe_filename.strip()
             if pipe_filename.startswith('#') or len(pipe_filename) == 0:
@@ -146,10 +146,16 @@ class PipesManager(FlagManager):
             if pipename not in pipes:
                 raise KeyError('Missing pipename defined by the ' +
                                'sequence file: %s' % pipe_filename)
-            result.append(pipes[pipename])
+            sorted_pipes.append(pipes[pipename])
         logger.info('Loading a sequence of pipes: ')
-        logger.info(pformat(result))
-        return result
+        logger.info(pformat([pipe.name for pipe in sorted_pipes]))
+        # By default every pipe in the sequence depends on the previous.
+        previous_pipeline = None
+        for pipeline in sorted_pipes:
+            if previous_pipeline is not None:
+                pipeline.definition['after'] = previous_pipeline.name
+            previous_pipeline = pipeline
+        return sorted_pipes
 
     def sort_pipelines(self, pipes):
         '''Reorder, tolerating declared dependencies found in definitions'''
