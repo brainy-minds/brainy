@@ -97,7 +97,6 @@ class BrainyPipe(PipettePipe):
 
         try:
             super(BrainyPipe, self).execute_process(process, parameters)
-
         except BrainyProcessError as error:
             # See brainy.errors
             error_is_fatal = False

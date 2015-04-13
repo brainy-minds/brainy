@@ -250,6 +250,7 @@ class PipesManager(FlagManager):
             BrainyReporter.append_report_pipe(pipeline.name)
             pipeline.communicate({'input': '{}'})
         except ProccessEndedIncomplete as process_error:
+            logger.exception(process_error)
             logger.warn('%s Stopped on process called: %s' %
                         (str(process_error), process_error.process.name))
             pipeline.has_failed = True  # Halt further progress

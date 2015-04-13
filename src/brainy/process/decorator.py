@@ -1,4 +1,7 @@
+import logging
 from brainy.errors import BrainyProcessError
+
+logger = logging.getLogger(__name__)
 
 
 def require_keys_in_description(*description_keys):
@@ -65,8 +68,15 @@ def format_with_params(method):
         param_name = method.param_name
 
     def formatting_with_params(self):
-        return self.format_with_params(param_name,
-                                       method(self))
+        logger.info('Compiling template {%s}: %s' % (param_name,
+                                                     method(self)))
+        try:
+            return self.format_with_params(param_name,
+                                           method(self))
+        except Exception as error:
+            raise BrainyProcessError(
+                    'Compilation failed: %s' % str(error)
+                )
 
     formatting_with_params.param_name = param_name
     return formatting_with_params

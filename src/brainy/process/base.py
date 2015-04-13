@@ -60,7 +60,19 @@ def format_code(code, lang='bash'):
     return result
 
 
-class BrainyProcess(PipetteProcess, FlagManager):
+class CanSubmit(object):
+    '''
+    Can submit and resubmit code.
+    '''
+
+    def submit(self):
+        '''Submit job for the first time.'''
+
+    def resubmit(self):
+        '''Retry submission with more resources and time.'''
+
+
+class BrainyProcess(PipetteProcess, FlagManager, CanSubmit):
 
     def __init__(self):
         super(BrainyProcess, self).__init__()
