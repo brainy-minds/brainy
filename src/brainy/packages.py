@@ -161,7 +161,7 @@ packages:
             # Attempt to execute package frame with class code.
             script_globals = {}
             script_locals = {}
-            execfile(formula_path, script_globals   , script_locals)
+            execfile(formula_path, script_globals, script_locals)
             # We expect it to instantiate formula object and define it as
             # formula variable.
             if 'formula' not in script_locals:
